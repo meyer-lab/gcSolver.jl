@@ -7,7 +7,7 @@ pipeline {
   stages {
     stage('Clean') { steps { sh 'git clean -ffdx' } }
     stage('Build') { steps { sh 'julia -e \'using Pkg; Pkg.build(; verbose = true)\'' } }
-    stage('Run') { steps { sh 'julia -e \'using Pkg; Pkg.test(coverage=true)\'' } }
+    stage('Run') { steps { sh 'julia -e \'using Pkg; Pkg.test("gcSolver")\'' } }
   }
   post {
     always {
