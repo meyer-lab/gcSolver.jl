@@ -1,0 +1,17 @@
+pipeline {
+  agent { label 'docker' }
+  options {
+    timeout(time: 1, unit: 'HOURS')
+    parallelsAlwaysFailFast()
+  }
+  stages {
+    stage('Clean') { steps { sh 'git clean -ffdx' } }
+    stage('Run') { steps { sh 'julia -e \'Pkg.test("DifferentialEquations")\'' } }
+    }
+  }
+  post {
+    always {
+      cleanWs cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false
+    }
+	}
+}
