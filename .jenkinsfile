@@ -6,7 +6,7 @@ pipeline {
   }
   stages {
     stage('Clean') { steps { sh 'git clean -ffdx' } }
-    stage('Run') { steps { sh 'julia -e \'Pkg.test("DifferentialEquations")\'' } }
+    stage('Run') { steps { sh 'julia -e \'using Pkg; Pkg.test("DifferentialEquations")\'' } }
   }
   post {
     always {
