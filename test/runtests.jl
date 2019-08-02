@@ -3,12 +3,13 @@ println("Testing...")
 using Distributions
 using ForwardDiff
 using BenchmarkTools
+using gcSolver
 
 ### Check that runCkine can run
-params = [rand(LogNormal(0.1, 0.25)) for i=1:Nparams]
+params = [rand(LogNormal(0.1, 0.25)) for i=1:gcSolver.Nparams]
 params[20] = tanh(params[20])
 
-IL2params = [rand(LogNormal(0.1, 0.25)) for i=1:NIL2params]
+IL2params = [rand(LogNormal(0.1, 0.25)) for i=1:gcSolver.NIL2params]
 
 tps = [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 
@@ -21,8 +22,6 @@ outTwo = runCkine(tps, params, false)
 
 
 fout = ForwardDiff.jacobian(x -> runCkine(tps, x, false)[1], params)
-
-@benchmark ForwardDiff.jacobian(x -> runCkine(tps, x, false)[1], params)
 
 #print(out[1])
 #print("\n\n\n\n")
