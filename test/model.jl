@@ -24,7 +24,7 @@ function assertConservation(y)
     # Check for conservation of species sum
     for ii in range(1, stop=length(consList))
         diff = sum(y[consList[ii] .+ 1])
-        #@test isapprox(diff, 0.0, atol=1.0e-12)
+        @test_skip isapprox(diff, 0.0, atol=1.0e-12)
     end
 end
 
@@ -60,18 +60,43 @@ end
 
 
 @testset "Equilibrium." begin
-    out = runCkine(100000.0, rxntfR, false)
-    IL2out = runCkine(100000.0, IL2params, true)
+    out = runCkine([100000.0], rxntfR, false)
+    IL2out = runCkine([100000.0], IL2params, true)
 
     dy = ones(gcSolver.Nspecies)
     IL2dy = ones(gcSolver.Nspecies)
 
-    gcSolver.fullDeriv(dy, out, rxntfR, 0.0)
-    gcSolver.fullDeriv(IL2dy, IL2out, IL2params, 0.0)
+    gcSolver.fullDeriv(dy, out[1], rxntfR, 0.0)
+    gcSolver.IL2Deriv(IL2dy, IL2out[1], IL2params, 0.0)
 
-    @test all(dy > 0.0)
-    @test all(IL2dy > 0.0)
+    @test all(out[1] .>= 0.0)
+    print(IL2out[1])
+    @test all(IL2out[1] .>= 0.0)
 
-    @test isapprox(dy, 0.0, atol=1.0e-6)
-    @test isapprox(IL2dy, 0.0, atol=1.0e-6)
+    @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
+    @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-6)
 end
+
+
+@testset "Steady-state at t=0." begin
+    out = runCkine([0.0], rxntfR, false)
+    IL2out = runCkine([0.0], IL2params, true)
+
+    rr = copy(rxntfR)
+    IL2rr = copy(IL2params)
+    rr[1:6] = 0.0
+    IL2rr[1] = 0.0
+
+    dy = ones(gcSolver.Nspecies)
+    IL2dy = ones(gcSolver.Nspecies)
+
+    gcSolver.fullDeriv(dy, out[1], rr, 0.0)
+    gcSolver.IL2Deriv(IL2dy, IL2out[1], IL2rr, 0.0)
+
+    @test all(out[1] .>= 0.0)
+    @test all(IL2out[1] .>= 0.0)
+
+    @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
+    @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-6)
+end
+
