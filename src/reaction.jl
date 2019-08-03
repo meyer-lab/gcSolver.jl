@@ -113,8 +113,8 @@ function solveAutocrine(r)
 
     # Assuming no autocrine ligand, so can solve steady state
     # Add the species
-    y0[recIDX .+ halfL] = view(r, range(5, length=length(recIDX))) / kDeg / internalFrac
-    y0[recIDX] = (view(r, range(5, length=length(recIDX))) + kRec*view(y0, recIDX .+ halfL)*internalFrac)/r[1]
+    y0[recIDX .+ halfL] = r[range(5, length=length(recIDX))] / kDeg / internalFrac
+    y0[recIDX] = (r[range(5, length=length(recIDX))] + kRec*y0[recIDX .+ halfL]*internalFrac)/r[1]
 
     return y0
 end
