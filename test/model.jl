@@ -57,3 +57,21 @@ end
     @test runCkine(tps, rxntfR, false) == runCkine(tps, rxntfR, false)
     @test runCkine(tps, IL2params, true) == runCkine(tps, IL2params, true)
 end
+
+
+@testset "Equilibrium." begin
+    out = runCkine(100000.0, rxntfR, false)
+    IL2out = runCkine(100000.0, IL2params, true)
+
+    dy = ones(gcSolver.Nspecies)
+    IL2dy = ones(gcSolver.Nspecies)
+
+    gcSolver.fullDeriv(dy, out, rxntfR, 0.0)
+    gcSolver.fullDeriv(IL2dy, IL2out, IL2params, 0.0)
+
+    @test all(dy > 0.0)
+    @test all(IL2dy > 0.0)
+
+    @test isapprox(dy, 0.0, atol=1.0e-6)
+    @test isapprox(IL2dy, 0.0, atol=1.0e-6)
+end
