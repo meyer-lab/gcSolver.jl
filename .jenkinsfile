@@ -7,7 +7,12 @@ pipeline {
   stages {
     stage('Clean') { steps { sh 'git clean -ffdx' } }
     stage('Build') { steps { sh 'julia -e \'using Pkg; Pkg.build(; verbose = true)\'' } }
-    stage('Run') { steps { sh 'julia -e \'using Pkg; Pkg.test("gcSolver")\'' } }
+    stage('Run') {
+      steps {
+        sh 'julia --code-coverage=user -e \'using Pkg; Pkg.test("gcSolver")\''
+        sh 'julia -e \'using Coverage; LCOV.writefile("coverage-lcov.info", process_folder())\''
+      }
+    }
   }
   post {
     always {
