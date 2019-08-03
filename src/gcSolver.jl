@@ -21,7 +21,7 @@ end
 
 function fullParam(rxntfR)
     ILs = rxntfR[1:6]
-    surface = Array{eltype(rxntfR)}(undef, 21)
+    surface = Vector{eltype(rxntfR)}(undef, 21)
     surface[[1, 4, 5]] = view(rxntfR, 7:9)
     surface[2] = kfbnd * 10 # doi:10.1016/j.jmb.2004.04.038, 10 nM
     surface[3] = kfbnd * 144 # doi:10.1016/j.jmb.2004.04.038, 144 nM
@@ -48,16 +48,16 @@ function fullParam(rxntfR)
 end
 
 
-function IL2param(rxntfR::Vector)
-    ILs = fill(zeros(promote_type(eltype(rxntfR), Float64)), Nlig)
+function IL2param(rxntfR)
+    ILs = zeros(eltype(rxntfR), Nlig)
     ILs[1] = rxntfR[1]
-    surface = fill(ones(promote_type(eltype(rxntfR), Float64)), 21)
-    surface[1:6] = rxntfR[2:7]
+    surface = ones(eltype(rxntfR), 21)
+    surface[1:6] .= rxntfR[2:7]
 
     # These are probably measured in the literature
     surface[6] = 12.0 * surface[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
 
-    trafP = fill(zeros(promote_type(eltype(rxntfR), Float64)), 13)
+    trafP = zeros(eltype(rxntfR), 13)
     trafP[1:5] = [0.08, 1.46, 0.18, 0.15, 0.017]
     trafP[6:8] = rxntfR[8:10]
 
@@ -83,7 +83,7 @@ function runCkine(tps, params, IL2case)
 
     prob = ODEProblem(f, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, TRBDF2())
+    sol = solve(prob, Rodas4P())
 
     return sol(tps).u
 end
