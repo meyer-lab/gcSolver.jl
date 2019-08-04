@@ -83,7 +83,7 @@ function runCkine(tps, params, IL2case)
 
     prob = ODEProblem(f, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, Rosenbrock23())
+    sol = solve(prob, TRBDF2())
 
     return sol(tps).u
 end

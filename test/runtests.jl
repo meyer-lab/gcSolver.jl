@@ -3,7 +3,7 @@ include("model.jl")
 
 #using Distributions
 #using ForwardDiff
-#using BenchmarkTools
+
 #using gcSolver
 
 ### Check that runCkine can run
