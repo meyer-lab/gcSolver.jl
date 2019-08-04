@@ -1,6 +1,7 @@
 using Test
 using Distributions
 using BenchmarkTools
+using Profile
 using gcSolver
 
 rxntfR = [rand(LogNormal(0.1, 0.25)) for i=1:gcSolver.Nparams]
@@ -104,4 +105,6 @@ end
 @testset "Benchmark." begin
     @time runCkine(tps, rxntfR, false)
     @time runCkine(tps, IL2params, true)
+    @profile runCkine(tps, rxntfR, false)
+    Profile.print()
 end
