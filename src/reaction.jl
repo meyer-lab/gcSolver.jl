@@ -21,7 +21,7 @@ function dYdT(du, u, p::Vector, ILs)
 
     # IL2/15
     for i in 0:1
-        pp = view(p, (1 + i*6):(8 + i*6))
+        pp = p[1 + i*6:8 + i*6]
         k12rev = pp[2] * pp[7] / pp[3] # Detailed balance
         k8rev = pp[6] * k12rev / pp[5] # Detailed balance
         k9rev = pp[6] * pp[7] / pp[4] # Detailed balance
@@ -104,8 +104,8 @@ function solveAutocrine(r)
 
     # Assuming no autocrine ligand, so can solve steady state
     # Add the species
-    y0[recIDX .+ halfL] = view(r, range(5, length=length(recIDX))) / kDeg / internalFrac
-    y0[recIDX] = (view(r, range(5, length=length(recIDX))) + kRec*view(y0, recIDX .+ halfL)*internalFrac)/r[1]
+    y0[recIDX .+ halfL] = r[range(5, length=length(recIDX))] / kDeg / internalFrac
+    y0[recIDX] = (r[range(5, length=length(recIDX))] + kRec*y0[recIDX .+ halfL]*internalFrac)/r[1]
 
     return y0
 end
