@@ -26,15 +26,25 @@ function dYdT(du, u, p::Vector, ILs)
         k8rev = pp[6] * k12rev / pp[5] # Detailed balance
         k9rev = pp[6] * pp[7] / pp[4] # Detailed balance
 
-        du[2] += -kfbnd * u[2] * ILs[i+1] + pp[3] * u[5 + 7*i] - p[1] * u[2] * u[7 + 7*i] + k9rev * u[9 + 7*i] - p[1] * u[2] * u[4 + 7*i] + pp[7] * u[6 + 7*i];
-        du[3] += -p[1] * u[5 + 7*i] * u[3] + p[5 + 7*i] * u[8 + 7*i] - p[1] * u[4 + 7*i] * u[3] + p[4 + 7*i] * u[7 + 7*i] - p[1] * u[6 + 7*i] * u[3] + p[6 + 7*i] * u[9 + 7*i];
-        du[1 + 9*i] = -kfbnd * u[1 + 9*i] * ILs[i+1] + pp[2] * u[4 + 7*i] - p[1] * u[1 + 9*i] * u[8 + 7*i] + k8rev * u[9 + 7*i] - p[1] * u[1 + 9*i] * u[5 + 7*i] + k12rev * u[6 + 7*i];
-        du[4 + 7*i] = -p[1] * u[4 + 7*i] * u[2] + pp[7] * u[6 + 7*i] - p[1] * u[4 + 7*i] * u[3] + pp[4] * u[7 + 7*i] + kfbnd * ILs[i+1] * u[1 + 9*i] - pp[2] * u[4 + 7*i]
-        du[5 + 7*i] = -p[1] * u[5 + 7*i] * u[1 + 9*i] + k12rev * u[6 + 7*i] - p[1] * u[5 + 7*i] * u[3] + p[5 + 7*i] * u[8 + 7*i] + kfbnd * ILs[i+1] * u[2] - pp[3] * u[5 + 7*i]
-        du[6 + 7*i] = -p[1] * u[6 + 7*i] * u[3] + pp[6] * u[9 + 7*i] + p[1] * u[4 + 7*i] * u[2] - pp[7] * u[6 + 7*i] + p[1] * u[5 + 7*i] * u[1 + 9*i] - k12rev * u[6 + 7*i]
-        du[9 + 7*i] = p[1] * u[8 + 7*i] * u[1 + 9*i] - k8rev * u[9 + 7*i] + p[1] * u[7 + 7*i] * u[2] - k9rev * u[9 + 7*i] + p[1] * u[6 + 7*i] * u[3] - pp[6] * u[9 + 7*i]
-        du[7 + 7*i] = -p[1] * u[7 + 7*i] * u[2] + k9rev * u[9 + 7*i] + p[1] * u[4 + 7*i] * u[3] - pp[4] * u[7 + 7*i]
-        du[8 + 7*i] = -p[1] * u[8 + 7*i] * u[1 + 9*i] + k8rev * u[9 + 7*i] + p[1] * u[3] * u[5 + 7*i] - pp[5] * u[8 + 7*i]
+        bndB  = kfbnd * u[2] * ILs[i+1] - pp[3] * u[5 + 7*i]
+        BbndG  = p[1] * u[5 + 7*i] * u[3] - pp[5] * u[8 + 7*i]
+        AGbndB = p[1] * u[7 + 7*i] * u[2] - k9rev * u[9 + 7*i]
+        BGbndA = p[1] * u[8 + 7*i] * u[1 + 9*i] - k8rev * u[9 + 7*i]
+        ABbndG = p[1] * u[6 + 7*i] * u[3] - pp[6] * u[9 + 7*i]
+        AbndB  = p[1] * u[2] * u[4 + 7*i] - pp[7] * u[6 + 7*i]
+        AbndG  = p[1] * u[4 + 7*i] * u[3] - pp[4] * u[7 + 7*i]
+        bndA  = kfbnd * u[1 + 9*i] * ILs[i+1] + pp[2] * u[4 + 7*i]
+        BbndA  = p[1] * u[5 + 7*i] * u[1 + 9*i] - k12rev * u[6 + 7*i]
+    
+        du[2] += -bndB - AGbndB - AbndB
+        du[3] += -BbndG - AbndG - ABbndG
+        du[1 + 9*i] = -bndA - BGbndA - BbndA
+        du[4 + 7*i] = -AbndB - AbndG + bndA
+        du[5 + 7*i] = -BbndA - BbndG + bndB
+        du[6 + 7*i] = -ABbndG + AbndB + BbndA
+        du[7 + 7*i] = -AGbndB + AbndG
+        du[8 + 7*i] = -BGbndA + BbndG
+        du[9 + 7*i] = BGbndA + AGbndB + ABbndG
     end
 
     for i in 0:3

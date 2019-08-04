@@ -24,7 +24,7 @@ function assertConservation(y)
     # Check for conservation of species sum
     for ii in range(1, stop=length(consList))
         diff = sum(y[consList[ii] .+ 1])
-        @test_skip isapprox(diff, 0.0, atol=1.0e-12)
+        @test isapprox(diff, 0.0, atol=1.0e-12)
     end
 end
 
