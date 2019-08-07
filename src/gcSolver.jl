@@ -1,7 +1,6 @@
 module gcSolver
 
 using OrdinaryDiffEq
-using DiffEqSensitivity
 
 include("reaction.jl")
 
