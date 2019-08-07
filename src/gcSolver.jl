@@ -41,6 +41,10 @@ function fullParam(rxntfR)
     endosome[2:21] *= 5.0
 
     @assert trafP[3] < 1.0
+    @assert all(ILs .>= 0.0)
+    @assert all(surface .>= 0.0)
+    @assert all(endosome .>= 0.0)
+    @assert all(trafP .>= 0.0)
 
     # all reverse rates are same in the endosome
     return ILs, surface, endosome, trafP
@@ -64,6 +68,10 @@ function IL2param(rxntfR)
     endosome[2:21] *= 5.0
 
     @assert trafP[3] < 1.0
+    @assert all(ILs .>= 0.0)
+    @assert all(surface .>= 0.0)
+    @assert all(endosome .>= 0.0)
+    @assert all(trafP .>= 0.0)
 
     return ILs, surface, endosome, trafP
 end
