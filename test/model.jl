@@ -1,6 +1,7 @@
 using Test
 using Distributions
 using BenchmarkTools
+using OrdinaryDiffEq
 using Profile
 using gcSolver
 
@@ -105,7 +106,25 @@ end
 
 
 @testset "Benchmark." begin
-    @time runCkine(tps, rxntfR)
+    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), rxntfR, 0.0)
+    
+    println("TRBDF2")
+    @time runCkine(tps, rxntfR; alg=TRBDF2())
+    println("Rosenbrock23")
+    @time runCkine(tps, rxntfR; alg=Rosenbrock23())
+    println("Kvaerno5")
+    @time runCkine(tps, rxntfR; alg=Kvaerno5())
+    println("KenCarp4")
+    @time runCkine(tps, rxntfR; alg=KenCarp4())
+    println("Rodas4P")
+    @time runCkine(tps, rxntfR; alg=Rodas4P())
+    println("Rodas5")
+    @time runCkine(tps, rxntfR; alg=Rodas5())
+    println("Trapezoid")
+    @time runCkine(tps, rxntfR; alg=Trapezoid())
+    println("ABDF2")
+    @time runCkine(tps, rxntfR; alg=ABDF2())
+    println("Default IL-2")
     @time runCkine(tps, IL2params)
 
     for ii in 1:10

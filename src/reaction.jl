@@ -1,7 +1,5 @@
-const active_species_IDX = [8, 9, 15, 16, 19, 22, 25, 28]
 const Nspecies = 62 # number of complexes in surface + endosome + free ligand
 const halfL = 28 # number of complexes on surface alone
-const internalV = 623.0 # Same as that used in TAM model
 const internalFrac = 0.5 # Same as that used in TAM model
 const recIDX = [1, 2, 3, 10, 17, 20, 23, 26]
 
@@ -51,10 +49,11 @@ end
 
 function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     fill!(du, 0.0)
+    internalV = 623.0 # Same as that used in TAM model
 
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
-    dYdT(view(du, halfL+1:2*halfL), view(u, halfL+1:2*halfL), pEndo, u[halfL*2 + 1:end])
+    dYdT(view(du, halfL+1:2*halfL), view(u, halfL+1:2*halfL), pEndo, view(u, halfL*2 + 1:Nspecies))
 
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
@@ -66,21 +65,21 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     du[62] = -sum(view(du, halfL+27:halfL+28)) / internalV
 
     # Actually calculate the trafficking
-    du[active_species_IDX] -= u[active_species_IDX] .* (trafP[1] + trafP[2]) # Endocytosis
-    du[active_species_IDX .+ halfL] += u[active_species_IDX] .* (trafP[1] + trafP[2]) ./ internalFrac - trafP[5] .* u[active_species_IDX .+ halfL] # Endocytosis, degradation
-
     for ii in range(1, stop=halfL)
-        if findfirst(isequal(ii), active_species_IDX) == nothing
-            du[ii] += -u[ii]*trafP[1] + trafP[4]*(1.0 - trafP[3])*u[ii+halfL]*internalFrac # Endocytosis, recycling
-            du[ii+halfL] += u[ii]*trafP[1]/internalFrac - trafP[4]*(1.0 - trafP[3])*u[ii+halfL] - (trafP[5]*trafP[3])*u[ii+halfL] # Endocytosis, recycling, degradation
+        if findfirst(isequal(ii), [8, 9, 15, 16, 19, 22, 25, 28]) != nothing
+            du[ii] -= u[ii] * (trafP[1] + trafP[2]) # Endo
+            du[ii+halfL] += u[ii] * (trafP[1] + trafP[2]) / internalFrac - trafP[5] * u[ii+halfL] # Endo, deg
+        else
+            du[ii] += -u[ii] * trafP[1] + trafP[4] * (1.0 - trafP[3]) * u[ii+halfL] * internalFrac # Endo, recycling
+            du[ii+halfL] += u[ii]*trafP[1]/internalFrac - trafP[4]*(1.0 - trafP[3])*u[ii+halfL] - (trafP[5]*trafP[3])*u[ii+halfL] # Endo, rec, deg
         end
     end
 
     # Expression: IL2Ra, IL2Rb, gc, IL15Ra, IL7Ra, IL9R, IL4Ra, IL21Ra
-    du[recIDX] += trafP[6:end]
+    du[recIDX] += view(trafP, 6:13)
 
     # Degradation does lead to some clearance of ligand in the endosome
-    du[halfL*2 + 1:end] -= u[halfL*2 + 1:end] .* trafP[5]
+    du[halfL*2 + 1:end] -= view(u, halfL*2 + 1:Nspecies) .* trafP[5]
 
     return nothing
 end

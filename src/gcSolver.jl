@@ -2,6 +2,7 @@ module gcSolver
 
 using OrdinaryDiffEq
 using ForwardDiff
+using StaticArrays
 
 include("reaction.jl")
 
@@ -60,14 +61,14 @@ function fullParam(rxntfR)
 end
 
 
-function runCkine(tps, params)
+function runCkine(tps, params; alg=Rosenbrock23())
     _, _, _, trafP = fullParam(params)
 
     u0 = solveAutocrine(trafP)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, TRBDF2(); reltol=1.0e-6, isoutofdomain=(u, p, t) -> any(x -> x < -1.0e-3, u))
+    sol = solve(prob, alg; reltol=1.0e-6, abstol=1.0e-6, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
 
     return sol(tps).u
 end
