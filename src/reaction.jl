@@ -18,10 +18,11 @@ const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 function dYdT(du, u, p::Vector, ILs)
     # IL2Ra, IL2Rb, gc, IL2_IL2Ra, IL2_IL2Rb, IL2_IL2Ra_IL2Rb, IL2_IL2Ra_gc, IL2_IL2Rb_gc, IL2_IL2Ra_IL2Rb_gc
     # IL15Ra, IL15_IL15Ra, IL15_IL2Rb, IL15_IL15Ra_IL2Rb, IL15_IL15Ra_gc, IL15_IL2Rb_gc, IL15_IL15Ra_IL2Rb_gc
+    @assert length(ILs) == Nlig
 
     # IL2/15
     for i in 0:1
-        pp = p[1 + i*6:8 + i*6]
+        pp = view(p, 1 + i*6:8 + i*6)
         k12rev = pp[2] * pp[7] / pp[3] # Detailed balance
         k8rev = pp[6] * k12rev / pp[5] # Detailed balance
         k9rev = pp[6] * pp[7] / pp[4] # Detailed balance
@@ -53,11 +54,11 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
 
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
-    dYdT(view(du, halfL+1:2*halfL), view(u, halfL+1:2*halfL), pEndo, view(u, halfL*2:Nspecies))
+    dYdT(view(du, halfL+1:2*halfL), view(u, halfL+1:2*halfL), pEndo, u[halfL*2 + 1:end])
 
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
-    du[57] = -sum(view(du, halfL+4:halfL+9)) / internalV
+    du[57] = -sum(view(du,  halfL+4:halfL+9 )) / internalV
     du[58] = -sum(view(du, halfL+11:halfL+16)) / internalV
     du[59] = -sum(view(du, halfL+18:halfL+19)) / internalV
     du[60] = -sum(view(du, halfL+21:halfL+22)) / internalV
