@@ -59,8 +59,8 @@ end
 @testset "Reproducibility." begin
     @test runCkine(tps, rxntfR) == runCkine(tps, rxntfR)
     @test runCkine(tps, IL2params) == runCkine(tps, IL2params)
-    #@test runCkineS(tps, rxntfR) == runCkineS(tps, rxntfR)
-    #@test runCkineS(tps, IL2params) == runCkineS(tps, IL2params)
+    @test runCkineS(tps, rxntfR) == runCkineS(tps, rxntfR)
+    @test runCkineS(tps, IL2params) == runCkineS(tps, IL2params)
 end
 
 
@@ -120,12 +120,12 @@ end
     @time runCkine(tps, rxntfR; alg=Rodas4P())
     println("Rodas5")
     @time runCkine(tps, rxntfR; alg=Rodas5())
-    println("Trapezoid")
-    @time runCkine(tps, rxntfR; alg=Trapezoid())
-    println("ABDF2")
-    @time runCkine(tps, rxntfR; alg=ABDF2())
+    println("ImplicitEuler")
+    @time runCkine(tps, rxntfR; alg=ImplicitEuler())
     println("Default IL-2")
     @time runCkine(tps, IL2params)
+    println("Default runCkineS")
+    @time runCkineS(tps, rxntfR)
 
     for ii in 1:10
         @profile runCkine(tps, rxntfR)

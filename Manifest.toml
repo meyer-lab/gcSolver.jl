@@ -441,9 +441,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[SparseDiffTools]]
 deps = ["Adapt", "ArrayInterface", "BandedMatrices", "BlockBandedMatrices", "DiffEqDiffTools", "ForwardDiff", "LightGraphs", "LinearAlgebra", "Requires", "SparseArrays", "VertexSafeGraphs"]
-git-tree-sha1 = "1b36284808f5971e73c43978e12842bedb31c293"
+git-tree-sha1 = "c1ecded2bd37b1ce7db8e55a814c8aa63efa80fe"
 uuid = "47a9eef4-7e08-11e9-0b38-333d64bd3804"
-version = "0.8.0"
+version = "0.9.0"
 
 [[SpecialFunctions]]
 deps = ["BinDeps", "BinaryProvider", "Libdl", "Test"]
