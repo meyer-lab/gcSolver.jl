@@ -65,8 +65,8 @@ end
 
 
 @testset "Steady-state at t=0." begin
-    out = gcSolver.solveAutocrine(gcSolver.fullParam(rxntfR)[4])
-    IL2out = gcSolver.solveAutocrine(gcSolver.fullParam(IL2params)[4])
+    out = gcSolver.solveAutocrine(gcSolver.fullParam(rxntfR)[4], rxntfR)
+    IL2out = gcSolver.solveAutocrine(gcSolver.fullParam(IL2params)[4], IL2params)
 
     rr = copy(rxntfR)
     IL2rr = copy(IL2params)
@@ -106,29 +106,27 @@ end
 
 
 @testset "Benchmark." begin
+    println("fullDeriv")
     @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), rxntfR, 0.0)
+    println("fullDeriv IL2")
+    @time gcSolver.fullDeriv(zeros(19), ones(19), IL2params, 0.0)
     
     println("TRBDF2")
     @time runCkine(tps, rxntfR; alg=TRBDF2())
     println("Rosenbrock23")
     @time runCkine(tps, rxntfR; alg=Rosenbrock23())
-    println("Kvaerno5")
-    @time runCkine(tps, rxntfR; alg=Kvaerno5())
-    println("KenCarp4")
-    @time runCkine(tps, rxntfR; alg=KenCarp4())
-    println("Rodas4P")
-    @time runCkine(tps, rxntfR; alg=Rodas4P())
-    println("Rodas5")
-    @time runCkine(tps, rxntfR; alg=Rodas5())
-    println("ImplicitEuler")
-    @time runCkine(tps, rxntfR; alg=ImplicitEuler())
-    println("Default IL-2")
-    @time runCkine(tps, IL2params)
     println("Default runCkineS")
     @time runCkineS(tps, rxntfR)
 
-    for ii in 1:10
+    println("TRBDF2 IL2")
+    @time runCkine(tps, IL2params; alg=TRBDF2())
+    println("Rosenbrock23 IL2")
+    @time runCkine(tps, IL2params; alg=Rosenbrock23())
+    println("Default IL2")
+    @time runCkine(tps, IL2params)
+
+    for ii in 1:2
         @profile runCkine(tps, rxntfR)
     end
-    Profile.print(noisefloor=5.0)
+    Profile.print(noisefloor=2.0)
 end

@@ -6,9 +6,25 @@ using ForwardDiff
 include("reaction.jl")
 
 function fullDeriv(du, u, p, t)
+    fill!(du, 0.0)
     ILs, surface, endosome, trafP = fullParam(p)
 
-    fullModel(du, u, surface, endosome, trafP, ILs)
+    if length(p) == NIL2params
+        # If we're just working with IL-2, let's cut out the other species
+        ui = zeros(eltype(u), Nspecies)
+        dui = zeros(eltype(du), Nspecies)
+        ui[1:9] .= u[1:9]
+        ui[halfL + 1 : halfL + 9] .= u[10:18]
+        ui[halfL*2 + 1] = u[19]
+
+        fullModel(dui, ui, surface, endosome, trafP, ILs)
+
+        du[1:9] .= dui[1:9]
+        du[10:18] .= dui[halfL + 1 : halfL + 9]
+        du[19] = dui[halfL*2 + 1]
+    else
+        fullModel(du, u, surface, endosome, trafP, ILs)
+    end
 end
 
 
@@ -61,12 +77,12 @@ function fullParam(rxntfR)
 end
 
 
-function runCkine(tps, params; alg=Rosenbrock23())
+function runCkine(tps::Array{Float64,1}, params; alg=Rosenbrock23())
     @assert all(params .>= 0.0)
     @assert all(tps .>= 0.0)
     _, _, _, trafP = fullParam(params)
 
-    u0 = solveAutocrine(trafP)
+    u0 = solveAutocrine(trafP, params)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
@@ -76,7 +92,7 @@ function runCkine(tps, params; alg=Rosenbrock23())
 end
 
 
-function runCkineS(tps, params)
+function runCkineS(tps::Array{Float64,1}, params::Array{Float64,1})
     return ForwardDiff.jacobian(pp -> runCkine(tps, pp), params)
 end
 
