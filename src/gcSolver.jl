@@ -20,6 +20,7 @@ function fullParam(rxntfR)
         surface[[1, 4, 5, 10, 11, 12, 13]] = rxntfR[7:13]
         surface[2] = kfbnd * 10 # doi:10.1016/j.jmb.2004.04.038, 10 nM
         surface[3] = kfbnd * 144 # doi:10.1016/j.jmb.2004.04.038, 144 nM
+        surface[6] = 12.0 * surface[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
         surface[7] = 63.0 * surface[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
         surface[8] = kfbnd * 0.065 # based on the multiple papers suggesting 30-100 pM
         surface[9] = kfbnd * 438 # doi:10.1038/ni.2449, 438 nM
@@ -29,24 +30,30 @@ function fullParam(rxntfR)
         surface[18] = kfbnd * 1.0 # DOI: 10.1126/scisignal.aal1253 (human)
         surface[20] = kfbnd * 0.07 # DOI: 10.1126/scisignal.aal1253 (human)
 
+        endosome = copy(surface)
+        # all reverse rates are 5-fold higher in endosome
+        endosome[2:21] *= 5.0
+
         trafP = view(rxntfR, 18:Nparams)
     else
         @assert length(rxntfR) == NIL2params
         ILs = zeros(eltype(rxntfR), Nlig)
         ILs[1] = rxntfR[1]
-        surface[1:6] .= rxntfR[2:7]
-        # XXX: surface[6] is over-written?!
+        surface[1:5] .= rxntfR[2:6]
+        surface[6] = 12.0 * surface[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
+        surface[7] = rxntfR[7]
+
+        endosome = copy(surface)
+        # all reverse rates are 5-fold higher in endosome
+        endosome[2:21] *= 5.0
+        endosome[2:5] .= rxntfR[11:14]
+        endosome[6] = 12.0 * endosome[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
+        endosome[7] = rxntfR[15]
 
         trafP = zeros(eltype(rxntfR), 13)
         trafP[1:5] = [0.08, 1.46, 0.18, 0.15, 0.017]
         trafP[6:8] = rxntfR[8:10]
     end
-
-    surface[6] = 12.0 * surface[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
-
-    endosome = copy(surface)
-    # all reverse rates are 5-fold higher in endosome
-    endosome[2:21] *= 5.0
 
     @assert trafP[3] < 1.0
 
@@ -56,6 +63,7 @@ end
 
 function runCkine(tps, params; alg=Rosenbrock23())
     @assert all(params .>= 0.0)
+    @assert all(tps .>= 0.0)
     _, _, _, trafP = fullParam(params)
 
     u0 = solveAutocrine(trafP)

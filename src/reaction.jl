@@ -4,7 +4,7 @@ const internalFrac = 0.5 # Same as that used in TAM model
 const recIDX = [1, 2, 3, 10, 17, 20, 23, 26]
 
 const Nparams = 30 # number of unknowns for the full model
-const NIL2params = 10 # number of unknowns for the IL2 model
+const NIL2params = 15 # number of unknowns for the IL2 model
 const Nlig = 6 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 
