@@ -76,7 +76,9 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
     solut = sol(tps).u
 
     if length(tps) > 1
-        solut = hcat(solut...)
+        solut = transpose(hcat(solut...))
+    else
+        solut = solut[1]
     end
 
     return solut
