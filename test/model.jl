@@ -1,14 +1,13 @@
 using Test
-using Distributions
 using BenchmarkTools
 using OrdinaryDiffEq
 using Profile
 using gcSolver
 
-rxntfR = [rand(LogNormal(0.1, 0.25)) for i=1:gcSolver.Nparams]
+rxntfR = exp.(randn(gcSolver.Nparams))
 rxntfR[20] = tanh(rxntfR[20])
 
-IL2params = [rand(LogNormal(0.1, 0.25)) for i=1:gcSolver.NIL2params]
+IL2params = exp.(randn(gcSolver.NIL2params))
 
 tps = [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 
@@ -97,11 +96,11 @@ end
     dy = ones(gcSolver.Nspecies)
     IL2dy = ones(gcSolver.Nspecies)
 
-    gcSolver.fullDeriv(dy, out[1], rxntfR, 0.0)
-    gcSolver.fullDeriv(IL2dy, IL2out[1], IL2params, 0.0)
+    gcSolver.fullDeriv(dy, out[1, :], rxntfR, 0.0)
+    gcSolver.fullDeriv(IL2dy, IL2out[1, :], IL2params, 0.0)
 
-    @test all(out[1] .>= 0.0)
-    @test all(IL2out[1] .>= 0.0)
+    @test all(out .>= 0.0)
+    @test all(IL2out .>= 0.0)
 
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
     @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-6)

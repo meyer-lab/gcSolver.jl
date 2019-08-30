@@ -76,9 +76,9 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
     solut = sol(tps).u
 
     if length(tps) > 1
-        solut = transpose(hcat(solut...))
+        solut = vcat(transpose.(solut)...)
     else
-        solut = solut[1]
+        solut = reshape(solut[1], (1, Nspecies))
     end
 
     return solut
@@ -90,8 +90,6 @@ function runCkineS(tps::Array{Float64,1}, params::Array{Float64,1})
 end
 
 
-export runCkine
-export runCkineS
-
+export runCkine, runCkineS
 
 end # module

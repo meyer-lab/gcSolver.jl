@@ -2,4 +2,4 @@
 language: julia
 codecov: true
 julia:
-  - 1.1
+  - 1.2
