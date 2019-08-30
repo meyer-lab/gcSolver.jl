@@ -5,34 +5,21 @@ using ForwardDiff
 
 include("reaction.jl")
 
-function fullDeriv(du, u, p, t)
+function fullDeriv(du::Vector, u::Vector, p::Vector, t)
     fill!(du, 0.0)
     ILs, surface, endosome, trafP = fullParam(p)
 
-    if length(p) == NIL2params
-        # If we're just working with IL-2, let's cut out the other species
-        ui = zeros(eltype(u), Nspecies)
-        dui = zeros(eltype(du), Nspecies)
-        ui[1:9] .= u[1:9]
-        ui[halfL + 1 : halfL + 9] .= u[10:18]
-        ui[halfL*2 + 1] = u[19]
-
-        fullModel(dui, ui, surface, endosome, trafP, ILs)
-
-        du[1:9] .= dui[1:9]
-        du[10:18] .= dui[halfL + 1 : halfL + 9]
-        du[19] = dui[halfL*2 + 1]
-    else
-        fullModel(du, u, surface, endosome, trafP, ILs)
-    end
+    fullModel(du, u, surface, endosome, trafP, ILs)
 end
 
 
-function fullParam(rxntfR)
+function fullParam(rxntfR::Vector)
     surface = ones(eltype(rxntfR), 21)
+    ILs = zeros(eltype(rxntfR), Nlig)
+    trafP = zeros(eltype(rxntfR), 13)
 
     if length(rxntfR) == Nparams
-        ILs = view(rxntfR, 1:6)
+        ILs[:] .= rxntfR[1:6]
         surface[[1, 4, 5, 10, 11, 12, 13]] = rxntfR[7:13]
         surface[2] = kfbnd * 10 # doi:10.1016/j.jmb.2004.04.038, 10 nM
         surface[3] = kfbnd * 144 # doi:10.1016/j.jmb.2004.04.038, 144 nM
@@ -50,10 +37,9 @@ function fullParam(rxntfR)
         # all reverse rates are 5-fold higher in endosome
         endosome[2:21] *= 5.0
 
-        trafP = view(rxntfR, 18:Nparams)
+        trafP[:] = rxntfR[18:Nparams]
     else
         @assert length(rxntfR) == NIL2params
-        ILs = zeros(eltype(rxntfR), Nlig)
         ILs[1] = rxntfR[1]
         surface[1:5] .= rxntfR[2:6]
         surface[6] = 12.0 * surface[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
@@ -66,7 +52,6 @@ function fullParam(rxntfR)
         endosome[6] = 12.0 * endosome[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
         endosome[7] = rxntfR[15]
 
-        trafP = zeros(eltype(rxntfR), 13)
         trafP[1:5] = [0.08, 1.46, 0.18, 0.15, 0.017]
         trafP[6:8] = rxntfR[8:10]
     end
@@ -77,18 +62,24 @@ function fullParam(rxntfR)
 end
 
 
-function runCkine(tps::Array{Float64,1}, params; alg=Rosenbrock23())
+function runCkine(tps::Array{Float64,1}, params::Vector)
     @assert all(params .>= 0.0)
     @assert all(tps .>= 0.0)
     _, _, _, trafP = fullParam(params)
 
-    u0 = solveAutocrine(trafP, params)
+    u0 = solveAutocrine(trafP)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, alg; reltol=1.0e-6, abstol=1.0e-6, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
+    sol = solve(prob, Rosenbrock23(); reltol=1.0e-6, abstol=1.0e-6, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
 
-    return sol(tps).u
+    solut = sol(tps).u
+
+    if length(tps) > 1
+        solut = hcat(solut...)
+    end
+
+    return solut
 end
 
 

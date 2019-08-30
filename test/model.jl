@@ -57,7 +57,10 @@ end
 
 
 @testset "Reproducibility." begin
-    @test runCkine(tps, rxntfR) == runCkine(tps, rxntfR)
+    output = runCkine(tps, rxntfR)
+
+    @test ndims(output) == 2
+    @test output == runCkine(tps, rxntfR)
     @test runCkine(tps, IL2params) == runCkine(tps, IL2params)
     @test runCkineS(tps, rxntfR) == runCkineS(tps, rxntfR)
     @test runCkineS(tps, IL2params) == runCkineS(tps, IL2params)
@@ -65,8 +68,8 @@ end
 
 
 @testset "Steady-state at t=0." begin
-    out = gcSolver.solveAutocrine(gcSolver.fullParam(rxntfR)[4], rxntfR)
-    IL2out = gcSolver.solveAutocrine(gcSolver.fullParam(IL2params)[4], IL2params)
+    out = gcSolver.solveAutocrine(gcSolver.fullParam(rxntfR)[4])
+    IL2out = gcSolver.solveAutocrine(gcSolver.fullParam(IL2params)[4])
 
     rr = copy(rxntfR)
     IL2rr = copy(IL2params)
@@ -109,20 +112,14 @@ end
     println("fullDeriv")
     @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), rxntfR, 0.0)
     println("fullDeriv IL2")
-    @time gcSolver.fullDeriv(zeros(19), ones(19), IL2params, 0.0)
-    
-    println("TRBDF2")
-    @time runCkine(tps, rxntfR; alg=TRBDF2())
-    println("Rosenbrock23")
-    @time runCkine(tps, rxntfR; alg=Rosenbrock23())
+    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), IL2params, 0.0)
+
     println("Default runCkineS")
     @time runCkineS(tps, rxntfR)
+    println("Default runCkine")
+    @time runCkine(tps, rxntfR)
 
-    println("TRBDF2 IL2")
-    @time runCkine(tps, IL2params; alg=TRBDF2())
-    println("Rosenbrock23 IL2")
-    @time runCkine(tps, IL2params; alg=Rosenbrock23())
-    println("Default IL2")
+    println("Default runCkine IL2")
     @time runCkine(tps, IL2params)
 
     for ii in 1:2

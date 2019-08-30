@@ -84,7 +84,7 @@ end
 
 
 # Initial autocrine condition - DONE
-function solveAutocrine(r, params)
+function solveAutocrine(r)
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
     y0 = zeros(eltype(r), Nspecies)
 
@@ -102,13 +102,6 @@ function solveAutocrine(r, params)
     # Add the species
     y0[recIDX .+ halfL] = r[6:end] / kDeg / internalFrac
     y0[recIDX] = (r[6:end] + kRec*y0[recIDX .+ halfL] * internalFrac) / r[1]
-
-    if length(params) == NIL2params
-        # If we're just working with IL-2, let's cut out the other species
-        splice!(y0, halfL*2 + 2 : Nspecies)
-        splice!(y0, halfL + 10 : halfL*2)
-        splice!(y0, 10 : halfL)
-    end
 
     return y0
 end
