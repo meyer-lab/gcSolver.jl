@@ -2,6 +2,7 @@ module gcSolver
 
 using OrdinaryDiffEq
 using ForwardDiff
+using LinearAlgebra
 
 include("reaction.jl")
 
@@ -10,6 +11,25 @@ function fullDeriv(du::Vector, u::Vector, p::Vector, t)
     ILs, surface, endosome, trafP = fullParam(p)
 
     fullModel(du, u, surface, endosome, trafP, ILs)
+end
+
+
+function dynAnalysis(du::Array{Float64,1}, u::Array{Float64,1}, p::Array{Float64,1})
+    fill!(du, 0.0)
+    ILs, surface, endosome, trafP = fullParam(p)
+
+    jac = ForwardDiff.jacobian((duxx, xx) -> fullModel(duxx, xx, surface, endosome, trafP, ILs), du, u) 
+
+    F = eigen(jac)
+
+    println("=====")
+    println(real.(F.values))
+    println(imag.(F.values))
+    println(".......")
+    println(round.(real.(F.vectors[:, 1]); digits=2))
+    println(".......")
+    println(round.(real.(F.vectors[:, 2]); digits=2))
+    println("=====")
 end
 
 
