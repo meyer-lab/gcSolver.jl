@@ -1,3 +1,5 @@
+
+__precompile__()
 module gcSolver
 
 using OrdinaryDiffEq
@@ -104,10 +106,14 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
     return solut
 end
 
+precompile(runCkine, (Array{Float64,1}, Array{Float64,1}))
+
 
 function runCkineS(tps::Array{Float64,1}, params::Array{Float64,1})
     return ForwardDiff.jacobian(pp -> runCkine(tps, pp), params)
 end
+
+precompile(runCkineS, (Array{Float64,1}, Array{Float64,1}))
 
 
 export runCkine, runCkineS
