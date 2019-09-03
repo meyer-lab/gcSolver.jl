@@ -56,12 +56,15 @@ end
 
 
 @testset "Reproducibility." begin
+    println("Starting runCkine")
     output = runCkine(tps, rxntfR)
 
     @test ndims(output) == 2
     @test output == runCkine(tps, rxntfR)
     @test runCkine(tps, IL2params) == runCkine(tps, IL2params)
+    println("Starting runCkineS")
     @test runCkineS(tps, rxntfR) == runCkineS(tps, rxntfR)
+    println("Starting runCkineS IL-2")
     @test runCkineS(tps, IL2params) == runCkineS(tps, IL2params)
 end
 
