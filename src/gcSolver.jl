@@ -100,7 +100,7 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
         method = Rosenbrock23()
     end
 
-    sol = solve(prob, method; reltol=1.0e-8, abstol=1.0e-8, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
+    sol = solve(prob, method; reltol=1.0e-4, abstol=1.0e-4, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
 
     solut = sol(tps).u
 
