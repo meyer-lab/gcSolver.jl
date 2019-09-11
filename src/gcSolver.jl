@@ -5,6 +5,7 @@ module gcSolver
 using OrdinaryDiffEq
 using ForwardDiff
 using LinearAlgebra
+using ODEInterfaceDiffEq
 
 include("reaction.jl")
 
@@ -93,7 +94,13 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, Rosenbrock23(); reltol=1.0e-6, abstol=1.0e-6, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
+    if eltype(params) == Float64
+        method = radau()
+    else
+        method = Rosenbrock23()
+    end
+
+    sol = solve(prob, method; reltol=1.0e-8, abstol=1.0e-8, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
 
     solut = sol(tps).u
 
