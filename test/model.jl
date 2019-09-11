@@ -56,16 +56,11 @@ end
 
 
 @testset "Reproducibility." begin
-    println("Starting runCkine")
     output = runCkine(tps, rxntfR)
 
     @test ndims(output) == 2
     @test output == runCkine(tps, rxntfR)
     @test runCkine(tps, IL2params) == runCkine(tps, IL2params)
-    println("Starting runCkineS")
-    @test runCkineS(tps, rxntfR) == runCkineS(tps, rxntfR)
-    println("Starting runCkineS IL-2")
-    @test runCkineS(tps, IL2params) == runCkineS(tps, IL2params)
 end
 
 
@@ -85,7 +80,7 @@ end
     gcSolver.fullDeriv(IL2dy, IL2out, IL2rr, 0.0)
 
     @test all(out .>= 0.0)
-    @test all(IL2out .>= 0.0)
+    @test all(IL2out .>= -1.0e-9)
 
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-12)
     @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-12)
@@ -103,7 +98,7 @@ end
     gcSolver.fullDeriv(IL2dy, IL2out[1, :], IL2params, 0.0)
 
     @test all(out .>= 0.0)
-    #@test all(IL2out .>= 0.0)
+    @test all(IL2out .>= -1.0e-9)
 
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
     @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-6)
@@ -116,11 +111,8 @@ end
     println("fullDeriv IL2")
     @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), IL2params, 0.0)
 
-    println("Default runCkineS")
-    @time runCkineS(tps, rxntfR)
     println("Default runCkine")
     @time runCkine(tps, rxntfR)
-
     println("Default runCkine IL2")
     @time runCkine(tps, IL2params)
 

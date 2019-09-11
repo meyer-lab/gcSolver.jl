@@ -116,13 +116,6 @@ end
 precompile(runCkine, (Array{Float64,1}, Array{Float64,1}))
 
 
-function runCkineS(tps::Array{Float64,1}, params::Array{Float64,1})
-    return ForwardDiff.jacobian(pp -> runCkine(tps, pp), params)
-end
-
-precompile(runCkineS, (Array{Float64,1}, Array{Float64,1}))
-
-
-export runCkine, runCkineS
+export runCkine
 
 end # module

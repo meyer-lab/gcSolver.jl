@@ -20,9 +20,9 @@ version = "1.2.1"
 
 [[BandedMatrices]]
 deps = ["FillArrays", "LazyArrays", "LinearAlgebra", "MatrixFactorizations", "Random", "SparseArrays"]
-git-tree-sha1 = "500bbb4e2db4c13d6e9555516e94624d18c2e302"
+git-tree-sha1 = "887159a41e0bf6d5d9fe9dd98ca7a48f6b8780d4"
 uuid = "aae01518-5342-5314-be14-df237901396f"
-version = "0.11.0"
+version = "0.11.1"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -96,10 +96,10 @@ deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
-deps = ["ArrayInterface", "Compat", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LinearAlgebra", "MuladdMacro", "Parameters", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TreeViews"]
-git-tree-sha1 = "2dbfca6a28647d3bf450fa83837a7a45be3336ca"
+deps = ["ArrayInterface", "Compat", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LinearAlgebra", "MuladdMacro", "Parameters", "Printf", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TreeViews"]
+git-tree-sha1 = "7fcfa41fd228e1da2dfea0627f7562e675e291ae"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "5.20.1"
+version = "6.1.0"
 
 [[DiffEqDiffTools]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
@@ -274,9 +274,9 @@ version = "0.4.6"
 
 [[ODEInterfaceDiffEq]]
 deps = ["Compat", "DataStructures", "DiffEqBase", "FunctionWrappers", "LinearAlgebra", "ODEInterface", "Reexport"]
-git-tree-sha1 = "5bbc9841c3c26d30ad6aa8edce31c5aa856315b0"
+git-tree-sha1 = "96ac860ed70d121816c1c6d33a4d1ef4d6105c5a"
 uuid = "09606e27-ecf5-54fc-bb29-004bd9f985bf"
-version = "3.3.1"
+version = "3.4.0"
 
 [[OrderedCollections]]
 deps = ["Random", "Serialization", "Test"]
@@ -286,9 +286,9 @@ version = "1.1.0"
 
 [[OrdinaryDiffEq]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqDiffTools", "ExponentialUtilities", "ForwardDiff", "GenericSVD", "LinearAlgebra", "Logging", "MacroTools", "MuladdMacro", "NLsolve", "Parameters", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays"]
-git-tree-sha1 = "50e7c32798962c8b41c95628c6169bbcfa18aa24"
+git-tree-sha1 = "1371aa180b728a2290f12da8b3bc09df36b39601"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "5.15.1"
+version = "5.16.0"
 
 [[Parameters]]
 deps = ["OrderedCollections"]
