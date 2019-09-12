@@ -1,9 +1,5 @@
 ## Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
 codecov: true
-addons:
-  apt:
-    packages:
-      - gfortran
 julia:
   - 1.2

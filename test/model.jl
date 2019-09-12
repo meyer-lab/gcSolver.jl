@@ -87,6 +87,11 @@ end
 end
 
 
+@testset "Failed before" begin
+    @time runCkine([0.0, 240.0], [9.333333332999999, 0.0, 0.0, 0.0, 0.0, 0.0, 0.002930684094998134, 11.055942957948536, 0.08960281799194239, 17.861899171316548, 0.05226215857640126, 4.185739497894328, 22.08717057928579, 1.0, 1.0, 1.0, 1.0, 0.09630587263491497, 2.3305059712157385, 0.12878917649055982, 0.08868170551708765, 0.006490933570370275, 3.583133893052269, 0.677297851416457, 14.4493888821763, 0.0, 3.6991307000438653, 0.0, 0.0, 0.0])
+end
+
+
 @testset "Equilibrium." begin
     out = runCkine([100000.0], rxntfR)
     IL2out = runCkine([100000.0], IL2params)
@@ -96,6 +101,9 @@ end
 
     gcSolver.fullDeriv(dy, out[1, :], rxntfR, 0.0)
     gcSolver.fullDeriv(IL2dy, IL2out[1, :], IL2params, 0.0)
+
+    println("Steady state")
+    @time runCkineSS(rxntfR)
 
     @test all(out .>= 0.0)
     @test all(IL2out .>= 0.0)

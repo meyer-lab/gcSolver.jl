@@ -5,6 +5,7 @@ module gcSolver
 using OrdinaryDiffEq
 using ForwardDiff
 using LinearAlgebra
+using LeastSquaresOptim
 
 include("reaction.jl")
 
@@ -114,9 +115,24 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
     return solut
 end
 
+
+function runCkineSS(params::Vector)
+    @assert all(params .>= 0.0)
+
+    function fullDSS(u)
+        du = zeros(eltype(u), Nspecies)
+        fullDeriv(du, u, params, nothing)
+        return du
+    end
+
+    sol = optimize(fullDSS, zeros(Nspecies), LevenbergMarquardt(), autodiff=:forward, lower=zeros(Nspecies))
+
+    return sol
+end
+
+export runCkine, runCkineSS
+
 precompile(runCkine, (Array{Float64,1}, Array{Float64,1}))
-
-
-export runCkine
+precompile(runCkineSS, (Array{Float64,1}, ))
 
 end # module
