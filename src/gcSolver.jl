@@ -5,7 +5,6 @@ module gcSolver
 using OrdinaryDiffEq
 using ForwardDiff
 using LinearAlgebra
-using Sundials
 
 include("reaction.jl")
 
@@ -94,8 +93,17 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, TRBDF2(); reltol=1.0e-2, abstol=1.0e-2, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
-    solut = sol(tps).u
+    try
+        sol = solve(prob, Rosenbrock23(); reltol=1.0e-2, abstol=1.0e-2, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
+        solut = sol(tps).u
+    catch
+        println("Solving failed.")
+        println("Params:")
+        println(params)
+        println("Timepoints:")
+        println(tps)
+        rethrow
+    end
 
     if length(tps) > 1
         solut = vcat(transpose.(solut)...)
