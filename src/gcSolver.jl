@@ -6,6 +6,7 @@ using OrdinaryDiffEq
 using ForwardDiff
 using LinearAlgebra
 using ODEInterfaceDiffEq
+using Sundials
 
 include("reaction.jl")
 
@@ -95,12 +96,12 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
     if eltype(params) == Float64
-        method = radau()
+        method = CVODE_BDF()
     else
         method = Rosenbrock23()
     end
 
-    sol = solve(prob, method; reltol=1.0e-4, abstol=1.0e-4, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
+    sol = solve(prob, method; reltol=1.0e-5, abstol=1.0e-5)
 
     solut = sol(tps).u
 
