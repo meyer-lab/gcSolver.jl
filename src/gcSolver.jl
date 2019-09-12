@@ -5,7 +5,6 @@ module gcSolver
 using OrdinaryDiffEq
 using ForwardDiff
 using LinearAlgebra
-using ODEInterfaceDiffEq
 using Sundials
 
 include("reaction.jl")
@@ -96,12 +95,14 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
     if eltype(params) == Float64
-        method = CVODE_BDF()
+        try
+            sol = solve(prob, CVODE_BDF(stability_limit_detect=true); reltol=1.0e-8, abstol=1.0e-8)
+        catch e
+            sol = solve(prob, Rosenbrock23(); reltol=1.0e-8, abstol=1.0e-8, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
+        end
     else
-        method = Rosenbrock23()
+        sol = solve(prob, Rosenbrock23(); reltol=1.0e-8, abstol=1.0e-8, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
     end
-
-    sol = solve(prob, method; reltol=1.0e-10, abstol=1.0e-10, stability_limit_detect=true)
 
     solut = sol(tps).u
 
