@@ -101,7 +101,7 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
         method = Rosenbrock23()
     end
 
-    sol = solve(prob, method; reltol=1.0e-9, abstol=1.0e-9)
+    sol = solve(prob, method; reltol=1.0e-10, abstol=1.0e-10, stability_limit_detect=true)
 
     solut = sol(tps).u
 
