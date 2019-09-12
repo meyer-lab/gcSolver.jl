@@ -94,7 +94,7 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, TRBDF2(); reltol=1.0e-3, abstol=1.0e-3, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
+    sol = solve(prob, TRBDF2(); reltol=1.0e-2, abstol=1.0e-2, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
     solut = sol(tps).u
 
     if length(tps) > 1
