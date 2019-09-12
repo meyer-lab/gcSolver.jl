@@ -96,7 +96,7 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
 
     if eltype(params) == Float64
         try
-            sol = solve(prob, CVODE_BDF(stability_limit_detect=true); reltol=1.0e-8, abstol=1.0e-8)
+            sol = solve(prob, CVODE_BDF(stability_limit_detect=true); reltol=1.0e-8, abstol=1.0e-10)
             solut = sol(tps).u
         catch e
             sol = solve(prob, Rosenbrock23(); reltol=1.0e-8, abstol=1.0e-8, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
