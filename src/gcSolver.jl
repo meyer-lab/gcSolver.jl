@@ -85,6 +85,11 @@ function fullParam(rxntfR::Vector)
 end
 
 
+function domainDef(u, p, t)
+    return any(x -> x < 0.0, u)
+end
+
+
 function runCkine(tps::Array{Float64,1}, params::Vector)
     @assert all(params .>= 0.0)
     @assert all(tps .>= 0.0)
@@ -95,8 +100,14 @@ function runCkine(tps::Array{Float64,1}, params::Vector)
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
     try
-        sol = solve(prob, Rosenbrock23(); reltol=1.0e-2, abstol=1.0e-2, isoutofdomain=(u, p, t) -> any(x -> x < 0.0, u))
-        solut = sol(tps).u
+        try
+            sol = solve(prob, Rosenbrock23(); reltol=1.0e-2, abstol=1.0e-2, isoutofdomain=domainDef)
+            solut = sol(tps).u
+        catch
+            println("Solving failed. Reducing tolerance.")
+            sol = solve(prob, Rosenbrock23(); reltol=1.0e-9, abstol=1.0e-9, isoutofdomain=domainDef)
+            solut = sol(tps).u
+        end
     catch
         println("Solving failed.")
         println("Params:")
