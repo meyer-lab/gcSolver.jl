@@ -1,7 +1,9 @@
+using StaticArrays
+
 const Nspecies = 62 # number of complexes in surface + endosome + free ligand
 const halfL = 28 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
-const recIDX = [1, 2, 3, 10, 17, 20, 23, 26]
+const recIDX = SVector(1, 2, 3, 10, 17, 20, 23, 26)
 
 const Nparams = 30 # number of unknowns for the full model
 const NIL2params = 15 # number of unknowns for the IL2 model
@@ -13,7 +15,7 @@ const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 # p[9:12] is k14rev, k16rev, k17rev, k22rev
 # p[13:14] is k23rev, k24rev
 
-function dYdT(du, u, p::Vector, ILs)
+function dYdT(du, u, p, ILs)
     # IL2Ra, IL2Rb, gc, IL2_IL2Ra, IL2_IL2Rb, IL2_IL2Ra_IL2Rb, IL2_IL2Ra_gc, IL2_IL2Rb_gc, IL2_IL2Ra_IL2Rb_gc
     # IL15Ra, IL15_IL15Ra, IL15_IL2Rb, IL15_IL15Ra_IL2Rb, IL15_IL15Ra_gc, IL15_IL2Rb_gc, IL15_IL15Ra_IL2Rb_gc
 
@@ -64,7 +66,7 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
 
     # Actually calculate the trafficking
     for ii in range(1, stop=halfL)
-        if findfirst(isequal(ii), [8, 9, 15, 16, 19, 22, 25, 28]) != nothing
+        if findfirst(isequal(ii), SVector(8, 9, 15, 16, 19, 22, 25, 28)) != nothing
             du[ii] -= u[ii] * (trafP[1] + trafP[2]) # Endo
             du[ii+halfL] += u[ii] * (trafP[1] + trafP[2]) / internalFrac - trafP[5] * u[ii+halfL] # Endo, deg
         else

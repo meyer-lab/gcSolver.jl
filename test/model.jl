@@ -9,6 +9,11 @@ rxntfR[20] = tanh(rxntfR[20])
 
 IL2params = exp.(randn(gcSolver.NIL2params))
 
+surface = ones(eltype(rxntfR), 21)
+endosome = copy(surface)
+ILs = zeros(eltype(rxntfR), gcSolver.Nlig)
+trafP = zeros(eltype(rxntfR), 13)
+
 tps = [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 
 # Assert the conservation of species throughout the experiment.
@@ -46,7 +51,7 @@ end
     rr[18:end] .= 0.0
     dy = zeros(gcSolver.Nspecies)
     
-    gcSolver.fullDeriv(dy, copy(dy), rr, 0.0)
+    gcSolver.fullDeriv(dy, copy(dy), (rr, surface, endosome, trafP, ILs), 0.0)
     
     # Check for conservation of each surface receptor
     assertConservation(dy)
@@ -65,8 +70,10 @@ end
 
 
 @testset "Steady-state at t=0." begin
-    out = gcSolver.solveAutocrine(gcSolver.fullParam(rxntfR)[4])
-    IL2out = gcSolver.solveAutocrine(gcSolver.fullParam(IL2params)[4])
+    gcSolver.fullParam!(rxntfR, surface, endosome, trafP, ILs)
+    out = gcSolver.solveAutocrine(trafP)
+    gcSolver.fullParam!(IL2params, surface, endosome, trafP, ILs)
+    IL2out = gcSolver.solveAutocrine(trafP)
 
     rr = copy(rxntfR)
     IL2rr = copy(IL2params)
@@ -76,19 +83,14 @@ end
     dy = ones(gcSolver.Nspecies)
     IL2dy = ones(gcSolver.Nspecies)
 
-    gcSolver.fullDeriv(dy, out, rr, 0.0)
-    gcSolver.fullDeriv(IL2dy, IL2out, IL2rr, 0.0)
+    gcSolver.fullDeriv(dy, out, (rr, surface, endosome, trafP, ILs), 0.0)
+    gcSolver.fullDeriv(IL2dy, IL2out, (IL2rr, surface, endosome, trafP, ILs), 0.0)
 
     @test all(out .>= 0.0)
     @test all(IL2out .>= 0.0)
 
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-12)
     @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-12)
-end
-
-
-@testset "Failed before" begin
-    @time runCkine([0.0, 240.0], [9.333333332999999, 0.0, 0.0, 0.0, 0.0, 0.0, 0.002930684094998134, 11.055942957948536, 0.08960281799194239, 17.861899171316548, 0.05226215857640126, 4.185739497894328, 22.08717057928579, 1.0, 1.0, 1.0, 1.0, 0.09630587263491497, 2.3305059712157385, 0.12878917649055982, 0.08868170551708765, 0.006490933570370275, 3.583133893052269, 0.677297851416457, 14.4493888821763, 0.0, 3.6991307000438653, 0.0, 0.0, 0.0])
 end
 
 
@@ -99,15 +101,17 @@ end
     dy = ones(gcSolver.Nspecies)
     IL2dy = ones(gcSolver.Nspecies)
 
-    gcSolver.fullDeriv(dy, out[1, :], rxntfR, 0.0)
-    gcSolver.fullDeriv(IL2dy, IL2out[1, :], IL2params, 0.0)
+    gcSolver.fullDeriv(dy, out[1, :], (rxntfR, surface, endosome, trafP, ILs), 0.0)
+    gcSolver.fullDeriv(IL2dy, IL2out[1, :], (IL2params, surface, endosome, trafP, ILs), 0.0)
 
-    println("Steady state")
-    @time runCkineSS(rxntfR)
+    println("runCkineSS")
+    @time outSS = runCkineSS(rxntfR)
 
+    #@test all(outSS .>= 0.0)
     @test all(out .>= 0.0)
     @test all(IL2out .>= 0.0)
 
+    #@test isapprox(sum(abs.(outSS)), 0.0, atol=1.0e-9)
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
     @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-6)
 end
@@ -115,9 +119,9 @@ end
 
 @testset "Benchmark." begin
     println("fullDeriv")
-    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), rxntfR, 0.0)
+    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), (rxntfR, surface, endosome, trafP, ILs), 0.0)
     println("fullDeriv IL2")
-    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), IL2params, 0.0)
+    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), (IL2params, surface, endosome, trafP, ILs), 0.0)
 
     println("Default runCkine")
     @time runCkine(tps, rxntfR)
