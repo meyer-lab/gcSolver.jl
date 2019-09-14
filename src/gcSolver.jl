@@ -17,25 +17,6 @@ function fullDeriv(du, u, (p, surface, endosome, trafP, ILs), t)
 end
 
 
-function dynAnalysis(du::Array{Float64,1}, u::Array{Float64,1}, p::Array{Float64,1})
-    fill!(du, 0.0)
-    ILs, surface, endosome, trafP = fullParam!(p)
-
-    jac = ForwardDiff.jacobian((duxx, xx) -> fullModel(duxx, xx, surface, endosome, trafP, ILs), du, u) 
-
-    F = eigen(jac)
-
-    println("=====")
-    println(real.(F.values))
-    println(imag.(F.values))
-    println(".......")
-    println(round.(real.(F.vectors[:, 1]); digits=2))
-    println(".......")
-    println(round.(real.(F.vectors[:, 2]); digits=2))
-    println("=====")
-end
-
-
 function fullParam!(rxntfR::Vector, surface, endosome, trafP, ILs)
     fill!(surface, 1.0)
     fill!(endosome, 1.0)
@@ -104,24 +85,8 @@ function runCkine(tps::Array{Float64,1}, params::Vector)::Array{Float64,2}
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), (params, surface, endosome, trafP, ILs))
 
-    try
-        try
-            sol = solve(prob, Rosenbrock23(); reltol=1.0e-2, abstol=1.0e-2, isoutofdomain=domainDef)
-            solut = sol(tps).u
-        catch e
-            println(sprint(showerror, e, backtrace()))
-            println("Solving failed. Reducing tolerance.")
-            sol = solve(prob, Rosenbrock23(); reltol=1.0e-9, abstol=1.0e-9, isoutofdomain=domainDef)
-            solut = sol(tps).u
-        end
-    catch
-        println("Solving failed.")
-        println("Params:")
-        println(params)
-        println("Timepoints:")
-        println(tps)
-        rethrow
-    end
+    sol = solve(prob, Rodas4P(); reltol=1.0e-4, abstol=1.0e-2, isoutofdomain=domainDef)
+    solut = sol(tps).u
 
     if length(tps) > 1
         solut = vcat(transpose.(solut)...)
@@ -137,20 +102,23 @@ function runCkineSS(params::Vector)
     @assert all(params .>= 0.0)
 
     # Allocate temporaries
-    surface = ones(eltype(params), 21)
-    endosome = copy(surface)
-    ILs = zeros(eltype(params), Nlig)
-    trafP = zeros(eltype(params), 13)
+    surface = @MVector ones(eltype(params), 21)
+    endosome = @MVector ones(eltype(params), 21)
+    ILs = @MVector zeros(eltype(params), Nlig)
+    trafP = @MVector zeros(eltype(params), 13)
 
     function fullDSS(u)
         du = zeros(eltype(u), Nspecies)
-        fullDeriv(du, u, (params, surface, endosome, trafP, ILs), nothing)
+        fullDeriv(du, u, (params, surface, endosome, trafP, ILs), 1.0)
         return du
     end
 
     sol = optimize(fullDSS, zeros(Nspecies), LevenbergMarquardt(), autodiff=:forward, lower=zeros(Nspecies))
 
-    return sol
+    @assert sol.ssr <= 1.0e-6
+    @assert sol.converged
+
+    return sol.minimizer
 end
 
 export runCkine, runCkineSS

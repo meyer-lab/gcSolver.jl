@@ -107,11 +107,9 @@ end
     println("runCkineSS")
     @time outSS = runCkineSS(rxntfR)
 
-    #@test all(outSS .>= 0.0)
     @test all(out .>= 0.0)
     @test all(IL2out .>= 0.0)
 
-    #@test isapprox(sum(abs.(outSS)), 0.0, atol=1.0e-9)
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
     @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-6)
 end
@@ -128,8 +126,8 @@ end
     println("Default runCkine IL2")
     @time runCkine(tps, IL2params)
 
-    for ii in 1:2
+    for ii in 1:10
         @profile runCkine(tps, rxntfR)
     end
-    Profile.print(noisefloor=2.0)
+    Profile.print(noisefloor=5.0)
 end
