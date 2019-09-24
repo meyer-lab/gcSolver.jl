@@ -14,7 +14,7 @@ endosome = copy(surface)
 ILs = zeros(eltype(rxntfR), gcSolver.Nlig)
 trafP = zeros(eltype(rxntfR), 13)
 
-tps = [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
+tps = [0.0, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 
 # Assert the conservation of species throughout the experiment.
 function assertConservation(y)
@@ -112,6 +112,22 @@ end
 
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
     @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-6)
+end
+
+
+@testset "Make sure no endosomal species are found when endo=0." begin
+    rxntfRR = copy(rxntfR)
+    rxntfRR[18:19] .= 0.0  # set endo and activeEndo to 0.0
+
+    yOut = runCkine(tps, rxntfRR)
+
+    @test all(isapprox(sum(abs.(yOut[:, 29:end])), 0.0, atol=1.0e-6))
+end
+
+
+@testset "Test that there is at least 1 non-zero species at T=0." begin
+    temp = runCkine(tps, rxntfR)
+    @test any(temp[1, :] .> 0.0)
 end
 
 
