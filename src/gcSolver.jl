@@ -39,6 +39,7 @@ function fullParam!(rxntfR::Vector, surface, endosome, trafP, ILs)
         surface[20] = kfbnd * 0.07 # DOI: 10.1126/scisignal.aal1253 (human)
 
         # all reverse rates are 5-fold higher in endosome
+        endosome[:] .= surface
         endosome[2:21] *= 5.0
 
         trafP[:] = rxntfR[18:Nparams]
@@ -50,6 +51,7 @@ function fullParam!(rxntfR::Vector, surface, endosome, trafP, ILs)
         surface[7] = rxntfR[7]
 
         # all reverse rates are 5-fold higher in endosome
+        endosome[:] .= surface
         endosome[2:21] *= 5.0
         endosome[2:5] .= rxntfR[11:14]
         endosome[6] = 12.0 * endosome[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
