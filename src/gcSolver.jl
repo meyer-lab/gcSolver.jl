@@ -24,8 +24,8 @@ function fullParam!(rxntfR::Vector, surface, endosome, trafP, ILs)
     fill!(ILs, 0.0)
 
     if length(rxntfR) == Nparams
-        ILs[:] .= rxntfR[1:5]
-        surface[SVector(1, 4, 5, 10, 11, 12, 13)] = view(rxntfR, 6:12)
+        ILs[:] .= rxntfR[1:6]
+        surface[SVector(1, 4, 5, 10, 11, 12, 13)] = view(rxntfR, 7:13)
         surface[2] = kfbnd * 10 # doi:10.1016/j.jmb.2004.04.038, 10 nM
         surface[3] = kfbnd * 144 # doi:10.1016/j.jmb.2004.04.038, 144 nM
         surface[6] = 12.0 * surface[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
@@ -33,15 +33,15 @@ function fullParam!(rxntfR::Vector, surface, endosome, trafP, ILs)
         surface[8] = kfbnd * 0.065 # based on the multiple papers suggesting 30-100 pM
         surface[9] = kfbnd * 438 # doi:10.1038/ni.2449, 438 nM
         surface[14] = kfbnd * 59 # DOI:10.1111/j.1600-065X.2012.01160.x, 59 nM
-        surface[SVector(15, 17, 19)] = view(rxntfR, 13:15)
+        surface[SVector(15, 17, 19, 21)] = view(rxntfR, 14:17)
         surface[16] = kfbnd * 0.1 # DOI:10.1073/pnas.89.12.5690, ~100 pM
         surface[18] = kfbnd * 1.0 # DOI: 10.1126/scisignal.aal1253 (human)
+        surface[20] = kfbnd * 0.07 # DOI: 10.1126/scisignal.aal1253 (human)
 
         # all reverse rates are 5-fold higher in endosome
-        endosome[:] .= surface
-        endosome[2:19] *= 5.0
+        endosome[2:21] *= 5.0
 
-        trafP[:] = rxntfR[16:end]
+        trafP[:] = rxntfR[18:Nparams]
     else
         @assert length(rxntfR) == NIL2params
         ILs[1] = rxntfR[1]
@@ -50,8 +50,7 @@ function fullParam!(rxntfR::Vector, surface, endosome, trafP, ILs)
         surface[7] = rxntfR[7]
 
         # all reverse rates are 5-fold higher in endosome
-        endosome[:] .= surface
-        endosome[2:end] *= 5.0
+        endosome[2:21] *= 5.0
         endosome[2:5] .= rxntfR[11:14]
         endosome[6] = 12.0 * endosome[5] / 1.5 # doi:10.1016/j.jmb.2004.04.038
         endosome[7] = rxntfR[15]
@@ -76,10 +75,10 @@ function runCkine(tps::Array{Float64,1}, params::Vector)::Array{Float64,2}
     @assert all(tps .>= 0.0)
 
     # Allocate temporaries
-    surface = @MVector ones(eltype(params), 19)
-    endosome = @MVector ones(eltype(params), 19)
+    surface = @MVector ones(eltype(params), 21)
+    endosome = @MVector ones(eltype(params), 21)
     ILs = @MVector zeros(eltype(params), Nlig)
-    trafP = @MVector zeros(eltype(params), 12)
+    trafP = @MVector zeros(eltype(params), 13)
 
     fullParam!(params, surface, endosome, trafP, ILs)
     u0 = solveAutocrine(trafP)
@@ -103,10 +102,10 @@ function runCkineSS(params::Vector)
     @assert all(params .>= 0.0)
 
     # Allocate temporaries
-    surface = @MVector ones(eltype(params), 19)
-    endosome = @MVector ones(eltype(params), 19)
+    surface = @MVector ones(eltype(params), 21)
+    endosome = @MVector ones(eltype(params), 21)
     ILs = @MVector zeros(eltype(params), Nlig)
-    trafP = @MVector zeros(eltype(params), 12)
+    trafP = @MVector zeros(eltype(params), 13)
 
     function fullDSS(u)
         du = zeros(eltype(u), Nspecies)

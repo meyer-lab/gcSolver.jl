@@ -5,14 +5,14 @@ using Profile
 using gcSolver
 
 rxntfR = exp.(randn(gcSolver.Nparams))
-rxntfR[18] = tanh(rxntfR[18])
+rxntfR[20] = tanh(rxntfR[20])
 
 IL2params = exp.(randn(gcSolver.NIL2params))
 
-surface = ones(eltype(rxntfR), 19)
+surface = ones(eltype(rxntfR), 21)
 endosome = copy(surface)
 ILs = zeros(eltype(rxntfR), gcSolver.Nlig)
-trafP = zeros(eltype(rxntfR), 12)
+trafP = zeros(eltype(rxntfR), 13)
 
 tps = [0.0, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 
@@ -25,7 +25,8 @@ function assertConservation(y)
                 [16, 17, 18],  # IL7Ra
                 [19, 20, 21],  # IL9R
                 [22, 23, 24],  # IL4Ra
-                [2, 6, 7, 8, 13, 14, 15, 18, 21, 24]] #gc
+                [25, 26, 27],  # IL21Ra
+                [2, 6, 7, 8, 13, 14, 15, 18, 21, 24, 27]] #gc
 
     # Check for conservation of species sum
     for ii in range(1, stop=length(consList))
@@ -47,7 +48,7 @@ end
 
 @testset "Full model mass conservation." begin
     rr = copy(rxntfR)
-    rr[16:end] .= 0.0
+    rr[18:end] .= 0.0
     dy = zeros(gcSolver.Nspecies)
     
     gcSolver.fullDeriv(dy, copy(dy), (rr, surface, endosome, trafP, ILs), 0.0)
@@ -116,11 +117,11 @@ end
 
 @testset "Make sure no endosomal species are found when endo=0." begin
     rxntfRR = copy(rxntfR)
-    rxntfRR[16:17] .= 0.0  # set endo and activeEndo to 0.0
+    rxntfRR[18:19] .= 0.0  # set endo and activeEndo to 0.0
 
     yOut = runCkine(tps, rxntfRR)
 
-    @test all(isapprox(sum(abs.(yOut[:, 26:end])), 0.0, atol=1.0e-6))
+    @test all(isapprox(sum(abs.(yOut[:, 29:end])), 0.0, atol=1.0e-6))
 end
 
 
