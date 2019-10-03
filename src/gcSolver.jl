@@ -87,7 +87,7 @@ function runCkine(tps::Array{Float64,1}, params::Vector)::Array{Float64,2}
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), (params, surface, endosome, trafP, ILs))
 
-    sol = solve(prob, Rodas4P(); reltol=1.0e-4, abstol=1.0e-2, isoutofdomain=domainDef)
+    sol = solve(prob, Rodas4P(); reltol=1.0e-6, abstol=1.0e-3, isoutofdomain=domainDef)
     solut = sol(tps).u
 
     if length(tps) > 1
