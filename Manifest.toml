@@ -82,15 +82,15 @@ uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "2.1.0"
 
 [[DataAPI]]
-git-tree-sha1 = "8903f0219d3472543fc4b2f5ebaf675a07f817c0"
+git-tree-sha1 = "674b67f344687a88310213ddfa8a2b3c76cc4252"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.0.1"
+version = "1.1.0"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "517ce30aa57cdfae1ab444a7c0aef8bb86345bc2"
+git-tree-sha1 = "f94423c68f2e47db0d6f626a26d4872266e0ec3d"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.1"
+version = "0.17.2"
 
 [[Dates]]
 deps = ["Printf"]
@@ -102,9 +102,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
 deps = ["ArrayInterface", "Compat", "DiffEqDiffTools", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LinearAlgebra", "MuladdMacro", "Parameters", "Printf", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TreeViews"]
-git-tree-sha1 = "5629889ad8aae3420cdd59c336ee776404b62c19"
+git-tree-sha1 = "72b6ffef7720c669606b282984b3efd9bd7973d9"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.3.3"
+version = "6.3.4"
 
 [[DiffEqDiffTools]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
@@ -199,9 +199,9 @@ version = "0.21.0"
 
 [[LazyArrays]]
 deps = ["FillArrays", "LinearAlgebra", "MacroTools", "StaticArrays"]
-git-tree-sha1 = "0e8448cc1774a8d067ce6dc576fcfa61f44adb2f"
+git-tree-sha1 = "576081d32ef488a03a8cebcc63fdb23d52b466e5"
 uuid = "5078a376-72f3-5289-bfd5-ec5146d43c02"
-version = "0.12.1"
+version = "0.12.2"
 
 [[LeastSquaresOptim]]
 deps = ["DiffEqDiffTools", "ForwardDiff", "LinearAlgebra", "Optim", "Printf", "SparseArrays", "Statistics", "SuiteSparse"]
@@ -251,9 +251,10 @@ uuid = "a3b82374-2e81-5b9e-98ce-41277c0e4c87"
 version = "0.2.0"
 
 [[Missings]]
-git-tree-sha1 = "29858ce6c8ae629cf2d733bffa329619a1c843d0"
+deps = ["DataAPI"]
+git-tree-sha1 = "de0a5ce9e5289f27df672ffabef4d1e5861247d5"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
-version = "0.4.2"
+version = "0.4.3"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
