@@ -5,7 +5,7 @@ module gcSolver
 using OrdinaryDiffEq
 using ForwardDiff
 using LinearAlgebra
-using LeastSquaresOptim
+using SteadyStateDiffEq
 
 include("reaction.jl")
 
@@ -109,18 +109,14 @@ function runCkineSS(params::Vector)
     ILs = @MVector zeros(eltype(params), Nlig)
     trafP = @MVector zeros(eltype(params), 13)
 
-    function fullDSS(u)
-        du = zeros(eltype(u), Nspecies)
-        fullDeriv(du, u, (params, surface, endosome, trafP, ILs), 1.0)
-        return du
-    end
+    fullParam!(params, surface, endosome, trafP, ILs)
+    u0 = solveAutocrine(trafP)
 
-    sol = optimize(fullDSS, zeros(Nspecies), LevenbergMarquardt(), autodiff=:forward, lower=zeros(Nspecies))
+    probInit = SteadyStateProblem(fullDeriv, u0, (params, surface, endosome, trafP, ILs))
 
-    @assert sol.ssr <= 1.0e-6
-    @assert sol.converged
+    solInit = solve(probInit, DynamicSS(Rosenbrock23(autodiff=(eltype(params) == Float64))); isoutofdomain=domainDef)
 
-    return sol.minimizer
+    return solInit
 end
 
 export runCkine, runCkineSS
