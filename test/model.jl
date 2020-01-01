@@ -1,12 +1,9 @@
 using Test
-using OrdinaryDiffEq
 using Profile
 using gcSolver
 
 rxntfR = exp.(randn(gcSolver.Nparams))
 rxntfR[20] = tanh(rxntfR[20])
-
-IL2params = exp.(randn(gcSolver.NIL2params))
 
 surface = ones(eltype(rxntfR), 21)
 endosome = copy(surface)
@@ -64,53 +61,38 @@ end
 
     @test ndims(output) == 2
     @test output == runCkine(tps, rxntfR)
-    @test runCkine(tps, IL2params) == runCkine(tps, IL2params)
 end
 
 
 @testset "Steady-state at t=0." begin
     gcSolver.fullParam!(rxntfR, surface, endosome, trafP, ILs)
     out = gcSolver.solveAutocrine(trafP)
-    gcSolver.fullParam!(IL2params, surface, endosome, trafP, ILs)
-    IL2out = gcSolver.solveAutocrine(trafP)
 
     rr = copy(rxntfR)
-    IL2rr = copy(IL2params)
     rr[1:6] .= 0.0
-    IL2rr[1] = 0.0
 
     dy = ones(gcSolver.Nspecies)
-    IL2dy = ones(gcSolver.Nspecies)
 
     gcSolver.fullDeriv(dy, out, (rr, surface, endosome, trafP, ILs), 0.0)
-    gcSolver.fullDeriv(IL2dy, IL2out, (IL2rr, surface, endosome, trafP, ILs), 0.0)
 
     @test all(out .>= 0.0)
-    @test all(IL2out .>= 0.0)
-
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-12)
-    @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-12)
 end
 
 
 @testset "Equilibrium." begin
     out = runCkine([100000.0], rxntfR)
-    IL2out = runCkine([100000.0], IL2params)
 
     dy = ones(gcSolver.Nspecies)
-    IL2dy = ones(gcSolver.Nspecies)
 
     gcSolver.fullDeriv(dy, out[1, :], (rxntfR, surface, endosome, trafP, ILs), 0.0)
-    gcSolver.fullDeriv(IL2dy, IL2out[1, :], (IL2params, surface, endosome, trafP, ILs), 0.0)
 
     println("runCkineSS")
     @time outSS = runCkineSS(rxntfR)
 
     @test all(out .>= 0.0)
-    @test all(IL2out .>= 0.0)
 
     @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
-    @test isapprox(sum(abs.(IL2dy)), 0.0, atol=1.0e-6)
 end
 
 
@@ -134,16 +116,10 @@ end
 @testset "Benchmark." begin
     println("fullDeriv")
     @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), (rxntfR, surface, endosome, trafP, ILs), 0.0)
-    println("fullDeriv IL2")
-    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), (IL2params, surface, endosome, trafP, ILs), 0.0)
 
     println("Default runCkine")
     @time runCkine(tps, rxntfR)
-    println("Default runCkine IL2")
-    @time runCkine(tps, IL2params)
 
-    for ii in 1:10
-        @profile runCkine(tps, rxntfR)
-    end
-    Profile.print(noisefloor=5.0)
+    @profile runCkine(tps, rxntfR)
+    Profile.print(noisefloor=2.0)
 end
