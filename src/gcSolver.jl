@@ -112,7 +112,7 @@ function runCkineSS(params::Vector)
     fullParam!(params, surface, endosome, trafP, ILs)
     u0 = solveAutocrine(trafP)
 
-    probInit = SteadyStateProblem(fullDeriv, u0, params)
+    probInit = SteadyStateProblem(fullDeriv, u0, (params, surface, endosome, trafP, ILs))
 
     solInit = solve(probInit, DynamicSS(Rosenbrock23(autodiff=(eltype(params) == Float64))); isoutofdomain=domainDef)
 
