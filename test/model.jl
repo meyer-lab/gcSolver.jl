@@ -1,5 +1,4 @@
 using Test
-using BenchmarkTools
 using OrdinaryDiffEq
 using Profile
 using gcSolver
