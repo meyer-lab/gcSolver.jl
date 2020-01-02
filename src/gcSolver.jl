@@ -69,7 +69,7 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix{Float64}
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), (params, surface, endosome, trafP, ILs))
 
-    sol = solve(prob, Rodas5(); reltol=1.0e-8, abstol=1.0e-8, isoutofdomain=domainDef)
+    sol = solve(prob, Rodas5(); reltol = 1.0e-8, abstol = 1.0e-8, isoutofdomain = domainDef)
     solut = sol(tps).u
 
     if length(tps) > 1
@@ -96,14 +96,14 @@ function runCkineSS(params::Vector)
 
     probInit = SteadyStateProblem(fullDeriv, u0, (params, surface, endosome, trafP, ILs))
 
-    solInit = solve(probInit, DynamicSS(Rodas5()); isoutofdomain=domainDef)
+    solInit = solve(probInit, DynamicSS(Rodas5()); isoutofdomain = domainDef)
 
     return solInit
 end
 
 export runCkine, runCkineSS
 
-precompile(runCkine, (Array{Float64,1}, Array{Float64,1}))
-precompile(runCkineSS, (Array{Float64,1}, ))
+precompile(runCkine, (Array{Float64, 1}, Array{Float64, 1}))
+precompile(runCkineSS, (Array{Float64, 1},))
 
 end # module

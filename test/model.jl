@@ -15,28 +15,30 @@ tps = [0.0, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 # Assert the conservation of species throughout the experiment.
 function assertConservation(y)
     # These are all 0-indexed, so add 1
-    consList = [[1, 4, 5, 7, 8, 11, 12, 14, 15],  # IL2Rb
-                [0, 3, 5, 6, 8],  # IL2Ra
-                [9, 10, 12, 13, 15],  # IL15Ra
-                [16, 17, 18],  # IL7Ra
-                [19, 20, 21],  # IL9R
-                [22, 23, 24],  # IL4Ra
-                [25, 26, 27],  # IL21Ra
-                [2, 6, 7, 8, 13, 14, 15, 18, 21, 24, 27]] #gc
+    consList = [
+        [1, 4, 5, 7, 8, 11, 12, 14, 15],  # IL2Rb
+        [0, 3, 5, 6, 8],  # IL2Ra
+        [9, 10, 12, 13, 15],  # IL15Ra
+        [16, 17, 18],  # IL7Ra
+        [19, 20, 21],  # IL9R
+        [22, 23, 24],  # IL4Ra
+        [25, 26, 27],  # IL21Ra
+        [2, 6, 7, 8, 13, 14, 15, 18, 21, 24, 27],
+    ] #gc
 
     # Check for conservation of species sum
-    for ii in range(1, stop=length(consList))
+    for ii in range(1, stop = length(consList))
         diff = sum(y[consList[ii] .+ 1])
-        @test isapprox(diff, 0.0, atol=1.0e-12)
+        @test isapprox(diff, 0.0, atol = 1.0e-12)
     end
 end
 
 
 @testset "Reaction model mass conservation." begin
     dy = zeros(gcSolver.halfL)
-    
+
     gcSolver.dYdT(dy, copy(dy), rxntfR, ones(gcSolver.Nlig))
-    
+
     # Check for conservation of each surface receptor
     assertConservation(dy)
 end
@@ -46,13 +48,13 @@ end
     rr = copy(rxntfR)
     rr[18:end] .= 0.0
     dy = zeros(gcSolver.Nspecies)
-    
+
     gcSolver.fullDeriv(dy, copy(dy), (rr, surface, endosome, trafP, ILs), 0.0)
-    
+
     # Check for conservation of each surface receptor
     assertConservation(dy)
     # Check for conservation of each endosomal receptor
-    assertConservation(dy[gcSolver.halfL+1:end])
+    assertConservation(dy[(gcSolver.halfL + 1):end])
 end
 
 
@@ -76,7 +78,7 @@ end
     gcSolver.fullDeriv(dy, out, (rr, surface, endosome, trafP, ILs), 0.0)
 
     @test all(out .>= 0.0)
-    @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-12)
+    @test isapprox(sum(abs.(dy)), 0.0, atol = 1.0e-12)
 end
 
 
@@ -92,7 +94,7 @@ end
 
     @test all(out .>= 0.0)
 
-    @test isapprox(sum(abs.(dy)), 0.0, atol=1.0e-6)
+    @test isapprox(sum(abs.(dy)), 0.0, atol = 1.0e-6)
 end
 
 
@@ -121,5 +123,5 @@ end
     @time runCkine(tps, rxntfR)
 
     @profile runCkine(tps, rxntfR)
-    Profile.print(noisefloor=2.0)
+    Profile.print(noisefloor = 2.0)
 end
