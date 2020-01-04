@@ -4,11 +4,12 @@ const Nspecies = 62 # number of complexes in surface + endosome + free ligand
 const halfL = 28 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
 const recIDX = SVector(1, 2, 3, 10, 17, 20, 23, 26)
+const recIDXint = @SVector [ii + halfL for ii in recIDX]
 
-const Nparams = 30 # number of unknowns for the full model
-const NIL2params = 15 # number of unknowns for the IL2 model
+const Nparams = 61 # number of unknowns for the full model
 const Nlig = 6 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
+const internalV = 623.0 # Same as that used in TAM model
 
 # p[1:4] is kfwd, k1rev, k2rev, k4rev
 # p[5:8] is k5rev, k10rev, k11rev, k13rev
@@ -64,9 +65,12 @@ function dYdT(du, u, p, ILs)
 end
 
 
-function fullModel(du, u, pSurf, pEndo, trafP, ILs)
-    internalV = 623.0 # Same as that used in TAM model
+function trafP(p)
+    return view(p, 49:61)
+end
 
+
+function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
     dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo, view(u, (halfL * 2 + 1):Nspecies))
