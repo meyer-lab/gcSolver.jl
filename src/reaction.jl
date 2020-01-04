@@ -74,6 +74,12 @@ end
 function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
+
+    # Don't bother with anything else if this is the no trafficking model
+    if trafP[1] == 0.0
+        return nothing
+    end
+
     dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo, view(u, ligIDX))
 
     # Handle endosomal ligand balance.
