@@ -4,11 +4,13 @@ const Nspecies = 62 # number of complexes in surface + endosome + free ligand
 const halfL = 28 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
 const recIDX = SVector(1, 2, 3, 10, 17, 20, 23, 26)
+const recIDXint = @SVector [ii + halfL for ii in recIDX]
+const ligIDX = @SVector [ii for ii in (halfL * 2 + 1):Nspecies]
 
-const Nparams = 30 # number of unknowns for the full model
-const NIL2params = 15 # number of unknowns for the IL2 model
+const Nparams = 61 # number of unknowns for the full model
 const Nlig = 6 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
+const internalV = 623.0 # Same as that used in TAM model
 
 # p[1:4] is kfwd, k1rev, k2rev, k4rev
 # p[5:8] is k5rev, k10rev, k11rev, k13rev
@@ -64,12 +66,21 @@ function dYdT(du, u, p, ILs)
 end
 
 
-function fullModel(du, u, pSurf, pEndo, trafP, ILs)
-    internalV = 623.0 # Same as that used in TAM model
+function trafP(p)
+    return view(p, 49:61)
+end
 
+
+function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
-    dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo, view(u, (halfL * 2 + 1):Nspecies))
+
+    # Don't bother with anything else if this is the no trafficking model
+    if trafP[1] == 0.0
+        return nothing
+    end
+
+    dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo, view(u, ligIDX))
 
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
@@ -95,14 +106,17 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     du[recIDX] += view(trafP, 6:13)
 
     # Degradation does lead to some clearance of ligand in the endosome
-    du[(halfL * 2 + 1):end] -= view(u, (halfL * 2 + 1):Nspecies) .* trafP[5]
+    du[ligIDX] -= view(u, ligIDX) .* trafP[5]
 
     return nothing
 end
 
 
-# Initial autocrine condition - DONE
-function solveAutocrine(r)
+# Initial autocrine condition
+function solveAutocrine(rIn::Vector)
+    r = trafP(rIn)
+    @assert r[3] < 1.0
+
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
     y0 = zeros(eltype(r), Nspecies)
 
@@ -118,8 +132,8 @@ function solveAutocrine(r)
 
     # Assuming no autocrine ligand, so can solve steady state
     # Add the species
-    y0[recIDX .+ halfL] = r[6:end] / kDeg / internalFrac
-    y0[recIDX] = (r[6:end] + kRec * y0[recIDX .+ halfL] * internalFrac) / r[1]
+    y0[recIDXint] = r[6:end] / kDeg / internalFrac
+    y0[recIDX] = (r[6:end] + kRec * y0[recIDXint] * internalFrac) / r[1]
 
     return y0
 end

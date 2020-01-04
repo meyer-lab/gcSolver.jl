@@ -5,11 +5,6 @@ using gcSolver
 rxntfR = exp.(randn(gcSolver.Nparams))
 rxntfR[20] = tanh(rxntfR[20])
 
-surface = ones(eltype(rxntfR), 21)
-endosome = copy(surface)
-ILs = zeros(eltype(rxntfR), gcSolver.Nlig)
-trafP = zeros(eltype(rxntfR), 13)
-
 tps = [0.0, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 
 # Assert the conservation of species throughout the experiment.
@@ -46,10 +41,10 @@ end
 
 @testset "Full model mass conservation." begin
     rr = copy(rxntfR)
-    rr[18:end] .= 0.0
+    rr[49:end] .= 0.0
     dy = zeros(gcSolver.Nspecies)
 
-    gcSolver.fullDeriv(dy, copy(dy), (rr, surface, endosome, trafP, ILs), 0.0)
+    gcSolver.fullDeriv(dy, copy(dy), rr, 0.0)
 
     # Check for conservation of each surface receptor
     assertConservation(dy)
@@ -67,15 +62,14 @@ end
 
 
 @testset "Steady-state at t=0." begin
-    gcSolver.fullParam!(rxntfR, surface, endosome, trafP, ILs)
-    out = gcSolver.solveAutocrine(trafP)
+    out = gcSolver.solveAutocrine(rxntfR)
 
     rr = copy(rxntfR)
     rr[1:6] .= 0.0
 
     dy = ones(gcSolver.Nspecies)
 
-    gcSolver.fullDeriv(dy, out, (rr, surface, endosome, trafP, ILs), 0.0)
+    gcSolver.fullDeriv(dy, out, rr, 0.0)
 
     @test all(out .>= 0.0)
     @test isapprox(sum(abs.(dy)), 0.0, atol = 1.0e-12)
@@ -87,9 +81,8 @@ end
 
     dy = ones(gcSolver.Nspecies)
 
-    gcSolver.fullDeriv(dy, out[1, :], (rxntfR, surface, endosome, trafP, ILs), 0.0)
+    gcSolver.fullDeriv(dy, out[1, :], rxntfR, 0.0)
 
-    println("runCkineSS")
     @time outSS = runCkineSS(rxntfR)
 
     @test all(out .>= 0.0)
@@ -100,12 +93,11 @@ end
 
 @testset "Make sure no endosomal species are found when endo=0." begin
     rxntfRR = copy(rxntfR)
-    rxntfRR[18:19] .= 0.0  # set endo and activeEndo to 0.0
+    rxntfRR[49:50] .= 0.0  # set endo and activeEndo to 0.0
 
-    # TODO: Something wrong with this test after upgrading packages?
-    # yOut = runCkine(tps, rxntfRR)
+    yOut = runCkine(tps, rxntfRR)
 
-    # @test all(isapprox(sum(abs.(yOut[:, 29:end])), 0.0, atol=1.0e-6))
+    @test all(isapprox(sum(abs.(yOut[:, 29:end])), 0.0, atol=1.0e-6))
 end
 
 
@@ -117,7 +109,7 @@ end
 
 @testset "Benchmark." begin
     println("fullDeriv")
-    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), (rxntfR, surface, endosome, trafP, ILs), 0.0)
+    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), rxntfR, 0.0)
 
     println("Default runCkine")
     @time runCkine(tps, rxntfR)
