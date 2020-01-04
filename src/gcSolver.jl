@@ -3,9 +3,9 @@ __precompile__()
 module gcSolver
 
 using OrdinaryDiffEq
-using ForwardDiff
 using LinearAlgebra
 using SteadyStateDiffEq
+using DiffEqSensitivity
 
 include("reaction.jl")
 
@@ -17,6 +17,7 @@ end
 
 
 const solTol = 1.0e-9
+const sAlg = AutoTsit5(Rodas5())
 
 
 function domainDef(u, p, t)
@@ -32,7 +33,7 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix{Float64}
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, AutoTsit5(Rodas5()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+    sol = solve(prob, sAlg; reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
     solut = sol(tps).u
 
     if length(tps) > 1
@@ -52,7 +53,7 @@ function runCkineSS(params::Vector)
 
     probInit = SteadyStateProblem(fullDeriv, u0, params)
 
-    solInit = solve(probInit, DynamicSS(AutoTsit5(Rodas5())); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+    solInit = solve(probInit, DynamicSS(sAlg); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
 
     return solInit
 end
