@@ -5,6 +5,7 @@ const halfL = 28 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
 const recIDX = SVector(1, 2, 3, 10, 17, 20, 23, 26)
 const recIDXint = @SVector [ii + halfL for ii in recIDX]
+const ligIDX = @SVector [ii for ii in (halfL * 2 + 1):Nspecies]
 
 const Nparams = 61 # number of unknowns for the full model
 const Nlig = 6 # Number of ligands
@@ -73,7 +74,7 @@ end
 function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
-    dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo, view(u, (halfL * 2 + 1):Nspecies))
+    dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo, view(u, ligIDX))
 
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
@@ -99,14 +100,14 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     du[recIDX] += view(trafP, 6:13)
 
     # Degradation does lead to some clearance of ligand in the endosome
-    du[(halfL * 2 + 1):end] -= view(u, (halfL * 2 + 1):Nspecies) .* trafP[5]
+    du[ligIDX] -= view(u, ligIDX) .* trafP[5]
 
     return nothing
 end
 
 
-# Initial autocrine condition - DONE
-function solveAutocrine(rIn)
+# Initial autocrine condition
+function solveAutocrine(rIn::Vector)
     r = trafP(rIn)
     @assert r[3] < 1.0
 
