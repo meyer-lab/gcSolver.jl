@@ -102,7 +102,10 @@ end
 
 
 # Initial autocrine condition - DONE
-function solveAutocrine(r)
+function solveAutocrine(rIn)
+    r = trafP(rIn)
+    @assert r[3] < 1.0
+
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
     y0 = zeros(eltype(r), Nspecies)
 
