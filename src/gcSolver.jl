@@ -45,37 +45,23 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
 end
 
 
-
-function runCkineFS(tp::Real, params::Vector)
+function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector)
     @assert all(params .>= 0.0)
-    @assert tp > 0.0
+    @assert all(tps .>= 0.0)
 
     u0 = solveAutocrine(params)
 
-    prob = ODEForwardSensitivityProblem(fullDeriv, u0, (0.0, tp), params)
-
-    sol = solve(prob, Rosenbrock32(autodiff=false); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
-
-    return extract_local_sensitivities(sol, tp)
-end
-
-
-# TODO: Not finished.
-function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::Vector)
-    @assert all(params .>= 0.0)
-    @assert tp > 0.0
-
-    dg = (out, u, i) -> out .= data[i] .- dot(u, reduce)
-
-    u0 = solveAutocrine(params)
+    g = (u, p, t) -> dot(u, reduce)
+    dg = (out, u, p, t) -> out .= reduce
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
     sol = solve(prob, AutoTsit5(Rodas5()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
 
-    res = adjoint_sensitivities(sol, AutoTsit5(Rodas5()), dg, tps, abstol=solTol, reltol=solTol, iabstol=solTol, ireltol=solTol)
+    #adj_u0 = adjoint_sensitivities_u0(sol, AutoTsit5(Rodas5()), g, nothing, dg, abstol=solTol, reltol=solTol, iabstol=solTol, ireltol=solTol)
+    adj = adjoint_sensitivities(sol, AutoTsit5(Rodas5()), g, nothing, dg, abstol=solTol, reltol=solTol, iabstol=solTol, ireltol=solTol, sensealg=QuadratureAdjoint(autojacvec=false))
 
-    return res
+    return adj
 end
 
 
@@ -93,7 +79,7 @@ function runCkineSS(params::Vector)
 end
 
 
-export runCkine, runCkineSS, runCkineFS
+export runCkine, runCkineSS, runCkineAS
 
 precompile(runCkine, (Array{Float64, 1}, Array{Float64, 1}))
 precompile(runCkineSS, (Array{Float64, 1},))
