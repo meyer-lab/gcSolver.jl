@@ -17,7 +17,6 @@ end
 
 
 const solTol = 1.0e-9
-const sAlg = AutoTsit5(Rodas5())
 
 
 function domainDef(u, p, t)
@@ -25,7 +24,7 @@ function domainDef(u, p, t)
 end
 
 
-function runCkine(tps::Vector{Float64}, params::Vector)::Matrix{Float64}
+function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     @assert all(params .>= 0.0)
     @assert all(tps .>= 0.0)
 
@@ -33,7 +32,7 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix{Float64}
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, sAlg; reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+    sol = solve(prob, AutoTsit5(Rodas5()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
     solut = sol(tps).u
 
     if length(tps) > 1
@@ -46,6 +45,41 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix{Float64}
 end
 
 
+
+function runCkineFS(tp::Real, params::Vector)
+    @assert all(params .>= 0.0)
+    @assert tp > 0.0
+
+    u0 = solveAutocrine(params)
+
+    prob = ODEForwardSensitivityProblem(fullDeriv, u0, (0.0, tp), params)
+
+    sol = solve(prob, Rosenbrock32(autodiff=false); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+
+    return extract_local_sensitivities(sol, tp)
+end
+
+
+# TODO: Not finished.
+function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::Vector)
+    @assert all(params .>= 0.0)
+    @assert tp > 0.0
+
+    dg = (out, u, i) -> out .= data[i] .- dot(u, reduce)
+
+    u0 = solveAutocrine(params)
+
+    prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
+
+    sol = solve(prob, AutoTsit5(Rodas5()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+
+    res = adjoint_sensitivities(sol, AutoTsit5(Rodas5()), dg, tps, abstol=solTol, reltol=solTol, iabstol=solTol, ireltol=solTol)
+
+    return res
+end
+
+
+
 function runCkineSS(params::Vector)
     @assert all(params .>= 0.0)
 
@@ -53,13 +87,13 @@ function runCkineSS(params::Vector)
 
     probInit = SteadyStateProblem(fullDeriv, u0, params)
 
-    solInit = solve(probInit, DynamicSS(sAlg); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+    solInit = solve(probInit, DynamicSS(AutoTsit5(Rodas5())); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
 
     return solInit
 end
 
 
-export runCkine, runCkineSS
+export runCkine, runCkineSS, runCkineFS
 
 precompile(runCkine, (Array{Float64, 1}, Array{Float64, 1}))
 precompile(runCkineSS, (Array{Float64, 1},))
