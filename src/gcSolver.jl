@@ -16,12 +16,13 @@ function fullDeriv(du, u, p, t)
 end
 
 
+const solTol = 1.0e-9
+
+
 function domainDef(u, p, t)
-    return any(x -> x < 0.0, u)
+    return any(x -> x < -solTol, u)
 end
 
-
-const solTol = 1.0e-8
 
 function runCkine(tps::Vector{Float64}, params::Vector)::Matrix{Float64}
     @assert all(params .>= 0.0)
@@ -31,7 +32,7 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix{Float64}
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, ABDF2(); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+    sol = solve(prob, AutoTsit5(Rodas5()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
     solut = sol(tps).u
 
     if length(tps) > 1
@@ -51,10 +52,11 @@ function runCkineSS(params::Vector)
 
     probInit = SteadyStateProblem(fullDeriv, u0, params)
 
-    solInit = solve(probInit, DynamicSS(ABDF2()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+    solInit = solve(probInit, DynamicSS(AutoTsit5(Rodas5())); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
 
     return solInit
 end
+
 
 export runCkine, runCkineSS
 
