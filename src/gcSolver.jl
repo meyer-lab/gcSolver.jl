@@ -5,6 +5,7 @@ using OrdinaryDiffEq
 using LinearAlgebra
 using SteadyStateDiffEq
 using DiffEqSensitivity
+using Sundials
 using ForwardDiff
 
 include("reaction.jl")
@@ -52,11 +53,11 @@ function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::
     sol = solve(prob, AutoTsit5(Rodas5()); options...)
 
     dg = (out, u, p, t, i) -> out .= data[i] - dot(u, reduce)
-    adj = adjoint_sensitivities(sol, Tsit5(), dg, tps)
-    #adj_u0 = adjoint_sensitivities_u0(sol, Rodas5(), dg, tps)
-    #u0g = ForwardDiff.gradient((p) -> dot(solveAutocrine(p), reduce), params)
+    adj = adjoint_sensitivities(sol, CVODE_BDF(), dg, tps)
+    adj_u0 = adjoint_sensitivities_u0(sol, CVODE_BDF(), dg, tps)
+    u0g = ForwardDiff.gradient((p) -> dot(solveAutocrine(p), reduce), params)
 
-    return adj
+    return sol
 end
 
 
