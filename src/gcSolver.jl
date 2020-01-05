@@ -46,18 +46,18 @@ end
 
 function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::Vector)
     @assert all(tps .>= 0.0)
+    @assert length(tps) == length(data)
     u0 = solveAutocrine(params)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
     sol = solve(prob, AutoTsit5(Rodas5()); options...)
 
-    dg = (out, u, p, t, i) -> out .= data[i] - dot(u, reduce)
-    adj = adjoint_sensitivities(sol, CVODE_BDF(), dg, tps)
-    adj_u0 = adjoint_sensitivities_u0(sol, CVODE_BDF(), dg, tps)
-    u0g = ForwardDiff.gradient((p) -> dot(solveAutocrine(p), reduce), params)
+    dg = (out, u, p, t, i) -> out .= abs(data[i] - dot(u, reduce))
+    du0, dp = adjoint_sensitivities_u0(sol, CVODE_BDF(), dg, tps)
+    u0g = ForwardDiff.jacobian(solveAutocrine, params)
 
-    return sol
+    return dp .+ (u0g' * du0)
 end
 
 
