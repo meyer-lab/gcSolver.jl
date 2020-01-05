@@ -5,7 +5,7 @@ const halfL = 28 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
 const recIDX = SVector(1, 2, 3, 10, 17, 20, 23, 26)
 const recIDXint = @SVector [ii + halfL for ii in recIDX]
-const ligIDX = @SVector [ii for ii in (halfL * 2 + 1):Nspecies]
+const ligIDX = @SVector [ii for ii = (halfL * 2 + 1):Nspecies]
 
 const Nparams = 61 # number of unknowns for the full model
 const Nlig = 6 # Number of ligands
