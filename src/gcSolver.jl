@@ -52,7 +52,7 @@ function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::
     sol = solve(prob, AutoTsit5(Rodas5()); options...)
 
     dg = (out, u, p, t, i) -> out .= data[i] - dot(u, reduce)
-    adj = adjoint_sensitivities(sol, Rodas5(autodiff=false), dg, tps)
+    adj = adjoint_sensitivities(sol, Tsit5(), dg, tps)
     #adj_u0 = adjoint_sensitivities_u0(sol, Rodas5(), dg, tps)
     #u0g = ForwardDiff.gradient((p) -> dot(solveAutocrine(p), reduce), params)
 
@@ -60,20 +60,8 @@ function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::
 end
 
 
-function runCkineSS(params::Vector)
-    u0 = solveAutocrine(params)
-
-    probInit = SteadyStateProblem(fullDeriv, u0, params)
-
-    solInit = solve(probInit, DynamicSS(AutoTsit5(Rodas5())); options...)
-
-    return solInit
-end
-
-
-export runCkine, runCkineSS, runCkineAS
+export runCkine, runCkineAS
 
 precompile(runCkine, (Array{Float64, 1}, Array{Float64, 1}))
-precompile(runCkineSS, (Array{Float64, 1},))
 
 end # module

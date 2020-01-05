@@ -75,8 +75,6 @@ end
 
     gcSolver.fullDeriv(dy, out[1, :], rxntfR, 0.0)
 
-    @time outSS = runCkineSS(rxntfR)
-
     @test all(out .>= 0.0)
 
     @test isapprox(sum(abs.(dy)), 0.0, atol = 1.0e-6)
