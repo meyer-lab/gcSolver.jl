@@ -89,7 +89,7 @@ end
 
     yOut = runCkine(tps, rxntfRR)
 
-    @test all(isapprox(sum(abs.(yOut[:, 29:end])), 0.0, atol=1.0e-6))
+    @test all(isapprox(sum(abs.(yOut[:, 29:end])), 0.0, atol = 1.0e-6))
 end
 
 
