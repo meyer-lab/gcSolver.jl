@@ -6,6 +6,7 @@ using OrdinaryDiffEq
 using LinearAlgebra
 using SteadyStateDiffEq
 using DiffEqSensitivity
+using ForwardDiff
 
 include("reaction.jl")
 
@@ -25,9 +26,7 @@ end
 
 
 function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
-    @assert all(params .>= 0.0)
     @assert all(tps .>= 0.0)
-
     u0 = solveAutocrine(params)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
@@ -46,12 +45,10 @@ end
 
 
 function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::Vector)
-    @assert all(params .>= 0.0)
     @assert all(tps .>= 0.0)
-
     u0 = solveAutocrine(params)
 
-    dg = (out, u, p, t, i) -> data[i] - dot(u, reduce)
+    dg = (out, u, p, t, i) -> out .= data[i] - dot(u, reduce)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
@@ -59,6 +56,7 @@ function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::
 
     adj = adjoint_sensitivities(sol, AutoTsit5(Rodas5()), dg, tps)
     adj_u0 = adjoint_sensitivities_u0(sol, AutoTsit5(Rodas5()), dg, tps)
+    u0g = ForwardDiff.gradient((p) -> dot(solveAutocrine(p), reduce), params)
 
     return adj
 end
@@ -66,8 +64,6 @@ end
 
 
 function runCkineSS(params::Vector)
-    @assert all(params .>= 0.0)
-
     u0 = solveAutocrine(params)
 
     probInit = SteadyStateProblem(fullDeriv, u0, params)

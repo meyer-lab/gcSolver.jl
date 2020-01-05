@@ -114,6 +114,7 @@ end
 
 # Initial autocrine condition
 function solveAutocrine(rIn::Vector)
+    @assert all(rIn .>= 0.0)
     r = trafP(rIn)
     @assert r[3] < 1.0
 
