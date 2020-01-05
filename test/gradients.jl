@@ -8,5 +8,5 @@ using ForwardDiff
     @time runCkineAS(tps, rxntfR, ones(gcSolver.Nspecies), ones(length(tps)))
 
     @profile runCkineAS(tps, rxntfR, ones(gcSolver.Nspecies), ones(length(tps)))
-    Profile.print(noisefloor = 5.0)
+    Profile.print(noisefloor = 10.0)
 end
