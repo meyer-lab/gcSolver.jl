@@ -1,11 +1,3 @@
-using Test
-using Profile
-using gcSolver
-
-rxntfR = exp.(randn(gcSolver.Nparams))
-rxntfR[20] = tanh(rxntfR[20])
-
-tps = [0.0, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
 
 # Assert the conservation of species throughout the experiment.
 function assertConservation(y)

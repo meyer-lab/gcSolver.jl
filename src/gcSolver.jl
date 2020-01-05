@@ -45,20 +45,20 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
 end
 
 
-function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector)
+function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::Vector)
     @assert all(params .>= 0.0)
     @assert all(tps .>= 0.0)
 
     u0 = solveAutocrine(params)
 
-    g = (u, p, t) -> dot(u, reduce)
+    dg = (out, u, p, t, i) -> data[i] - dot(u, reduce)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
     sol = solve(prob, AutoTsit5(Rodas5()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
 
-    #adj_u0 = adjoint_sensitivities_u0(sol, AutoTsit5(Rodas5()), g, nothing, dg, abstol=solTol, reltol=solTol, iabstol=solTol, ireltol=solTol)
-    adj = adjoint_sensitivities(sol, AutoTsit5(Rodas5()), g, nothing, abstol=solTol, reltol=solTol, iabstol=solTol, ireltol=solTol, sensealg=InterpolatingAdjoint())
+    adj = adjoint_sensitivities(sol, AutoTsit5(Rodas5()), dg, tps)
+    adj_u0 = adjoint_sensitivities_u0(sol, AutoTsit5(Rodas5()), dg, tps)
 
     return adj
 end
