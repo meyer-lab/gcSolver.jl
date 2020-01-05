@@ -101,9 +101,6 @@ end
     println("fullDeriv")
     @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), rxntfR, 0.0)
 
-    println("Default runCkine")
+    println("runCkine")
     @time runCkine(tps, rxntfR)
-
-    @profile runCkine(tps, rxntfR)
-    Profile.print(noisefloor = 2.0)
 end

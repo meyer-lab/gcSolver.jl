@@ -1,5 +1,4 @@
 using Test
-using Profile
 using gcSolver
 using Random
 Random.seed!(123)
