@@ -5,6 +5,7 @@ using OrdinaryDiffEq
 using LinearAlgebra
 using SteadyStateDiffEq
 using DiffEqSensitivity
+using Sundials
 using ForwardDiff
 
 include("reaction.jl")
@@ -45,35 +46,23 @@ end
 
 function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::Vector)
     @assert all(tps .>= 0.0)
+    @assert length(tps) == length(data)
     u0 = solveAutocrine(params)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
     sol = solve(prob, AutoTsit5(Rodas5()); options...)
 
-    dg = (out, u, p, t, i) -> out .= data[i] - dot(u, reduce)
-    adj = adjoint_sensitivities(sol, Rodas5(autodiff=false), dg, tps)
-    #adj_u0 = adjoint_sensitivities_u0(sol, Rodas5(), dg, tps)
-    #u0g = ForwardDiff.gradient((p) -> dot(solveAutocrine(p), reduce), params)
+    dg = (out, u, p, t, i) -> out .= abs(data[i] - dot(u, reduce))
+    du0, dp = adjoint_sensitivities_u0(sol, CVODE_BDF(), dg, tps)
+    u0g = ForwardDiff.jacobian(solveAutocrine, params)
 
-    return adj
+    return dp .+ (u0g' * du0)
 end
 
 
-function runCkineSS(params::Vector)
-    u0 = solveAutocrine(params)
-
-    probInit = SteadyStateProblem(fullDeriv, u0, params)
-
-    solInit = solve(probInit, DynamicSS(AutoTsit5(Rodas5())); options...)
-
-    return solInit
-end
-
-
-export runCkine, runCkineSS, runCkineAS
+export runCkine, runCkineAS
 
 precompile(runCkine, (Array{Float64, 1}, Array{Float64, 1}))
-precompile(runCkineSS, (Array{Float64, 1},))
 
 end # module
