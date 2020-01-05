@@ -1,4 +1,3 @@
-
 __precompile__()
 module gcSolver
 
@@ -19,10 +18,11 @@ end
 
 const solTol = 1.0e-9
 
-
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
 end
+
+const options = Dict([:reltol => solTol, :abstol => solTol, :isoutofdomain => domainDef])
 
 
 function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
@@ -31,16 +31,15 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, AutoTsit5(Rodas5()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
-    solut = sol(tps).u
+    sol = solve(prob, AutoTsit5(Rodas5()); saveat=tps, options...).u
 
     if length(tps) > 1
-        solut = vcat(transpose.(solut)...)
+        sol = vcat(transpose.(sol)...)
     else
-        solut = reshape(solut[1], (1, Nspecies))
+        sol = reshape(sol[1], (1, Nspecies))
     end
 
-    return solut
+    return sol
 end
 
 
@@ -48,19 +47,17 @@ function runCkineAS(tps::Vector{Float64}, params::Vector, reduce::Vector, data::
     @assert all(tps .>= 0.0)
     u0 = solveAutocrine(params)
 
-    dg = (out, u, p, t, i) -> out .= data[i] - dot(u, reduce)
-
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, AutoTsit5(Rodas5()); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+    sol = solve(prob, AutoTsit5(Rodas5()); options...)
 
-    adj = adjoint_sensitivities(sol, AutoTsit5(Rodas5()), dg, tps)
-    adj_u0 = adjoint_sensitivities_u0(sol, AutoTsit5(Rodas5()), dg, tps)
-    u0g = ForwardDiff.gradient((p) -> dot(solveAutocrine(p), reduce), params)
+    dg = (out, u, p, t, i) -> out .= data[i] - dot(u, reduce)
+    adj = adjoint_sensitivities(sol, Rodas5(autodiff=false), dg, tps)
+    #adj_u0 = adjoint_sensitivities_u0(sol, Rodas5(), dg, tps)
+    #u0g = ForwardDiff.gradient((p) -> dot(solveAutocrine(p), reduce), params)
 
     return adj
 end
-
 
 
 function runCkineSS(params::Vector)
@@ -68,7 +65,7 @@ function runCkineSS(params::Vector)
 
     probInit = SteadyStateProblem(fullDeriv, u0, params)
 
-    solInit = solve(probInit, DynamicSS(AutoTsit5(Rodas5())); reltol = solTol, abstol = solTol, isoutofdomain = domainDef)
+    solInit = solve(probInit, DynamicSS(AutoTsit5(Rodas5())); options...)
 
     return solInit
 end
