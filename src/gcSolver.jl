@@ -32,7 +32,7 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
 
     prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 
-    sol = solve(prob, AutoTsit5(Rodas5()); saveat=tps, options...).u
+    sol = solve(prob, AutoTsit5(Rodas5()); saveat = tps, options...).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
