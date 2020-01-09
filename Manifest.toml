@@ -105,10 +105,10 @@ deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
-deps = ["ArrayInterface", "Compat", "DataStructures", "DiffEqDiffTools", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LinearAlgebra", "MuladdMacro", "Parameters", "Printf", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TreeViews", "ZygoteRules"]
-git-tree-sha1 = "c2a3d3b1f44240feee1e5052d77afc7ac4d5b953"
+deps = ["ArrayInterface", "ChainRulesCore", "Compat", "DataStructures", "DiffEqDiffTools", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LinearAlgebra", "MuladdMacro", "Parameters", "Printf", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TreeViews", "ZygoteRules"]
+git-tree-sha1 = "2bb222b5dd4b138a3ce285693b1360c7b04e3fb8"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.10.0"
+version = "6.10.2"
 
 [[DiffEqCallbacks]]
 deps = ["DataStructures", "DiffEqBase", "ForwardDiff", "LinearAlgebra", "NLsolve", "OrdinaryDiffEq", "RecipesBase", "RecursiveArrayTools", "StaticArrays"]
@@ -124,9 +124,9 @@ version = "1.7.0"
 
 [[DiffEqSensitivity]]
 deps = ["ChainRulesCore", "DataFrames", "DiffEqBase", "DiffEqCallbacks", "DiffEqDiffTools", "Distributions", "FFTW", "ForwardDiff", "GLM", "LinearAlgebra", "Parameters", "QuadGK", "QuasiMonteCarlo", "RecursiveArrayTools", "Statistics", "Tracker", "Zygote", "ZygoteRules"]
-git-tree-sha1 = "5394de3f8a7c9984fad0088ce13ae73a3726dcc6"
+git-tree-sha1 = "d6d693dfd2d3eb2a04f2fbe387fbe3b11038b68c"
 uuid = "41bf760c-e81c-5289-8e54-58b1f1f8abe2"
-version = "6.1.0"
+version = "6.2.0"
 
 [[DiffResults]]
 deps = ["StaticArrays"]
@@ -346,9 +346,9 @@ version = "0.3.3"
 
 [[OpenBLAS_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "cb0671dfcf4afbad1d3631079c58275b46a572b8"
+git-tree-sha1 = "3a6e5767e8ae022871c19162cc3ecd80748bd3dc"
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.7+2"
+version = "0.3.7+4"
 
 [[OpenSpecFun_jll]]
 deps = ["Libdl", "Pkg"]
@@ -364,9 +364,9 @@ version = "1.1.0"
 
 [[OrdinaryDiffEq]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqDiffTools", "ExponentialUtilities", "ForwardDiff", "GenericSVD", "LinearAlgebra", "Logging", "MacroTools", "MuladdMacro", "Parameters", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays"]
-git-tree-sha1 = "0817414626015c2dc5badc89e81a55144f603bbc"
+git-tree-sha1 = "143b4d228d3a2e84c45a4acf937f1b0d6788da65"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "5.26.7"
+version = "5.26.8"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
@@ -387,7 +387,7 @@ uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "0.3.10"
 
 [[Pkg]]
-deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Test", "UUIDs"]
+deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[PooledArrays]]
@@ -600,9 +600,9 @@ version = "0.1.0"
 
 [[Zygote]]
 deps = ["DiffRules", "FFTW", "FillArrays", "ForwardDiff", "IRTools", "InteractiveUtils", "LinearAlgebra", "MacroTools", "NNlib", "NaNMath", "Random", "Requires", "SpecialFunctions", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "e353adc2b1026114c7ba2a112f8317dd054644c2"
+git-tree-sha1 = "7e293d7bef87c2cf2847e99ed0da4edadb75fe90"
 uuid = "e88e6eb3-aa80-5325-afca-941959d7151f"
-version = "0.4.3"
+version = "0.4.4"
 
 [[ZygoteRules]]
 deps = ["MacroTools"]
