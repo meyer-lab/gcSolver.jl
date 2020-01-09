@@ -2,8 +2,7 @@ using ForwardDiff
 
 
 @testset "Profile forward sensitivities." begin
-    runCkineAS(tps, rxntfR, ones(gcSolver.Nspecies), ones(length(tps)))
+    ForwardDiff.jacobian((x) -> runCkine(tps, x), rxntfR)
 
-    println("runCkineAS")
-    @time runCkineAS(tps, rxntfR, ones(gcSolver.Nspecies), ones(length(tps)))
+    @time ForwardDiff.jacobian((x) -> runCkine(tps, x), rxntfR)
 end
