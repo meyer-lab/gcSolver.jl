@@ -33,7 +33,7 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     if eltype(params) == Float64
         alg = AutoTsit5(Rodas5())
     else
-        alg = Rodas5(autodiff=false)
+        alg = Rodas5(autodiff = false)
     end
 
     sol = solve(prob, alg; saveat = tps, options...).u
