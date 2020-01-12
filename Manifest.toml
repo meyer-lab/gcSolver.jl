@@ -60,15 +60,15 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
 deps = ["ArrayInterface", "ChainRulesCore", "Compat", "DataStructures", "DiffEqDiffTools", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LinearAlgebra", "MuladdMacro", "Parameters", "Printf", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TreeViews", "ZygoteRules"]
-git-tree-sha1 = "2bb222b5dd4b138a3ce285693b1360c7b04e3fb8"
+git-tree-sha1 = "8a570215581a2c87d6e9717fde59ec9df453d1c4"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.10.2"
+version = "6.12.2"
 
 [[DiffEqCallbacks]]
 deps = ["DataStructures", "DiffEqBase", "ForwardDiff", "LinearAlgebra", "NLsolve", "OrdinaryDiffEq", "RecipesBase", "RecursiveArrayTools", "StaticArrays"]
-git-tree-sha1 = "f85da2bade6eb9bee58f06540a8c00d071e9f432"
+git-tree-sha1 = "573b46d716ff12b79e9f6e1c1602b0553b619e84"
 uuid = "459566f4-90b8-5000-8ac3-15dfb0a30def"
-version = "2.10.0"
+version = "2.11.0"
 
 [[DiffEqDiffTools]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
@@ -224,9 +224,9 @@ version = "1.1.0"
 
 [[OrdinaryDiffEq]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqDiffTools", "ExponentialUtilities", "ForwardDiff", "GenericSVD", "LinearAlgebra", "Logging", "MacroTools", "MuladdMacro", "Parameters", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays"]
-git-tree-sha1 = "143b4d228d3a2e84c45a4acf937f1b0d6788da65"
+git-tree-sha1 = "c00465ade8d779f5f16e747319b8c5c4392b92f4"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "5.26.8"
+version = "5.27.0"
 
 [[Parameters]]
 deps = ["OrderedCollections"]
@@ -257,9 +257,9 @@ version = "0.7.0"
 
 [[RecursiveArrayTools]]
 deps = ["ArrayInterface", "RecipesBase", "Requires", "StaticArrays", "Statistics"]
-git-tree-sha1 = "35a01ee8529e84d1ca4c7131fee30e7f61047fc8"
+git-tree-sha1 = "f795d0f557ff9f40a16e2b0634fc709ceb59c0d5"
 uuid = "731186ca-8d62-57ce-b412-fbd966d074cd"
-version = "1.2.1"
+version = "2.0.0"
 
 [[RecursiveFactorization]]
 deps = ["LinearAlgebra"]
