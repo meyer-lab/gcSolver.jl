@@ -2,34 +2,28 @@ name: pkg-update
 
 on:
   schedule:
-    - cron: '0 0 * * */4'
+    - cron: '0 0 * * 0'
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        julia-version: [1.3.0]
         julia-arch: [x86]
-        os: [ubuntu-latest]
     steps:
       - uses: julia-actions/setup-julia@latest
         with:
-          version: ${{ matrix.julia-version }}
-
-      - uses: actions/checkout@v1
+          version: 1.3.1
+      - uses: actions/checkout@v2
       - name: Update Manifest.toml
         run: julia --project=. -e "import Pkg; Pkg.update()"
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Upgrade packages
-          title: '[AUTO] Upgrade packages'
-          branch: create-pull-request/upgrade-pkgs
-          labels: automated pr, no changelog
-      - name: Check outputs
-        run: |
-          echo 'Pull Request Number - ${{ env.PULL_REQUEST_NUMBER }}'
-          echo 'Pull Request Number - ${{ steps.cpr.outputs.pr_number }}'
+          commit-message: Update */Manifest.toml
+          title: '[AUTO] Update */Manifest.toml'
+          labels: no changelog
+          branch: create-pull-request/pkg-update
+      - name: Check output environment variable
+        run: echo "Pull Request Number - ${{ env.PULL_REQUEST_NUMBER }}"
