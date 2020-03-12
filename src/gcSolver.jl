@@ -47,6 +47,7 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     return sol
 end
 
+include("normFlows.jl")
 
 export runCkine
 
