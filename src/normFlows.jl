@@ -1,6 +1,3 @@
-__precompile__()
-module gcSolver
-
 using Bijectors
 using Optim
 using Statistics
