@@ -1,5 +1,7 @@
 using Test
 using gcSolver
+using ForwardDiff
+using LinearAlgebra
 using Random
 Random.seed!(123)
 

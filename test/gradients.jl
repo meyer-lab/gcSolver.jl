@@ -1,6 +1,3 @@
-using ForwardDiff
-
-
 @testset "Profile forward sensitivities." begin
     ForwardDiff.jacobian((x) -> runCkine(tps, x), rxntfR)
 

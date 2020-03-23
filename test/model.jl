@@ -81,6 +81,18 @@ end
 end
 
 
+@testset "Detailed balance using no-trafficking model." begin
+    rxntfRR = copy(rxntfR)
+    rxntfRR[49:50] .= 0.0  # set endo and activeEndo to 0.0
+    out = vec(runCkine([1000000.0], rxntfRR))
+
+    J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, rxntfRR, 0.0), ones(gcSolver.Nspecies), out)
+    GK = J * diagm(vec(out))
+
+    @test norm(GK - transpose(GK)) < 1.0e-5
+end
+
+
 @testset "Make sure no endosomal species are found when endo=0." begin
     rxntfRR = copy(rxntfR)
     rxntfRR[49:50] .= 0.0  # set endo and activeEndo to 0.0
