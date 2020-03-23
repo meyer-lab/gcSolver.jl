@@ -103,10 +103,10 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     end
 
     # Expression: IL2Ra, IL2Rb, gc, IL15Ra, IL7Ra, IL9R, IL4Ra, IL21Ra
-    du[recIDX] += view(trafP, 6:13)
+    du[recIDX] .+= view(trafP, 6:13)
 
     # Degradation does lead to some clearance of ligand in the endosome
-    du[ligIDX] -= view(u, ligIDX) .* trafP[5]
+    du[ligIDX] .-= view(u, ligIDX) .* trafP[5]
 
     return nothing
 end
