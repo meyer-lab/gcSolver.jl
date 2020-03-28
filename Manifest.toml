@@ -37,18 +37,18 @@ version = "3.5.0+2"
 
 [[ArrayInterface]]
 deps = ["LinearAlgebra", "Requires", "SparseArrays"]
-git-tree-sha1 = "8683deff18ed6cd123e2b4d4147d2dc21f19391b"
+git-tree-sha1 = "3ffa20ffa495e9a4c823cb026164d8c0f95f72aa"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "2.6.1"
+version = "2.6.2"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[Bijectors]]
 deps = ["ArgCheck", "Compat", "Distributions", "LinearAlgebra", "MappedArrays", "NNlib", "Random", "Reexport", "Requires", "Roots", "SparseArrays", "Statistics", "StatsFuns"]
-git-tree-sha1 = "cf6a9766e7e4fbe40f37e5e1652731627c09fd42"
+git-tree-sha1 = "6b162868890ca70174d0eda206d14a107c5cb480"
 uuid = "76274a88-744f-5084-9051-94815aaf08c4"
-version = "0.6.4"
+version = "0.6.5"
 
 [[BinaryProvider]]
 deps = ["Libdl", "SHA"]
@@ -107,9 +107,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
 deps = ["ArrayInterface", "ChainRulesCore", "ConsoleProgressMonitor", "DataStructures", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "LoggingExtras", "MuladdMacro", "Parameters", "Printf", "ProgressLogging", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TerminalLoggers", "TreeViews", "ZygoteRules"]
-git-tree-sha1 = "b20a1c5741d279787c7db100e11106ea14ee6dbf"
+git-tree-sha1 = "261b7acf18cbd4ffc13a15398bc579e1c9c26d5e"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.25.0"
+version = "6.25.1"
 
 [[DiffEqCallbacks]]
 deps = ["DataStructures", "DiffEqBase", "ForwardDiff", "LinearAlgebra", "NLsolve", "OrdinaryDiffEq", "RecipesBase", "RecursiveArrayTools", "StaticArrays"]

@@ -1,5 +1,13 @@
-@testset "Profile forward sensitivities." begin
-    ForwardDiff.jacobian((x) -> runCkine(tps, x), rxntfR)
 
-    @time ForwardDiff.jacobian((x) -> runCkine(tps, x), rxntfR)
+function gradFunc(x)
+	return runCkine(tps, x)
+end
+
+
+@testset "Profile forward sensitivities." begin
+	jac = zeros(gcSolver.Nspecies*length(tps), gcSolver.Nparams)
+
+    ForwardDiff.jacobian!(jac, gradFunc, rxntfR)
+
+    @time ForwardDiff.jacobian!(jac, gradFunc, rxntfR)
 end
