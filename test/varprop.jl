@@ -20,7 +20,7 @@ end
 
     @time gcSolver.runCkineVarProp(tps, rxntfR, sigma)
 
-    @test size(retval) == length(tps)
+    @test length(retval) == length(tps)
     @test all(retval .>= 0.0)
 end
 
