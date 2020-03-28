@@ -66,11 +66,6 @@ function dYdT(du, u, p, ILs)
 end
 
 
-function trafP(p)
-    return view(p, 49:61)
-end
-
-
 function fullModel(du, u, pSurf, pEndo, trafP, ILs)
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
@@ -115,7 +110,7 @@ end
 # Initial autocrine condition
 function solveAutocrine(rIn::Vector)
     @assert all(rIn .>= 0.0)
-    r = trafP(rIn)
+    r = view(rIn, 49:61)
     @assert r[3] < 1.0
 
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
