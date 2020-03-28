@@ -58,6 +58,7 @@ end
 
 " Calculate the Jacobian of the model and perform variance propagation. "
 function runCkineVarPorp(tps::Vector, params::Vector, sigma)::Matrix
+    # Sigma is the covariance matrix of the input parameters
     function jacF(x)
         return runCkinePSTAT(tps, x)
     end
