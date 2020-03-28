@@ -113,7 +113,6 @@ function solveAutocrine(rIn::Vector)
 
     # Check if we're working with the no trafficking model
     if r[1] == 0.0
-        println("No trafficking")
         y0[recIDX] = r[6:end]
         return y0
     end

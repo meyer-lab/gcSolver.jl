@@ -46,13 +46,13 @@ end
 
 
 " Converts the ODE solution to a predicted amount of pSTAT. "
-function runCkinePSTAT(tps::Vector, params::Vector)
+function runCkinePSTAT(tps::Vector, params::Vector)::Vector
     # TODO: Add in the sigmoidal relationship.
-    retval = runCkine(tps::Vector{Float64}, params::Vector)
+    retval = runCkine(tps, params)
 
     # Summation of active species
-    # TODO: This is only surface species
-    pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19)], dims=2)
+    pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19)], dims=2) # surface
+    pSTAT += sum(retval[:, SVector(8, 9, 15, 16, 19) .+ halfL], dims=2) # endosome
 
     @assert length(pSTAT) == length(tps)
     return vec(pSTAT)
@@ -60,7 +60,7 @@ end
 
 
 " Calculate the Jacobian of the model and perform variance propagation. "
-function runCkineVarPorp(tps::Vector, params::Vector, sigma)::Matrix
+function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
         return runCkinePSTAT(tps, x)
@@ -69,7 +69,9 @@ function runCkineVarPorp(tps::Vector, params::Vector, sigma)::Matrix
     jac = zeros(length(params), length(tps))
     ForwardDiff.jacobian!(jac, jacF, params)
 
-    return transpose(jac) * sigma * jac
+
+    # Just return the diagonal for the marginal variance
+    return diag(transpose(jac) * sigma * jac)
 end
 
 

@@ -86,9 +86,7 @@ end
     J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, rxntfRR, 0.0), ones(gcSolver.Nspecies), out)
     GK = J * diagm(vec(out))
 
-    println(norm(GK - transpose(GK)))
-
-    @test norm(GK - transpose(GK)) < 1.0e-5
+    @test norm(GK - transpose(GK)) < 1.0e-9
 end
 
 
