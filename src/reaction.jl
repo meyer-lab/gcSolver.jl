@@ -79,16 +79,13 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
 
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
-    du[57] = -sum(view(du, (halfL + 4):(halfL + 9))) / internalV
-    du[58] = -sum(view(du, (halfL + 11):(halfL + 16))) / internalV
-    du[59] = -sum(view(du, (halfL + 18):(halfL + 19))) / internalV
-    du[60] = -sum(view(du, (halfL + 21):(halfL + 22))) / internalV
-    du[61] = -sum(view(du, (halfL + 24):(halfL + 25))) / internalV
-    du[62] = -sum(view(du, (halfL + 27):(halfL + 28))) / internalV
+    du[39] = -sum(view(du, (halfL + 4):(halfL + 9))) / internalV
+    du[40] = -sum(view(du, (halfL + 11):(halfL + 16))) / internalV
+    du[41] = -sum(view(du, (halfL + 18):(halfL + 19))) / internalV
 
     # Actually calculate the trafficking
     for ii in range(1, stop = halfL)
-        if findfirst(isequal(ii), SVector(8, 9, 15, 16, 19, 22, 25, 28)) != nothing
+        if findfirst(isequal(ii), SVector(8, 9, 15, 16, 19)) != nothing
             du[ii] -= u[ii] * (trafP[1] + trafP[2]) # Endo
             du[ii + halfL] += u[ii] * (trafP[1] + trafP[2]) / internalFrac - trafP[5] * u[ii + halfL] # Endo, deg
         else

@@ -7,10 +7,7 @@ function assertConservation(y)
         [0, 3, 5, 6, 8],  # IL2Ra
         [9, 10, 12, 13, 15],  # IL15Ra
         [16, 17, 18],  # IL7Ra
-        [19, 20, 21],  # IL9R
-        [22, 23, 24],  # IL4Ra
-        [25, 26, 27],  # IL21Ra
-        [2, 6, 7, 8, 13, 14, 15, 18, 21, 24, 27],
+        [2, 6, 7, 8, 13, 14, 15, 18],
     ] #gc
 
     # Check for conservation of species sum
@@ -57,7 +54,7 @@ end
     out = gcSolver.solveAutocrine(rxntfR)
 
     rr = copy(rxntfR)
-    rr[1:6] .= 0.0
+    rr[1:gcSolver.Nlig] .= 0.0
 
     dy = ones(gcSolver.Nspecies)
 
