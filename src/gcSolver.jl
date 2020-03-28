@@ -5,7 +5,6 @@ using OrdinaryDiffEq
 using LinearAlgebra
 using SteadyStateDiffEq
 using ForwardDiff
-using DiffEqSensitivity
 
 include("reaction.jl")
 
