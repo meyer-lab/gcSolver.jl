@@ -42,6 +42,34 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     return sol
 end
 
+
+" Converts the ODE solution to a predicted amount of pSTAT. "
+function runCkinePSTAT(tps::Vector, params::Vector)
+    # TODO: Add in the sigmoidal relationship.
+    retval = runCkine(tps::Vector{Float64}, params::Vector)
+
+    # Summation of active species
+    pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19, 22, 25, 28)], dims=2)
+
+    @assert length(pSTAT) == length(tps)
+    return vec(pSTAT)
+end
+
+
+" Calculate the Jacobian of the model and perform variance propagation. "
+function runCkineVarPorp(tps::Vector, params::Vector, sigma)::Matrix
+    # Sigma is the covariance matrix of the input parameters
+    function jacF(x)
+        return runCkinePSTAT(tps, x)
+    end
+
+    jac = zeros(length(params), length(tps))
+    ForwardDiff.jacobian!(jac, jacF, params)
+
+    return transpose(jac) * sigma * jac
+end
+
+
 include("normFlows.jl")
 
 export runCkine
