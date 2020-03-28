@@ -7,10 +7,7 @@ function assertConservation(y)
         [0, 3, 5, 6, 8],  # IL2Ra
         [9, 10, 12, 13, 15],  # IL15Ra
         [16, 17, 18],  # IL7Ra
-        [19, 20, 21],  # IL9R
-        [22, 23, 24],  # IL4Ra
-        [25, 26, 27],  # IL21Ra
-        [2, 6, 7, 8, 13, 14, 15, 18, 21, 24, 27],
+        [2, 6, 7, 8, 13, 14, 15, 18],
     ] #gc
 
     # Check for conservation of species sum
@@ -33,7 +30,7 @@ end
 
 @testset "Full model mass conservation." begin
     rr = copy(rxntfR)
-    rr[49:end] .= 0.0
+    rr[47:end] .= 0.0
     dy = zeros(gcSolver.Nspecies)
 
     gcSolver.fullDeriv(dy, copy(dy), rr, 0.0)
@@ -57,7 +54,7 @@ end
     out = gcSolver.solveAutocrine(rxntfR)
 
     rr = copy(rxntfR)
-    rr[1:6] .= 0.0
+    rr[1:gcSolver.Nlig] .= 0.0
 
     dy = ones(gcSolver.Nspecies)
 
@@ -83,23 +80,23 @@ end
 
 @testset "Detailed balance using no-trafficking model." begin
     rxntfRR = copy(rxntfR)
-    rxntfRR[49:50] .= 0.0  # set endo and activeEndo to 0.0
+    rxntfRR[43:44] .= 0.0  # set endo and activeEndo to 0.0
     out = vec(runCkine([1000000.0], rxntfRR))
 
     J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, rxntfRR, 0.0), ones(gcSolver.Nspecies), out)
     GK = J * diagm(vec(out))
 
-    @test norm(GK - transpose(GK)) < 1.0e-5
+    @test norm(GK - transpose(GK)) < 1.0e-9
 end
 
 
 @testset "Make sure no endosomal species are found when endo=0." begin
     rxntfRR = copy(rxntfR)
-    rxntfRR[49:50] .= 0.0  # set endo and activeEndo to 0.0
+    rxntfRR[43:44] .= 0.0  # set endo and activeEndo to 0.0
 
     yOut = runCkine(tps, rxntfRR)
 
-    @test all(isapprox(sum(abs.(yOut[:, 29:end])), 0.0, atol = 1.0e-6))
+    @test all(isapprox(sum(abs.(yOut[:, 20:end])), 0.0, atol = 1.0e-6))
 end
 
 

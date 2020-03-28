@@ -1,14 +1,14 @@
 using StaticArrays
 
-const Nspecies = 62 # number of complexes in surface + endosome + free ligand
-const halfL = 28 # number of complexes on surface alone
+const Nspecies = 41 # number of complexes in surface + endosome + free ligand
+const halfL = 19 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
-const recIDX = SVector(1, 2, 3, 10, 17, 20, 23, 26)
+const recIDX = SVector(1, 2, 3, 10, 17)
 const recIDXint = @SVector [ii + halfL for ii in recIDX]
 const ligIDX = @SVector [ii for ii = (halfL * 2 + 1):Nspecies]
 
-const Nparams = 61 # number of unknowns for the full model
-const Nlig = 6 # Number of ligands
+const Nparams = 52 # number of unknowns for the full model
+const Nlig = 3 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
 
@@ -55,19 +55,12 @@ function dYdT(du, u, p, ILs)
         du[8 + 7 * i] = -p[1] * u[8 + 7 * i] * u[1 + 9 * i] + k8rev * u[9 + 7 * i] + p[1] * u[3] * u[5 + 7 * i] - pp[5] * u[8 + 7 * i]
     end
 
-    for i = 0:3
-        ij = 17 + i * 3
-        du[3] += -p[1] * u[3] * u[ij + 1] + p[15 + 2 * i] * u[ij + 2]
-        du[ij] = -kfbnd * u[ij] * ILs[3 + i] + p[14 + 2 * i] * u[ij + 1]
-        du[ij + 1] = kfbnd * u[ij] * ILs[3 + i] - p[14 + 2 * i] * u[ij + 1] - p[1] * u[3] * u[ij + 1] + p[15 + 2 * i] * u[ij + 2]
-        du[ij + 2] = p[1] * u[3] * u[ij + 1] - p[15 + 2 * i] * u[ij + 2]
-    end
+    du[3] += -p[1] * u[3] * u[18] + p[15] * u[19]
+    du[17] = -kfbnd * u[17] * ILs[3] + p[14] * u[18]
+    du[18] = kfbnd * u[17] * ILs[3] - p[14] * u[18] - p[1] * u[3] * u[18] + p[15] * u[19]
+    du[19] = p[1] * u[3] * u[18] - p[15] * u[19]
+
     return nothing
-end
-
-
-function trafP(p)
-    return view(p, 49:61)
 end
 
 
@@ -84,16 +77,13 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
 
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
-    du[57] = -sum(view(du, (halfL + 4):(halfL + 9))) / internalV
-    du[58] = -sum(view(du, (halfL + 11):(halfL + 16))) / internalV
-    du[59] = -sum(view(du, (halfL + 18):(halfL + 19))) / internalV
-    du[60] = -sum(view(du, (halfL + 21):(halfL + 22))) / internalV
-    du[61] = -sum(view(du, (halfL + 24):(halfL + 25))) / internalV
-    du[62] = -sum(view(du, (halfL + 27):(halfL + 28))) / internalV
+    du[39] = -sum(view(du, (halfL + 4):(halfL + 9))) / internalV
+    du[40] = -sum(view(du, (halfL + 11):(halfL + 16))) / internalV
+    du[41] = -sum(view(du, (halfL + 18):(halfL + 19))) / internalV
 
     # Actually calculate the trafficking
     for ii in range(1, stop = halfL)
-        if findfirst(isequal(ii), SVector(8, 9, 15, 16, 19, 22, 25, 28)) != nothing
+        if findfirst(isequal(ii), SVector(8, 9, 15, 16, 19)) != nothing
             du[ii] -= u[ii] * (trafP[1] + trafP[2]) # Endo
             du[ii + halfL] += u[ii] * (trafP[1] + trafP[2]) / internalFrac - trafP[5] * u[ii + halfL] # Endo, deg
         else
@@ -102,8 +92,8 @@ function fullModel(du, u, pSurf, pEndo, trafP, ILs)
         end
     end
 
-    # Expression: IL2Ra, IL2Rb, gc, IL15Ra, IL7Ra, IL9R, IL4Ra, IL21Ra
-    du[recIDX] .+= view(trafP, 6:13)
+    # Expression: IL2Ra, IL2Rb, gc, IL15Ra, IL7Ra
+    du[recIDX] .+= view(trafP, 6:10)
 
     # Degradation does lead to some clearance of ligand in the endosome
     du[ligIDX] .-= view(u, ligIDX) .* trafP[5]
@@ -115,7 +105,7 @@ end
 # Initial autocrine condition
 function solveAutocrine(rIn::Vector)
     @assert all(rIn .>= 0.0)
-    r = trafP(rIn)
+    r = view(rIn, 43:52)
     @assert r[3] < 1.0
 
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8

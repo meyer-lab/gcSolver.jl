@@ -5,13 +5,15 @@ using OrdinaryDiffEq
 using LinearAlgebra
 using SteadyStateDiffEq
 using ForwardDiff
+using Optim
+using Statistics
 
 include("reaction.jl")
 
 function fullDeriv(du, u, p, t)
     fill!(du, 0.0)
 
-    fullModel(du, u, view(p, 7:27), view(p, 28:48), trafP(p), view(p, 1:6))
+    fullModel(du, u, view(p, 4:21), view(p, 22:42), view(p, 43:52), view(p, 1:3))
 end
 
 
@@ -44,12 +46,13 @@ end
 
 
 " Converts the ODE solution to a predicted amount of pSTAT. "
-function runCkinePSTAT(tps::Vector, params::Vector)
+function runCkinePSTAT(tps::Vector, params::Vector)::Vector
     # TODO: Add in the sigmoidal relationship.
-    retval = runCkine(tps::Vector{Float64}, params::Vector)
+    retval = runCkine(tps, params)
 
     # Summation of active species
-    pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19, 22, 25, 28)], dims=2)
+    pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19)], dims=2) # surface
+    pSTAT += sum(retval[:, SVector(8, 9, 15, 16, 19) .+ halfL], dims=2) # endosome
 
     @assert length(pSTAT) == length(tps)
     return vec(pSTAT)
@@ -57,7 +60,7 @@ end
 
 
 " Calculate the Jacobian of the model and perform variance propagation. "
-function runCkineVarPorp(tps::Vector, params::Vector, sigma)::Matrix
+function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
         return runCkinePSTAT(tps, x)
@@ -66,11 +69,10 @@ function runCkineVarPorp(tps::Vector, params::Vector, sigma)::Matrix
     jac = zeros(length(params), length(tps))
     ForwardDiff.jacobian!(jac, jacF, params)
 
-    return transpose(jac) * sigma * jac
+    # Just return the diagonal for the marginal variance
+    return diag(transpose(jac) * sigma * jac)
 end
 
-
-include("normFlows.jl")
 
 export runCkine
 
