@@ -30,7 +30,7 @@ end
 
 @testset "Full model mass conservation." begin
     rr = copy(rxntfR)
-    rr[49:end] .= 0.0
+    rr[47:end] .= 0.0
     dy = zeros(gcSolver.Nspecies)
 
     gcSolver.fullDeriv(dy, copy(dy), rr, 0.0)
@@ -80,11 +80,13 @@ end
 
 @testset "Detailed balance using no-trafficking model." begin
     rxntfRR = copy(rxntfR)
-    rxntfRR[49:50] .= 0.0  # set endo and activeEndo to 0.0
+    rxntfRR[43:44] .= 0.0  # set endo and activeEndo to 0.0
     out = vec(runCkine([1000000.0], rxntfRR))
 
     J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, rxntfRR, 0.0), ones(gcSolver.Nspecies), out)
     GK = J * diagm(vec(out))
+
+    println(norm(GK - transpose(GK)))
 
     @test norm(GK - transpose(GK)) < 1.0e-5
 end
@@ -92,11 +94,11 @@ end
 
 @testset "Make sure no endosomal species are found when endo=0." begin
     rxntfRR = copy(rxntfR)
-    rxntfRR[49:50] .= 0.0  # set endo and activeEndo to 0.0
+    rxntfRR[43:44] .= 0.0  # set endo and activeEndo to 0.0
 
     yOut = runCkine(tps, rxntfRR)
 
-    @test all(isapprox(sum(abs.(yOut[:, 29:end])), 0.0, atol = 1.0e-6))
+    @test all(isapprox(sum(abs.(yOut[:, 20:end])), 0.0, atol = 1.0e-6))
 end
 
 

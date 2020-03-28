@@ -13,7 +13,7 @@ include("reaction.jl")
 function fullDeriv(du, u, p, t)
     fill!(du, 0.0)
 
-    fullModel(du, u, view(p, 7:27), view(p, 28:48), trafP(p), view(p, 1:6))
+    fullModel(du, u, view(p, 4:21), view(p, 22:42), view(p, 43:52), view(p, 1:3))
 end
 
 
@@ -51,7 +51,8 @@ function runCkinePSTAT(tps::Vector, params::Vector)
     retval = runCkine(tps::Vector{Float64}, params::Vector)
 
     # Summation of active species
-    pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19, 22, 25, 28)], dims=2)
+    # TODO: This is only surface species
+    pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19)], dims=2)
 
     @assert length(pSTAT) == length(tps)
     return vec(pSTAT)
