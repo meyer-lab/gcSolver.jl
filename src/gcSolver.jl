@@ -69,7 +69,6 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     jac = zeros(length(params), length(tps))
     ForwardDiff.jacobian!(jac, jacF, params)
 
-
     # Just return the diagonal for the marginal variance
     return diag(transpose(jac) * sigma * jac)
 end
