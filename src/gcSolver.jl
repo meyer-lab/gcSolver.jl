@@ -5,6 +5,8 @@ using OrdinaryDiffEq
 using LinearAlgebra
 using SteadyStateDiffEq
 using ForwardDiff
+using Optim
+using Statistics
 
 include("reaction.jl")
 
@@ -69,8 +71,6 @@ function runCkineVarPorp(tps::Vector, params::Vector, sigma)::Matrix
     return transpose(jac) * sigma * jac
 end
 
-
-include("normFlows.jl")
 
 export runCkine
 
