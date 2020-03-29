@@ -90,8 +90,8 @@ function fullDeriv(du, u, p, t)
     du[41] = -sum(view(du, (halfL + 18):(halfL + 19))) / internalV
 
     # Actually calculate the trafficking
-    for ii in range(1, stop = halfL)
-        if findfirst(isequal(ii), activeSpec) != nothing
+    for ii = 1:halfL
+        if ii ∈ activeSpec
             du[ii] -= u[ii] * (trafP[1] + trafP[2]) # Endo
             du[ii + halfL] += u[ii] * (trafP[1] + trafP[2]) / internalFrac - trafP[5] * u[ii + halfL] # Endo, deg
         else
