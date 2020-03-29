@@ -6,6 +6,7 @@ const internalFrac = 0.5 # Same as that used in TAM model
 const recIDX = SVector(1, 2, 3, 10, 17)
 const recIDXint = @SVector [ii + halfL for ii in recIDX]
 const ligIDX = @SVector [ii for ii = (halfL * 2 + 1):Nspecies]
+const activeSpec = SVector(8, 9, 15, 16, 19)
 
 const Nparams = 32 # number of unknowns for the full model
 const Nlig = 3 # Number of ligands
@@ -90,7 +91,7 @@ function fullDeriv(du, u, p, t)
 
     # Actually calculate the trafficking
     for ii in range(1, stop = halfL)
-        if findfirst(isequal(ii), SVector(8, 9, 15, 16, 19)) != nothing
+        if findfirst(isequal(ii), activeSpec) != nothing
             du[ii] -= u[ii] * (trafP[1] + trafP[2]) # Endo
             du[ii + halfL] += u[ii] * (trafP[1] + trafP[2]) / internalFrac - trafP[5] * u[ii + halfL] # Endo, deg
         else

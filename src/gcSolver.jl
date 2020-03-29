@@ -44,8 +44,8 @@ function runCkinePSTAT(tps::Vector, params::Vector)::Vector
     retval = runCkine(tps, params)
 
     # Summation of active species
-    pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19)], dims = 2) # surface
-    pSTAT += internalFrac * sum(retval[:, SVector(8, 9, 15, 16, 19) .+ halfL], dims = 2) # endosome
+    pSTAT = sum(retval[:, activeSpec], dims = 2) # surface
+    pSTAT += internalFrac * sum(retval[:, activeSpec .+ halfL], dims = 2) # endosome
 
     @assert length(pSTAT) == length(tps)
     return vec(pSTAT)
