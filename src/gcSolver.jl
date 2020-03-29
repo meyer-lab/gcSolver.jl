@@ -10,7 +10,7 @@ using Statistics
 
 include("reaction.jl")
 
-const solTol = 1.0e-9
+const solTol = 1.0e-10
 
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
@@ -45,7 +45,7 @@ function runCkinePSTAT(tps::Vector, params::Vector)::Vector
 
     # Summation of active species
     pSTAT = sum(retval[:, SVector(8, 9, 15, 16, 19)], dims = 2) # surface
-    pSTAT += sum(retval[:, SVector(8, 9, 15, 16, 19) .+ halfL], dims = 2) # endosome
+    pSTAT += internalFrac * sum(retval[:, SVector(8, 9, 15, 16, 19) .+ halfL], dims = 2) # endosome
 
     @assert length(pSTAT) == length(tps)
     return vec(pSTAT)
@@ -56,11 +56,12 @@ end
 function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
-        return runCkinePSTAT(tps, x)
+        pp = vcat(params[1:27], x)
+        return runCkinePSTAT(tps, pp)
     end
 
-    jac = zeros(length(params), length(tps))
-    ForwardDiff.jacobian!(jac, jacF, params)
+    jac = zeros(5, length(tps))
+    ForwardDiff.jacobian!(jac, jacF, params[28:32])
 
     # Just return the diagonal for the marginal variance
     return diag(transpose(jac) * sigma * jac)

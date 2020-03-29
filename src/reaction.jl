@@ -7,7 +7,7 @@ const recIDX = SVector(1, 2, 3, 10, 17)
 const recIDXint = @SVector [ii + halfL for ii in recIDX]
 const ligIDX = @SVector [ii for ii = (halfL * 2 + 1):Nspecies]
 
-const Nparams = 49 # number of unknowns for the full model
+const Nparams = 32 # number of unknowns for the full model
 const Nlig = 3 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
@@ -69,8 +69,8 @@ function fullDeriv(du, u, p, t)
 
     ILs = view(p, 1:3)
     pSurf = view(p, 4:21)
-    pEndo = view(p, 22:39)
-    trafP = view(p, 40:49)
+    pEndo = p[22]
+    trafP = view(p, 23:32)
 
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
@@ -80,7 +80,7 @@ function fullDeriv(du, u, p, t)
         return nothing
     end
 
-    dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo, view(u, ligIDX))
+    dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo * pSurf, view(u, ligIDX))
 
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
@@ -112,7 +112,7 @@ end
 # Initial autocrine condition
 function solveAutocrine(rIn::Vector)
     @assert all(rIn .>= 0.0)
-    r = view(rIn, 40:49)
+    r = view(rIn, 23:32)
     @assert r[3] < 1.0
 
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8

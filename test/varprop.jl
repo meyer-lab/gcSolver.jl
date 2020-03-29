@@ -14,7 +14,7 @@ end
 
 
 @testset "Reasonable return from varprop function." begin
-    sigma = Matrix{Int}(I, length(rxntfR), length(rxntfR))
+    sigma = Matrix{Int}(I, 5, 5)
 
     retval = gcSolver.runCkineVarProp(tps, rxntfR, sigma)
 
