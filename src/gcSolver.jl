@@ -10,7 +10,7 @@ using Statistics
 
 include("reaction.jl")
 
-const solTol = 1.0e-10
+const solTol = 1.0e-9
 
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
@@ -19,11 +19,16 @@ end
 const options = Dict([:reltol => solTol, :abstol => solTol, :isoutofdomain => domainDef])
 
 
-function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
+function runCkineSetup(tps::Vector{Float64}, params::Vector)
     @assert all(tps .>= 0.0)
     u0 = solveAutocrine(params)
 
-    prob = ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
+    return ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
+end 
+
+
+function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
+    prob = runCkineSetup(tps, params)
 
     alg = AutoTsit5(Rodas5(autodiff = eltype(params) == Float64))
     sol = solve(prob, alg; saveat = tps, options...).u
