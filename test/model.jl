@@ -54,7 +54,7 @@ end
     out = gcSolver.solveAutocrine(rxntfR)
 
     rr = copy(rxntfR)
-    rr[1:gcSolver.Nlig] .= 0.0
+    rr[1:(gcSolver.Nlig)] .= 0.0
 
     dy = ones(gcSolver.Nspecies)
 
