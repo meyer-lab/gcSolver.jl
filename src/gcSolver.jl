@@ -10,13 +10,6 @@ using Statistics
 
 include("reaction.jl")
 
-function fullDeriv(du, u, p, t)
-    fill!(du, 0.0)
-
-    fullModel(du, u, view(p, 4:21), view(p, 22:42), view(p, 43:52), view(p, 1:3))
-end
-
-
 const solTol = 1.0e-9
 
 function domainDef(u, p, t)

@@ -7,7 +7,7 @@ const recIDX = SVector(1, 2, 3, 10, 17)
 const recIDXint = @SVector [ii + halfL for ii in recIDX]
 const ligIDX = @SVector [ii for ii = (halfL * 2 + 1):Nspecies]
 
-const Nparams = 52 # number of unknowns for the full model
+const Nparams = 49 # number of unknowns for the full model
 const Nlig = 3 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
@@ -64,7 +64,14 @@ function dYdT(du, u, p, ILs)
 end
 
 
-function fullModel(du, u, pSurf, pEndo, trafP, ILs)
+function fullDeriv(du, u, p, t)
+    fill!(du, 0.0)
+
+    ILs = view(p, 1:3)
+    pSurf = view(p, 4:21)
+    pEndo = view(p, 22:39)
+    trafP = view(p, 40:49)
+
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
 
@@ -105,7 +112,7 @@ end
 # Initial autocrine condition
 function solveAutocrine(rIn::Vector)
     @assert all(rIn .>= 0.0)
-    r = view(rIn, 43:52)
+    r = view(rIn, 40:49)
     @assert r[3] < 1.0
 
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
