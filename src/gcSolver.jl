@@ -24,7 +24,7 @@ function runCkineSetup(tps::Vector{Float64}, params::Vector)
     u0 = solveAutocrine(params)
 
     return ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
-end 
+end
 
 
 function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
