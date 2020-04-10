@@ -2,8 +2,8 @@ __precompile__()
 module gcSolver
 
 using OrdinaryDiffEq
-using LinearAlgebra
-using ForwardDiff
+import LinearAlgebra: diag
+import ForwardDiff
 using Optim
 using Statistics
 
@@ -15,10 +15,8 @@ function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
 end
 
-const options = Dict([:reltol => solTol, :abstol => solTol, :isoutofdomain => domainDef])
 
-
-function runCkineSetup(tps::Vector{Float64}, params::Vector)
+function runCkineSetup(tps::Vector{Float64}, params)
     @assert all(tps .>= 0.0)
     u0 = solveAutocrine(params)
 
@@ -26,11 +24,12 @@ function runCkineSetup(tps::Vector{Float64}, params::Vector)
 end
 
 
-function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
+" Actually run the gc ODE model. "
+function runCkine(tps::Vector{Float64}, params)::Matrix
     prob = runCkineSetup(tps, params)
 
     alg = AutoTsit5(Rodas5(autodiff = eltype(params) == Float64))
-    sol = solve(prob, alg; saveat = tps, options...).u
+    sol = solve(prob, alg; saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)

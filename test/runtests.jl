@@ -1,4 +1,5 @@
 using Test
+using Profile
 using gcSolver
 using ForwardDiff
 using LinearAlgebra
