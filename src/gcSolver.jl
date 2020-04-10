@@ -3,7 +3,6 @@ module gcSolver
 
 using OrdinaryDiffEq
 using LinearAlgebra
-using SteadyStateDiffEq
 using ForwardDiff
 using Optim
 using Statistics
