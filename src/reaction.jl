@@ -65,13 +65,13 @@ function dYdT(du, u, p, ILs)
 end
 
 
-@views function fullDeriv(du, u, p, t)
+function fullDeriv(du, u, p, t)
     fill!(du, 0.0)
 
-    ILs = p[1:3]
-    pSurf = p[4:21]
+    ILs = view(p, 1:3)
+    pSurf = view(p, 4:21)
     pEndo = p[22]
-    trafP = p[23:32]
+    trafP = view(p, 23:32)
 
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
@@ -81,13 +81,13 @@ end
         return nothing
     end
 
-    dYdT(du[(halfL + 1):(2 * halfL)], u[(halfL + 1):(2 * halfL)], pEndo * pSurf, u[ligIDX])
+    dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo * pSurf, view(u, ligIDX))
 
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
-    du[39] = -sum(du[(halfL + 4):(halfL + 9)]) / internalV
-    du[40] = -sum(du[(halfL + 11):(halfL + 16)]) / internalV
-    du[41] = -sum(du[(halfL + 18):(halfL + 19)]) / internalV
+    du[39] = -sum(view(du, (halfL + 4):(halfL + 9))) / internalV
+    du[40] = -sum(view(du, (halfL + 11):(halfL + 16))) / internalV
+    du[41] = -sum(view(du, (halfL + 18):(halfL + 19))) / internalV
 
     # Actually calculate the trafficking
     for ii = 1:halfL
@@ -101,10 +101,10 @@ end
     end
 
     # Expression: IL2Ra, IL2Rb, gc, IL15Ra, IL7Ra
-    du[recIDX] .+= trafP[6:10]
+    du[recIDX] .+= view(trafP, 6:10)
 
     # Degradation does lead to some clearance of ligand in the endosome
-    du[ligIDX] .-= u[ligIDX] .* trafP[5]
+    du[ligIDX] .-= view(u, ligIDX) .* trafP[5]
 
     return nothing
 end
