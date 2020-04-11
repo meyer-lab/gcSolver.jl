@@ -111,9 +111,9 @@ end
 
 
 # Initial autocrine condition
-function solveAutocrine(rIn::Vector)
+@views function solveAutocrine(rIn::Vector)
     @assert all(rIn .>= 0.0)
-    r = view(rIn, 23:32)
+    r = rIn[23:32]
     @assert r[3] < 1.0
 
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
