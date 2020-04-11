@@ -16,8 +16,17 @@ function domainDef(u, p, t)
 end
 
 
-function runCkineSetup(tps::Vector{Float64}, params)
+" Check that we haven't been provided anything ridiculous by the user. "
+function checkInputs(tps::Vector, params::Vector)
     @assert all(tps .>= 0.0)
+    @assert length(params) == Nparams
+    @assert all(params .>= 0.0)
+    @assert params[25] < 1.0
+end
+
+
+function runCkineSetup(tps::Vector{Float64}, params::Vector)
+    checkInputs(tps, params)
     u0 = solveAutocrine(params)
 
     return ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
@@ -25,10 +34,10 @@ end
 
 
 " Actually run the gc ODE model. "
-function runCkine(tps::Vector{Float64}, params)::Matrix
+function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     prob = runCkineSetup(tps, params)
 
-    alg = AutoTsit5(Rodas5(autodiff = eltype(params) == Float64))
+    alg = AutoTsit5(Rodas5(autodiff = false))
     sol = solve(prob, alg; saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
 
     if length(tps) > 1
@@ -43,12 +52,10 @@ end
 
 " Converts the ODE solution to a predicted amount of pSTAT. "
 function runCkinePSTAT(tps::Vector, params::Vector)::Vector
-    # TODO: Add in the sigmoidal relationship.
-    retval = runCkine(tps, params)
+    sol = runCkine(tps, params)
 
     # Summation of active species
-    pSTAT = sum(retval[:, activeSpec], dims = 2) # surface
-    pSTAT += internalFrac * sum(retval[:, activeSpec .+ halfL], dims = 2) # endosome
+    pSTAT = sol[:, 43] + 2 * (sol[:, 44] + sol[:, 45])
 
     @assert length(pSTAT) == length(tps)
     return vec(pSTAT)
@@ -57,9 +64,11 @@ end
 
 " Calculate the Jacobian of the model and perform variance propagation. "
 function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
+    checkInputs(tps, params)
+
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
-        pp = vcat(params[1:27], x)
+        pp = vcat(params[1:27], x, params[33:end])
         return runCkinePSTAT(tps, pp)
     end
 
@@ -71,8 +80,6 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
 end
 
 
-export runCkine
-
-precompile(runCkine, (Array{Float64, 1}, Array{Float64, 1}))
+export runCkine, runCkineVarProp
 
 end # module

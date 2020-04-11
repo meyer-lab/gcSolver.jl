@@ -61,7 +61,7 @@ end
     gcSolver.fullDeriv(dy, out, rr, 0.0)
 
     @test all(out .>= 0.0)
-    @test isapprox(sum(abs.(dy)), 0.0, atol = 1.0e-12)
+    @test isapprox(norm(dy), 0.0, atol = 1.0e-12)
 end
 
 
@@ -84,7 +84,9 @@ end
     out = vec(runCkine([1000000.0], rxntfRR))
 
     J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, rxntfRR, 0.0), ones(gcSolver.Nspecies), out)
-    GK = J * diagm(vec(out))
+
+    # Slice out just the surface species
+    GK = J[1:gcSolver.halfL, 1:gcSolver.halfL] * diagm(vec(out[1:gcSolver.halfL]))
 
     @test norm(GK - transpose(GK)) < 1.0e-9
 end
@@ -96,7 +98,7 @@ end
 
     yOut = runCkine(tps, rxntfRR)
 
-    @test all(isapprox(sum(abs.(yOut[:, 20:end])), 0.0, atol = 1.0e-6))
+    @test all(isapprox(sum(abs.(yOut[:, (gcSolver.halfL + 1):(2 * gcSolver.halfL)])), 0.0, atol = 1.0e-6))
 end
 
 

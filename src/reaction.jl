@@ -1,14 +1,14 @@
 using StaticArrays
 
-const Nspecies = 41 # number of complexes in surface + endosome + free ligand
+const Nspecies = 47 # number of complexes in surface + endosome + free ligand
 const halfL = 19 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
 const recIDX = SVector(1, 2, 3, 10, 17)
 const recIDXint = @SVector [ii + halfL for ii in recIDX]
-const ligIDX = @SVector [ii for ii = (halfL * 2 + 1):Nspecies]
+const ligIDX = SVector(39, 40, 41)
 const activeSpec = SVector(8, 9, 15, 16, 19)
 
-const Nparams = 32 # number of unknowns for the full model
+const Nparams = 39 # number of unknowns for the full model
 const Nlig = 3 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
@@ -71,10 +71,20 @@ function fullDeriv(du, u, p, t)
     ILs = view(p, 1:3)
     pSurf = view(p, 4:21)
     pEndo = p[22]
-    trafP = view(p, 23:32)
+    trafP = view(p, 23:33)
 
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
+
+    # Add STAT5 reactions
+    activR = sum(u[activeSpec]) + internalFrac * sum(u[activeSpec .+ halfL])
+    du[42] = p[39] * u[47] - p[34] * u[42] * activR # STAT5
+    du[43] = p[34] * u[42] * activR - p[35] * u[43] # pSTAT5
+    du[44] = 0.5 * p[35] * u[43] - p[36] * u[44] # pSTAT5d
+    du[45] = p[36] * u[44] - p[37] * u[45] # pSTAT5nd
+    du[46] = p[37] * u[45] - 0.5 * p[38] * u[46] # STAT5nd
+    du[47] = p[38] * u[46] - p[39] * u[47] # STAT5n
+
 
     # Don't bother with anything else if this is the no trafficking model
     if trafP[1] == 0.0
@@ -113,26 +123,29 @@ end
 # Initial autocrine condition
 function solveAutocrine(rIn::Vector)
     @assert all(rIn .>= 0.0)
-    r = view(rIn, 23:32)
+    r = view(rIn, 23:33)
     @assert r[3] < 1.0
 
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
     y0 = zeros(eltype(r), Nspecies)
 
+    # Add base amount of STAT5
+    y0[42] = r[11]
+
     # Check if we're working with the no trafficking model
     if r[1] == 0.0
-        y0[recIDX] = r[6:end]
+        y0[recIDX] = r[6:10]
         return y0
     end
 
     # Expand out trafficking terms
-    kRec = r[4] * (1 - r[3])
+    kRec = r[4] * (1.0 - r[3])
     kDeg = r[5] * r[3]
 
     # Assuming no autocrine ligand, so can solve steady state
     # Add the species
-    y0[recIDXint] = r[6:end] / kDeg / internalFrac
-    y0[recIDX] = (r[6:end] + kRec * y0[recIDXint] * internalFrac) / r[1]
+    y0[recIDXint] = r[6:10] / kDeg / internalFrac
+    y0[recIDX] = (r[6:10] + kRec * y0[recIDXint] * internalFrac) / r[1]
 
     return y0
 end
