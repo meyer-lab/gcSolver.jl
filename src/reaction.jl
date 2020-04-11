@@ -24,7 +24,7 @@ function dYdT(du, u, p, ILs)
 
     # IL2/15
     @views for i = 0:1
-        pp = p[1 + i * 6):(8 + i * 6)]
+        pp = p[(1 + i * 6):(8 + i * 6)]
         k12rev = pp[2] * pp[7] / pp[3] # Detailed balance
         k8rev = pp[6] * k12rev / pp[5] # Detailed balance
         k9rev = pp[6] * pp[7] / pp[4] # Detailed balance
