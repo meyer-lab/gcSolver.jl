@@ -85,12 +85,6 @@ function fullDeriv(du, u, p, t)
     du[46] = p[37] * u[45] - 0.5 * p[38] * u[46] # STAT5nd
     du[47] = p[38] * u[46] - p[39] * u[47] # STAT5n
 
-
-    # Don't bother with anything else if this is the no trafficking model
-    if trafP[1] == 0.0
-        return nothing
-    end
-
     dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo * pSurf, view(u, ligIDX))
 
     # Handle endosomal ligand balance.
