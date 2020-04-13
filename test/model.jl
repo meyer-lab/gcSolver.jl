@@ -86,7 +86,7 @@ end
     J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, rxntfRR, 0.0), ones(gcSolver.Nspecies), out)
 
     # Slice out just the surface species
-    GK = J[1:gcSolver.halfL, 1:gcSolver.halfL] * diagm(vec(out[1:gcSolver.halfL]))
+    GK = J[1:(gcSolver.halfL), 1:(gcSolver.halfL)] * diagm(vec(out[1:(gcSolver.halfL)]))
 
     @test norm(GK - transpose(GK)) < 1.0e-9
 end
