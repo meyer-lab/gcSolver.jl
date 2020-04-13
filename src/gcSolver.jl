@@ -6,6 +6,7 @@ import LinearAlgebra: diag
 import ForwardDiff
 using Optim
 using Statistics
+using ModelingToolkit
 
 include("reaction.jl")
 
