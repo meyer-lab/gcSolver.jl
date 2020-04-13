@@ -6,7 +6,7 @@ import LinearAlgebra: diag
 import ForwardDiff
 using Optim
 using Statistics
-using ModelingToolkit
+import ModelingToolkit
 
 include("reaction.jl")
 
@@ -26,6 +26,25 @@ function checkInputs(tps::Vector, params::Vector)
 end
 
 
+" This recompiles the ODE function into a symbolic Jacobian. "
+function modelCompile()
+    u0 = ones(Nspecies)
+    params = ones(Nparams) * 0.1
+
+    prob = ODEProblem(fullDeriv, u0, (0.0, 1.0), params)
+    deMT, varsMT, paramsMT = ModelingToolkit.modelingtoolkitize(prob)
+
+    f_iip = eval(ModelingToolkit.generate_function(deMT, varsMT, paramsMT)[2])
+    tgrad_iip = eval(ModelingToolkit.generate_tgrad(deMT)[2])
+    jac = eval(ModelingToolkit.generate_jacobian(deMT)[2])
+
+    return ODEFunction(f_iip; tgrad=tgrad_iip, jac=jac)
+end
+
+
+const modelFunc = modelCompile()
+
+
 function runCkineSetup(tps::Vector{Float64}, params::Vector)
     checkInputs(tps, params)
     u0 = solveAutocrine(params)
@@ -35,7 +54,7 @@ function runCkineSetup(tps::Vector{Float64}, params::Vector)
         params[28:32] .= 0.0  # set receptor expression to 0.0
     end
 
-    return ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
+    return ODEProblem(modelFunc, u0, (0.0, maximum(tps)), params)
 end
 
 
@@ -43,8 +62,7 @@ end
 function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     prob = runCkineSetup(tps, params)
 
-    alg = AutoTsit5(Rodas5(autodiff = false))
-    sol = solve(prob, alg; saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
+    sol = solve(prob, AutoTsit5(Rodas5()); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
