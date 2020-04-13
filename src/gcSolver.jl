@@ -30,6 +30,11 @@ function runCkineSetup(tps::Vector{Float64}, params::Vector)
     checkInputs(tps, params)
     u0 = solveAutocrine(params)
 
+    # Remove receptor expression if we're modeling no-trafficking
+    if params[23] == 0.0
+        params[28:32] .= 0.0  # set receptor expression to 0.0
+    end
+
     return ODEProblem(fullDeriv, u0, (0.0, maximum(tps)), params)
 end
 
