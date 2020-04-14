@@ -33,22 +33,24 @@ const internalV = 623.0 # Same as that used in TAM model
     rd["surf.k23rev"] = rxntfr[12]
     rd["surf.k25rev"] = kfbnd * 59.0
     rd["surf.k27rev"] = rxntfr[13]
-
 """
 function getUnkVec():
     """Creates full vector of unknown values to be fit"""
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
     unkVecF = zeros(Float64, 1, 19)
     
-    unkVecF[1] = .00125
-    unkVecF[2:7] = 0.679 # Mean of previously used prior distribution (lognormal, mu=0, sd=0.5)
-    unkVecF[8] = 1.0 # Previous prior
+    unkVecF[1] = 0.00125
+    unkVecF[2:7] = 0.679
+    unkVecF[8] = 1.0
     unkVecF[9] = 0.1
-    unkvecF[10] = 0.678
-    unkvecF[11] = 0.1
-    unk0.01
-    asdfsdf0.13
-    unasdfF[14:19] = 0.679, # Same as previous rationale
+    unkVecF[10] = 0.678
+    unkVecF[11] = 0.1
+    unkVecF[12] = 0.01
+    unkVecF[13] = 0.13
+    unkVecF[14:19] = 0.679
+    
+    
+
 end
     
 
@@ -82,4 +84,3 @@ function runFit():
     optimize(resids, unkVecInit)
     return fit
 end
-    
