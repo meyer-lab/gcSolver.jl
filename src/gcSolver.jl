@@ -38,7 +38,7 @@ function modelCompile()
     jac = eval(ModelingToolkit.generate_jacobian(deMT)[2])
     MM = ModelingToolkit.calculate_massmatrix(deMT)
 
-    return ODEFunction(f_iip; tgrad = tgrad_iip, jac = jac, mass_matrix=MM)
+    return ODEFunction(f_iip; tgrad = tgrad_iip, jac = jac, mass_matrix = MM)
 end
 
 
