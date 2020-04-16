@@ -1,5 +1,6 @@
 using StaticArrays
 using CSV
+using Optim
 
 const Nspecies = 47 # number of complexes in surface + endosome + free ligand
 const halfL = 19 # number of complexes on surface alone
@@ -15,6 +16,7 @@ const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
 
 workDir = pwd()
+include("gcSolver.jl")
 
 """Creates full vector of unknown values to be fit"""
 function getUnkVec()
@@ -74,6 +76,7 @@ end
 """Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams"""
 function getyVec()
     #import data into Julia Vector - should be X by 2
+    
     df = CSV.read(workDir + "gcSolver.jl/data/VarianceData", copycols=true)
     sort!(df, (:Date, :Ligand, :Cell, :Dose, :Time))
     yVec = df.Mean #add in variance later
@@ -86,7 +89,7 @@ function getyVec()
     expVec = zeros(Float64, size(df)[1], 5)
     expDict = getExpression()
 
-    for i = 1:size(df[1])
+    for i = 1:size(df)[1]
         if ligs[i] == "IL2"
             ligVec[i, 1] = doses[i]
         else
@@ -103,25 +106,28 @@ end
 function getExpression():
     #CSV.read...
     #dict = {Treg, TregNaive,....}
-    #entries = asdfasdf
+    #entries = ...
     return recDict
 end
 
 
+"""Calculates squared error for a given unkVec"""
 function resids(x)
     #TODO add weights etc.
     ytrue, tps, expVec, ligVec = getyVec()
+    yhat = zeros(Float64, size(ytrue))
     for i = 1 : size(tps)[1]
-        fit = fitParams(ligVec[i, 1:3]), x, expVec[i, 1:5])
-    
-    
-    return runmodel(fitmat) - ytrue
+        vec = fitParams(ligVec[i, 1:3], x, expVec[i, 1:5])
+        yhat[i] = runCkinePSTAT(tps[i], vec)
+
+    return (yhat .- ytrue).^2
 end
 
 
+""" Gets inital unkowns, optimizes them, and returns parameters of best fit"""
 function runFit()
     unkVecInit = getUnkVec
-    
-    optimize(resids, unkVecInit)
-    return fit
+    fit = optimize(resids, unkVecInit, LBFGS())
+
+    return fit.minimizer
 end
