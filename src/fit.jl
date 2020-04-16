@@ -60,7 +60,7 @@ function fitParams(ILs, unkVec, recAbundances)
     paramvec[19] = 5.0 #endoadjust
     paramvec[20:24] = unkVec[9:13]
     paramvec[25:29] = receptorExp(recAbundances, unkvec[9], unkvec[11], unkvec[12], unkvec[13])
-    paramvec[30] = 0.0#error (I think)
+    paramvec[30] = 1.0 #TODO add initial STAT
     paramVec[31:36] = unkVec[14:19]
     
 end
@@ -103,7 +103,7 @@ end
 
 
 """Gets expression vector for each cell type and puts it into dictionary"""
-function getExpression():
+function getExpression()
     #CSV.read...
     #dict = {Treg, TregNaive,....}
     #entries = ...
@@ -116,9 +116,10 @@ function resids(x)
     #TODO add weights etc.
     ytrue, tps, expVec, ligVec = getyVec()
     yhat = zeros(Float64, size(ytrue))
-    for i = 1 : size(tps)[1]
+    for i = 1:size(tps)[1]
         vec = fitParams(ligVec[i, 1:3], x, expVec[i, 1:5])
         yhat[i] = runCkinePSTAT(tps[i], vec)
+    end
 
     return (yhat .- ytrue).^2
 end
