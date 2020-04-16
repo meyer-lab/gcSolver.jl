@@ -35,7 +35,7 @@ function getUnkVec()
 end
 
 
-"""Takes in full unkvec and constructs it into full fit parameters vector"""
+"""Takes in full unkvec and constructs it into full fit parameters vector - TODO move this"""
 function fitParams(ILs, unkVec, recAbundances)
     kfbnd = 0.60
     paramvec = zeros(Float64, 1, Nparams)
@@ -71,22 +71,50 @@ function receptor_expression(receptor_abundance, endo, kRec, sortF, kDeg)
 end
 
 
-"""Constructs full vector of pSTAT means and variances to fit to"""
+"""Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams"""
 function getyVec()
     #import data into Julia Vector - should be X by 2
     df = CSV.read(workDir + "gcSolver.jl/data/VarianceData", copycols=true)
-    sort!(df, (:Date, :Cell, :Time, :Dose))
-    yvec = df.Mean #add in variance later
-    cellvec = df.Cell
-    return yvec, cellvec
+    sort!(df, (:Date, :Ligand, :Cell, :Dose, :Time))
+    yVec = df.Mean #add in variance later
+    cellVec = df.Cell
+    tpsVec = df.Time * 60.0
+    ligs = df.Ligand
+    doses = df.Dose
+
+    ligVec = zeros(Float64, size(df)[1], 3)
+    expVec = zeros(Float64, size(df)[1], 5)
+    expDict = getExpression()
+
+    for i = 1:size(df[1])
+        if ligs[i] == "IL2"
+            ligVec[i, 1] = doses[i]
+        else
+            ligVec[i, 2] = doses[i]
+        end
+        expVec[i, 1:5] = expDict(cellVec[i])
+    end
+
+    return yVec, tpsVec, expVec, ligVec
+end
+
+
+"""Gets expression vector for each cell type and puts it into dictionary"""
+function getExpression():
+    #CSV.read...
+    #dict = {Treg, TregNaive,....}
+    #entries = asdfasdf
+    return recDict
 end
 
 
 function resids(x)
     #TODO add weights etc.
+    ytrue, tps, expVec, ligVec = getyVec()
+    for i = 1 : size(tps)[1]
+        fit = fitParams(ligVec[i, 1:3]), x, expVec[i, 1:5])
     
-    fit = fitParams(x)
-    ytrue = yHatVec()
+    
     return runmodel(fitmat) - ytrue
 end
 
