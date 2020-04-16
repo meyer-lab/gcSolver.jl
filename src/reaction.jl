@@ -8,7 +8,7 @@ const recIDXint = @SVector [ii + halfL for ii in recIDX]
 const ligIDX = SVector(39, 40, 41)
 const activeSpec = SVector(8, 9, 15, 16, 19)
 
-const Nparams = 39 # number of unknowns for the full model
+const Nparams = 36 # number of unknowns for the full model
 const Nlig = 3 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
@@ -69,21 +69,21 @@ function fullDeriv(du, u, p, t)
     fill!(du, 0.0)
 
     ILs = view(p, 1:3)
-    pSurf = view(p, 4:21)
-    pEndo = p[22]
-    trafP = view(p, 23:33)
+    pSurf = view(p, 4:18)
+    pEndo = p[19]
+    trafP = view(p, 20:30)
 
     # Calculate cell surface and endosomal reactions
     dYdT(du, u, pSurf, ILs)
 
     # Add STAT5 reactions
     activR = sum(u[activeSpec]) + internalFrac * sum(u[activeSpec .+ halfL])
-    du[42] = p[39] * u[47] - p[34] * u[42] * activR # STAT5
-    du[43] = p[34] * u[42] * activR - p[35] * u[43] # pSTAT5
-    du[44] = 0.5 * p[35] * u[43] - p[36] * u[44] # pSTAT5d
-    du[45] = p[36] * u[44] - p[37] * u[45] # pSTAT5nd
-    du[46] = p[37] * u[45] - 0.5 * p[38] * u[46] # STAT5nd
-    du[47] = p[38] * u[46] - p[39] * u[47] # STAT5n
+    du[42] = p[36] * u[47] - p[31] * u[42] * activR # STAT5
+    du[43] = p[31] * u[42] * activR - p[32] * u[43] # pSTAT5
+    du[44] = 0.5 * p[32] * u[43] - p[33] * u[44] # pSTAT5d
+    du[45] = p[33] * u[44] - p[34] * u[45] # pSTAT5nd
+    du[46] = p[34] * u[45] - 0.5 * p[35] * u[46] # STAT5nd
+    du[47] = p[35] * u[46] - p[36] * u[47] # STAT5n
 
     dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo * pSurf, view(u, ligIDX))
 
@@ -116,8 +116,9 @@ end
 
 # Initial autocrine condition
 function solveAutocrine(rIn::Vector)
+    """Takes in parameters and solves for steady state expression and initial species states"""
     @assert all(rIn .>= 0.0)
-    r = view(rIn, 23:33)
+    r = view(rIn, 20:30)
     @assert r[3] < 1.0
 
     # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
