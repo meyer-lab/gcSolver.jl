@@ -18,43 +18,26 @@ const internalV = 623.0 # Same as that used in TAM model
 # p[9:12] is k14rev, k16rev, k17rev, k22rev
 # p[13:14] is k23rev, k24rev
 
-function getUnkVec():
+function getUnkVec()
     """Creates full vector of unknown values to be fit"""
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
     unkVecF = zeros(Float64, 1, 19)
 
-    unkVecF[1] = 0.00125
+    unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
     unkVecF[2:7] = 0.679
     unkVecF[8] = 1.0
     unkVecF[9] = 0.1
-    unkVecF[10] = 0.678
+    unkVecF[10] = 0.678 
     unkVecF[11] = 0.1
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
-    unkVecF[14:19] = 0.679
+    unkVecF[14:19] = 0.679 # pSTAT Rates
 
     return unkVecF
 end
 
-"""
-    kfbnd = 0.60
-    rd["IL2"], rd["IL15"], rd["IL7"], rd["IL9"], rd["IL4"], rd["IL21"], rd["kfwd"] = tuple(rxntfr[0:7])
-    rd["surf.k1rev"] = kfbnd * 10.0  # 7
-    rd["surf.k2rev"] = kfbnd * 144.0
-    rd["surf.k4rev"], rd["surf.k5rev"] = rxntfr[7], rxntfr[8]  # 9 #10
-    rd["surf.k10rev"] = 12.0 * rd["surf.k5rev"] / 1.5
-    rd["surf.k11rev"] = 63.0 * rd["surf.k5rev"] / 1.5
-    rd["surf.k13rev"] = kfbnd * 0.065
-    rd["surf.k14rev"] = kfbnd * 438.0
-    rd["surf.k16rev"] = rxntfr[9]
-    rd["surf.k17rev"] = rxntfr[10]  # 16
-    rd["surf.k22rev"] = rxntfr[11]
-    rd["surf.k23rev"] = rxntfr[12]
-    rd["surf.k25rev"] = kfbnd * 59.0
-    rd["surf.k27rev"] = rxntfr[13]
-"""
 
-function fitParams(ILs, unkVec, recAbundances):
+function fitParams(ILs, unkVec, recAbundances)
     """Takes in full unkvec and constructs it into full fit parameters vector"""
     kfbnd = 0.60
     paramvec = zeros(Float64, 1, Nparams)
@@ -76,20 +59,27 @@ function fitParams(ILs, unkVec, recAbundances):
     paramvec[18] = unkVec[8] #k25
     paramvec[19] = 5.0 #endoadjust
     paramvec[20:24] = unkVec[9:13]
-    paramvec[25:29] = receptorExp(recAbundances)
-    paramvec[30] = 0.0#error
+    paramvec[25:29] = receptorExp(recAbundances, unkvec[9], unkvec[11], unkvec[12], unkvec[13])
+    paramvec[30] = 0.0#error (I think)
     paramVec[31:36] = unkVec[14:19]
     
 end
 
 
-function yHatVec():
+function receptor_expression(receptor_abundance, endo, kRec, sortF, kDeg)
+    """ Uses receptor abundance (from flow) and trafficking rates to calculate receptor expression rate at steady state. """
+    rec_ex = (receptor_abundance * endo) / (1.0 + ((kRec * (1.0 - sortF)) / (kDeg * sortF)))
+    return rec_ex
+end
+
+
+function yHatVec()
     """Constructs full vector of pSTAT means and variances to fit to"""
     #import data into Julia Vector - should be X by 2
 end
 
 
-function resids(x):
+function resids(x)
     #TODO add weights etc.
     fit = fitParams(x)
     ytrue = yHatVec()
@@ -97,7 +87,7 @@ function resids(x):
 end
 
 
-function runFit():
+function runFit()
     unkVecInit = getUnkVec
     optimize(resids, unkVecInit)
     return fit
