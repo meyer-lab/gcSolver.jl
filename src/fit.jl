@@ -1,4 +1,5 @@
 using StaticArrays
+using CSV
 
 const Nspecies = 47 # number of complexes in surface + endosome + free ligand
 const halfL = 19 # number of complexes on surface alone
@@ -13,13 +14,10 @@ const Nlig = 3 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
 
-# p[1:4] is kfwd, k1rev, k2rev, k4rev
-# p[5:8] is k5rev, k10rev, k11rev, k13rev
-# p[9:12] is k14rev, k16rev, k17rev, k22rev
-# p[13:14] is k23rev, k24rev
+workDir = pwd()
 
+"""Creates full vector of unknown values to be fit"""
 function getUnkVec()
-    """Creates full vector of unknown values to be fit"""
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
     unkVecF = zeros(Float64, 1, 19)
 
@@ -37,8 +35,8 @@ function getUnkVec()
 end
 
 
+"""Takes in full unkvec and constructs it into full fit parameters vector"""
 function fitParams(ILs, unkVec, recAbundances)
-    """Takes in full unkvec and constructs it into full fit parameters vector"""
     kfbnd = 0.60
     paramvec = zeros(Float64, 1, Nparams)
     paramvec[1:3] = ILs
@@ -66,21 +64,27 @@ function fitParams(ILs, unkVec, recAbundances)
 end
 
 
+""" Uses receptor abundance (from flow) and trafficking rates to calculate receptor expression rate at steady state. """
 function receptor_expression(receptor_abundance, endo, kRec, sortF, kDeg)
-    """ Uses receptor abundance (from flow) and trafficking rates to calculate receptor expression rate at steady state. """
     rec_ex = (receptor_abundance * endo) / (1.0 + ((kRec * (1.0 - sortF)) / (kDeg * sortF)))
     return rec_ex
 end
 
 
-function yHatVec()
-    """Constructs full vector of pSTAT means and variances to fit to"""
+"""Constructs full vector of pSTAT means and variances to fit to"""
+function getyVec()
     #import data into Julia Vector - should be X by 2
+    df = CSV.read(workDir + "gcSolver.jl/data/VarianceData", copycols=true)
+    sort!(df, (:Date, :Cell, :Time, :Dose))
+    yvec = df.Mean #add in variance later
+    cellvec = df.Cell
+    return yvec, cellvec
 end
 
 
 function resids(x)
     #TODO add weights etc.
+    
     fit = fitParams(x)
     ytrue = yHatVec()
     return runmodel(fitmat) - ytrue
@@ -89,6 +93,7 @@ end
 
 function runFit()
     unkVecInit = getUnkVec
+    
     optimize(resids, unkVecInit)
     return fit
 end
