@@ -27,7 +27,7 @@ function getUnkVec()
     unkVecF[2:7] = 0.679
     unkVecF[8] = 1.0
     unkVecF[9] = 0.1
-    unkVecF[10] = 0.678 
+    unkVecF[10] = 0.678
     unkVecF[11] = 0.1
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
@@ -62,7 +62,7 @@ function fitParams(ILs, unkVec, recAbundances)
     paramvec[25:29] = receptorExp(recAbundances, unkvec[9], unkvec[11], unkvec[12], unkvec[13])
     paramvec[30] = 1.0 #TODO add initial STAT
     paramVec[31:36] = unkVec[14:19]
-    
+
 end
 
 
@@ -76,8 +76,8 @@ end
 """Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams"""
 function getyVec()
     #import data into Julia Vector - should be X by 2
-    
-    df = CSV.read(workDir + "gcSolver.jl/data/VarianceData", copycols=true)
+
+    df = CSV.read(workDir + "gcSolver.jl/data/VarianceData", copycols = true)
     sort!(df, (:Date, :Ligand, :Cell, :Dose, :Time))
     yVec = df.Mean #add in variance later
     cellVec = df.Cell
@@ -121,7 +121,7 @@ function resids(x)
         yhat[i] = runCkinePSTAT(tps[i], vec)
     end
 
-    return (yhat .- ytrue).^2
+    return (yhat .- ytrue) .^ 2
 end
 
 
