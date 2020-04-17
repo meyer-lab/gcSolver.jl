@@ -1,37 +1,23 @@
-using StaticArrays
 using CSV
-using Optim
+using Memoize
 
-const Nspecies = 47 # number of complexes in surface + endosome + free ligand
-const halfL = 19 # number of complexes on surface alone
-const internalFrac = 0.5 # Same as that used in TAM model
-const recIDX = SVector(1, 2, 3, 10, 17)
-const recIDXint = @SVector [ii + halfL for ii in recIDX]
-const ligIDX = SVector(39, 40, 41)
-const activeSpec = SVector(8, 9, 15, 16, 19)
+const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
-const Nparams = 36 # number of unknowns for the full model
-const Nlig = 3 # Number of ligands
-const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
-const internalV = 623.0 # Same as that used in TAM model
-
-workDir = pwd()
-include("gcSolver.jl")
 
 """Creates full vector of unknown values to be fit"""
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    unkVecF = zeros(Float64, 1, 19)
+    unkVecF = zeros(19)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
-    unkVecF[2:7] = 0.679
+    unkVecF[2:7] .= 0.679
     unkVecF[8] = 1.0
     unkVecF[9] = 0.1
     unkVecF[10] = 0.678
     unkVecF[11] = 0.1
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
-    unkVecF[14:19] = 0.679 # pSTAT Rates
+    unkVecF[14:19] .= 0.679 # pSTAT Rates
 
     return unkVecF
 end
@@ -74,10 +60,10 @@ end
 
 
 """Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams"""
-function getyVec()
+@memoize function getyVec()
     #import data into Julia Vector - should be X by 2
 
-    df = CSV.read(workDir + "gcSolver.jl/data/VarianceData", copycols = true)
+    df = CSV.read(joinpath(dataDir, "VarianceData.csv"), copycols = true)
     sort!(df, (:Date, :Ligand, :Cell, :Dose, :Time))
     yVec = df.Mean #add in variance later
     cellVec = df.Cell
@@ -112,23 +98,24 @@ end
 
 
 """Calculates squared error for a given unkVec"""
-function resids(x)
+function resids(x::Vector{T}) where T
     #TODO add weights etc.
     ytrue, tps, expVec, ligVec = getyVec()
-    yhat = zeros(Float64, size(ytrue))
+    yhat = similar(ytrue, T)
     for i = 1:size(tps)[1]
         vec = fitParams(ligVec[i, 1:3], x, expVec[i, 1:5])
+        println(tps[i])
         yhat[i] = runCkinePSTAT(tps[i], vec)
     end
 
-    return (yhat .- ytrue) .^ 2
+    return norm(yhat .- ytrue)
 end
 
 
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
-function runFit()
-    unkVecInit = getUnkVec
-    fit = optimize(resids, unkVecInit, LBFGS())
+function runFit(; itern = 1E6)
+    unkVecInit = getUnkVec()
+    fit = optimize(resids, unkVecInit, LBFGS(), Optim.Options(iterations = itern, show_trace = true))
 
     return fit.minimizer
 end

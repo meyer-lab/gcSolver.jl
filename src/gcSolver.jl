@@ -1,7 +1,7 @@
 module gcSolver
 
 using OrdinaryDiffEq
-import LinearAlgebra: diag
+import LinearAlgebra: diag, norm
 import ForwardDiff
 using Optim
 using Statistics
@@ -103,6 +103,7 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     return diag(transpose(jac) * sigma * jac)
 end
 
+include("fit.jl")
 
 export runCkine, runCkineVarProp
 
