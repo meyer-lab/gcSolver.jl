@@ -106,7 +106,7 @@ function resids(x::Vector{T}) where T
     for i = 2:size(tps)[1]
         if tps[i] < tps[i-1] #run model for multiple timepoints simultaneously.
             vec = fitParams(ligVec[i-1, 1:3], x, expVec[i-1, 1:5])
-            yhat[i-length(timepoints): i-1] = runCkinePSTAT(timepoints, vec)
+            yhat[i-length(timepoints): i-1] = runCkinePSTAT(timepoints, vec(vec))
             timepoints = []
         else
             append!(timepoints, tps[i])
@@ -114,7 +114,7 @@ function resids(x::Vector{T}) where T
     end
     #will miss last batch of data, fill that here
     vec = fitParams(ligVec[size(tps)[1], 1:3], x, expVec[size(tps)[1], 1:5])
-    yhat[size(tps)[1]-length(timepoints): size(tps)[1]] = runCkinePSTAT(timepoints, vec)
+    yhat[size(tps)[1]-length(timepoints): size(tps)[1]] = runCkinePSTAT(timepoints, vec(vec))
 
     return norm(yhat .- ytrue)
 end
