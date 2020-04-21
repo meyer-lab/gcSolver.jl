@@ -82,7 +82,7 @@ end
         else
             ligVec[i, 2] = doses[i]
         end
-        expVec[i, 1:5] = expDict(cellVec[i])
+        expVec[i, 1:5] = exprDF[!, Symbol(cellVec[i])]
     end
 
     return yVec, tpsVec, expVec, ligVec
@@ -92,8 +92,7 @@ end
 """Gets expression vector for each cell type and puts it into dictionary"""
 function getExpression()
     recDF = CSV.read(joinpath(dataDir, "FakeExpressionData.csv"), copycols = true)
-    dict = {"Treg": recDF.Treg,"Thelper": recDF.Thelper, "NK": recDF.NK, "CD8": recDF.CD8}
-    return recDict
+    return recDF
 end
 
 
@@ -101,7 +100,7 @@ end
 function resids(x::Vector{T}) where T
     #TODO add weights etc.
     ytrue, tps, expVec, ligVec = getyVec()
-    yhat = zeros(Float64, size(ytrue))
+    yhat = similar(ytrue, T)
     timepoints = []
     timepoints = timepoints.append(tps[1])
     for i = 2:size(tps)[1]
