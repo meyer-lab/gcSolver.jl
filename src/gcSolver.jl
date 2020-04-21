@@ -75,7 +75,7 @@ end
 
 
 " Converts the ODE solution to a predicted amount of pSTAT. "
-function runCkinePSTAT(tps::Vector, params::Vector)::Vector
+function runCkinePSTAT(tps::Vector{Float64}, params::Vector)::Vector
     sol = runCkine(tps, params)
 
     # Summation of active species
