@@ -109,7 +109,7 @@ function resids(x::Vector{T}) where T
             yhat[i-length(timepoints): i-1] = runCkinePSTAT(timepoints, vec)
             timepoints = []
         else
-            append!(timepoints, tps[i!])
+            append!(timepoints, tps[i])
         end
     end
     #will miss last batch of data, fill that here
