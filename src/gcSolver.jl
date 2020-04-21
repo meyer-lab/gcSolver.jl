@@ -21,7 +21,7 @@ function checkInputs(tps::Vector, params::Vector)
     @assert all(tps .>= 0.0)
     @assert length(params) == Nparams
     @assert all(params .>= 0.0)
-    @assert params[25] < 1.0
+    @assert params[22] < 1.0
 end
 
 
