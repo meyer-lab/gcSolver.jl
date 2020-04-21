@@ -45,7 +45,7 @@ end
 const modelFunc = modelCompile()
 
 
-function runCkineSetup(tps::Vector{Float64},, params::Vector)
+function runCkineSetup(tps::Vector{Float64}, params::Vector)
     checkInputs(tps, params)
     u0 = solveAutocrine(params)
 
