@@ -7,7 +7,7 @@ const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """Creates full vector of unknown values to be fit"""
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    unkVecF = zeros(19)
+    unkVecF = zeros(20)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
     unkVecF[2:7] .= 0.679
