@@ -17,7 +17,7 @@ end
 
 
 " Check that we haven't been provided anything ridiculous by the user. "
-function checkInputs(tps::Vector, params::Vector)
+function checkInputs(tps::Vector{Float64},, params::Vector)
     @assert all(tps .>= 0.0)
     @assert length(params) == Nparams
     @assert all(params .>= 0.0)
@@ -45,7 +45,7 @@ end
 const modelFunc = modelCompile()
 
 
-function runCkineSetup(tps::Vector, params::Vector)# here
+function runCkineSetup(tps::Vector{Float64},, params::Vector)
     checkInputs(tps, params)
     u0 = solveAutocrine(params)
 
@@ -59,7 +59,7 @@ end
 
 
 " Actually run the gc ODE model. "
-function runCkine(tps::Vector, params::Vector)::Matrix# here
+function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     prob = runCkineSetup(tps, params)
 
     sol = solve(prob, AutoTsit5(Rodas5()); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
@@ -75,7 +75,7 @@ end
 
 
 " Converts the ODE solution to a predicted amount of pSTAT. "
-function runCkinePSTAT(tps::Vector, params::Vector)::Vector #here
+function runCkinePSTAT(tps::Vector{Float64}, params::Vector)::Vector
     sol = runCkine(tps, params)
 
     # Summation of active species

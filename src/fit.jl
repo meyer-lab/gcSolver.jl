@@ -124,7 +124,7 @@ end
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
 function runFit(; itern = 1E6)
     unkVecInit = getUnkVec()
-    fit = optimize(resids, unkVecInit, LBFGS(), Optim.Options(iterations = itern, show_trace = true); autodiff=:forward )
+    fit = optimize(resids, unkVecInit, LBFGS(), Optim.Options(iterations = itern, show_trace = true))
 
     return fit.minimizer
 end
