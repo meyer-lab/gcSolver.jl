@@ -102,14 +102,14 @@ function resids(x::Vector{T}) where T
     ytrue, tps, expVec, ligVec = getyVec()
     yhat = similar(ytrue, T)
     timepoints = []
-    timepoints = timepoints.append(tps[1])
+    append!(timepoints, tps[1])
     for i = 2:size(tps)[1]
         if tps[i] < tps[i-1] #run model for multiple timepoints simultaneously.
             vec = fitParams(ligVec[i-1, 1:3], x, expVec[i-1, 1:5])
             yhat[i-length(timepoints): i-1] = runCkinePSTAT(timepoints, vec)
             timepoints = []
         else
-            timepoints.append(tps[i])
+            append!(timepoints, tps[i!])
         end
     end
     #will miss last batch of data, fill that here
