@@ -31,7 +31,8 @@ function getUnkVec()
     unkVecF[11] = 0.1
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
-    unkVecF[14:19] = 0.679 # pSTAT Rates
+    unkVecF[14] = 30000.0
+    unkVecF[15:20] = 0.679 # pSTAT Rates
 
     return unkVecF
 end
@@ -60,8 +61,8 @@ function fitParams(ILs, unkVec, recAbundances)
     paramvec[19] = 5.0 #endoadjust
     paramvec[20:24] = unkVec[9:13]
     paramvec[25:29] = receptorExp(recAbundances, unkvec[9], unkvec[11], unkvec[12], unkvec[13])
-    paramvec[30] = 1.0 #TODO add initial STAT
-    paramVec[31:36] = unkVec[14:19]
+    paramvec[30] = unkVec[14]
+    paramVec[31:36] = unkVec[15:20]
 
 end
 
@@ -75,7 +76,7 @@ end
 
 """Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams"""
 function getyVec()
-    #import data into Julia Vector - should be X by 2
+    #import data into Julia Vector - should be X by 1 until variance is added
 
     df = CSV.read(workDir + "gcSolver.jl/data/VarianceData", copycols = true)
     sort!(df, (:Date, :Ligand, :Cell, :Dose, :Time))
@@ -116,10 +117,20 @@ function resids(x)
     #TODO add weights etc.
     ytrue, tps, expVec, ligVec = getyVec()
     yhat = zeros(Float64, size(ytrue))
-    for i = 1:size(tps)[1]
-        vec = fitParams(ligVec[i, 1:3], x, expVec[i, 1:5])
-        yhat[i] = runCkinePSTAT(tps[i], vec)
+    timepoints = []
+    timepoints = timepoints.append(tps[1])
+    for i = 2:size(tps)[1]
+        if tps[i] < tps[i-1] #run model for multiple timepoints simultaneously.
+            vec = fitParams(ligVec[i-1, 1:3], x, expVec[i-1, 1:5])
+            yhat[i-length(timepoints): i-1] = runCkinePSTAT(timepoints, vec)
+            timepoints = []
+        else
+            timepoints.append(tps[i])
+        end
     end
+    #will miss last batch of data, fill that here
+    vec = fitParams(ligVec[size(tps)[1], 1:3], x, expVec[size(tps)[1], 1:5])
+    yhat[size(tps)[1]-length(timepoints): size(tps)[1]] = runCkinePSTAT(timepoints, vec)
 
     return (yhat .- ytrue) .^ 2
 end
@@ -128,7 +139,7 @@ end
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
 function runFit()
     unkVecInit = getUnkVec
-    fit = optimize(resids, unkVecInit, LBFGS())
+    fit = optimize(resids, unkVecInit, LBFGS(); autodiff=:forward)
 
     return fit.minimizer
 end
