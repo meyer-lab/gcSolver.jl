@@ -74,7 +74,7 @@ end
 
     ligVec = zeros(Float64, size(df)[1], 3)
     expVec = zeros(Float64, size(df)[1], 5)
-    expDict = getExpression()
+    exprDF = getExpression()
 
     for i = 1:size(df)[1]
         if ligs[i] == "IL2"
