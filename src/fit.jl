@@ -114,7 +114,7 @@ function resids(x::Vector{T}) where T
     end
     #will miss last batch of data, fill that here
     vec = fitParams(ligVec[size(tps)[1], 1:3], x, expVec[size(tps)[1], 1:5])
-    yhat[size(tps)[1]-length(timepoints): size(tps)[1]] = runCkinePSTAT(timepoints, vec(vec))
+    yhat[length(tps)-length(timepoints): length(tps)] = runCkinePSTAT(timepoints, vec(vec))
 
     return norm(yhat .- ytrue)
 end
