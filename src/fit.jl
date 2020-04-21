@@ -27,7 +27,7 @@ end
 """Takes in full unkvec and constructs it into full fit parameters vector - TODO move this"""
 function fitParams(ILs, unkVec, recAbundances)
     kfbnd = 0.60
-    paramvec = zeros(Float64, 1, Nparams)
+    paramvec = zeros(1, Nparams)
     paramvec[1:3] = ILs
     paramvec[4] = unkVec[1] #kfwd
     paramvec[5] = kfbnd * 10.0 #k1rev
@@ -72,8 +72,8 @@ end
     ligs = df.Ligand
     doses = df.Dose
 
-    ligVec = zeros(Float64, size(df)[1], 3)
-    expVec = zeros(Float64, size(df)[1], 5)
+    ligVec = zeros(size(df)[1], 3)
+    expVec = zeros(size(df)[1], 5)
     exprDF = getExpression()
 
     for i = 1:size(df)[1]
