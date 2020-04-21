@@ -23,3 +23,8 @@ end
     @test length(retval) == length(tps)
     @test all(retval .>= 0.0)
 end
+
+
+@testset "Run fitting." begin
+    gcSolver.runFit(itern = 10)
+end 
