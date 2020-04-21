@@ -48,7 +48,7 @@ function fitParams(ILs, unkVec, recAbundances)
     paramvec[20:24] = unkVec[9:13]
     paramvec[25:29] = receptor_expression(recAbundances, unkVec[9], unkVec[11], unkVec[12], unkVec[13])
     paramvec[30] = unkVec[14]
-    paramVec[31:36] = unkVec[15:20]
+    paramvec[31:36] = unkVec[15:20]
 
 end
 
