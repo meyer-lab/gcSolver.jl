@@ -3,6 +3,8 @@ using Memoize
 
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
+include("gcSolver.jl")
+
 
 """Creates full vector of unknown values to be fit"""
 function getUnkVec()
@@ -105,10 +107,8 @@ function resids(x::Vector{T}) where T
     append!(timepoints, tps[1])
     for i = 2:size(tps)[1]
         if tps[i] < tps[i-1] #run model for multiple timepoints simultaneously.
-            vec = fitParams(ligVec[i-1, 1:3], x, expVec[i-1, 1:5])
-            println(yhat[i-length(timepoints): i-1])
-            println(runCkinePSTAT(timepoints, vec(vec)))
-            yhat[i-length(timepoints): i-1] = runCkinePSTAT(timepoints, vec(vec))
+            vector = fitParams(ligVec[i-1, 1:3], x, expVec[i-1, 1:5])
+            yhat[i-length(timepoints): i-1] = runCkinePSTAT(timepoints, vec(vector))
             timepoints = []
         else
             append!(timepoints, tps[i])
