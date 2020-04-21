@@ -50,6 +50,7 @@ function fitParams(ILs, unkVec, recAbundances)
     paramvec[30] = unkVec[14]
     paramvec[31:36] = unkVec[15:20]
 
+    return paramvec
 end
 
 
@@ -106,9 +107,6 @@ function resids(x::Vector{T}) where T
     for i = 2:size(tps)[1]
         if tps[i] < tps[i-1] #run model for multiple timepoints simultaneously.
             vector = vec(fitParams(ligVec[i-1, 1:3], x, expVec[i-1, 1:5]))
-            println(timepoints)
-            println(vector)
-            println(length(vector))
             yhat[(i-length(timepoints)): i-1] = runCkinePSTAT(convert(Array{Float64}, timepoints), vector)
             timepoints = []
         else
