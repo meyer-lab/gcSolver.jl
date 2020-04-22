@@ -1,7 +1,7 @@
 module gcSolver
 
 using OrdinaryDiffEq
-import LinearAlgebra: diag
+import LinearAlgebra: diag, norm
 import ForwardDiff
 using Optim
 using Statistics
@@ -17,11 +17,11 @@ end
 
 
 " Check that we haven't been provided anything ridiculous by the user. "
-function checkInputs(tps::Vector, params::Vector)
+function checkInputs(tps::Vector{Float64}, params::Vector)
     @assert all(tps .>= 0.0)
     @assert length(params) == Nparams
     @assert all(params .>= 0.0)
-    @assert params[25] < 1.0
+    @assert params[22] < 1.0
 end
 
 
@@ -75,7 +75,7 @@ end
 
 
 " Converts the ODE solution to a predicted amount of pSTAT. "
-function runCkinePSTAT(tps::Vector, params::Vector)::Vector
+function runCkinePSTAT(tps::Vector{Float64}, params::Vector)::Vector
     sol = runCkine(tps, params)
 
     # Summation of active species
@@ -103,6 +103,7 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     return diag(transpose(jac) * sigma * jac)
 end
 
+include("fit.jl")
 
 export runCkine, runCkineVarProp
 
