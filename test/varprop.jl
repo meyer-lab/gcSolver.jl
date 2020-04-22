@@ -25,6 +25,6 @@ end
 end
 
 
-@testset "Run fitting." begin
-    gcSolver.runFit(itern = 10)
-end 
+#@testset "Run fitting." begin
+#    gcSolver.runFit(itern = 10)
+#end 
