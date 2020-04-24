@@ -27,7 +27,7 @@ end
 
 @testset "Run fitting." begin
     outt = gcSolver.resids(gcSolver.getUnkVec())
-    outtG = ForwardDiff.gradient(gcSolver.resids, gcSolver.getUnkVec())
+    # outtG = ForwardDiff.gradient(gcSolver.resids, gcSolver.getUnkVec())
 
     # @test_broken isfinite(outt)
     # @test_broken all(isfinite.(outtG))
