@@ -9,7 +9,7 @@ import ModelingToolkit
 
 include("reaction.jl")
 
-const solTol = 1.0e-9
+const solTol = 1.0e-10
 
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
