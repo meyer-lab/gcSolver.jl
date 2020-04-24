@@ -61,7 +61,7 @@ end
 function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     prob = runCkineSetup(tps, params)
 
-    sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 11//10); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
+    sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10//10); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
