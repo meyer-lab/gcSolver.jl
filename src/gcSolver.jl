@@ -9,7 +9,7 @@ import ModelingToolkit
 
 include("reaction.jl")
 
-const solTol = 1.0e-9
+const solTol = 1.0e-12
 
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
@@ -36,9 +36,8 @@ function modelCompile()
     f_iip = eval(ModelingToolkit.generate_function(deMT, varsMT, paramsMT)[2])
     tgrad_iip = eval(ModelingToolkit.generate_tgrad(deMT)[2])
     jac = eval(ModelingToolkit.generate_jacobian(deMT)[2])
-    MM = ModelingToolkit.calculate_massmatrix(deMT)
 
-    return ODEFunction(f_iip; tgrad = tgrad_iip, jac = jac, mass_matrix = MM)
+    return ODEFunction(f_iip; tgrad = tgrad_iip, jac = jac)
 end
 
 
@@ -62,7 +61,7 @@ end
 function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
     prob = runCkineSetup(tps, params)
 
-    sol = solve(prob, AutoTsit5(Rodas5()); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
+    sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10//10); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)

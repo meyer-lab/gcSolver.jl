@@ -61,7 +61,7 @@ end
     gcSolver.fullDeriv(dy, out, rr, 0.0)
 
     @test all(out .>= 0.0)
-    @test isapprox(norm(dy), 0.0, atol = 1.0e-12)
+    @test norm(dy) < 1.0e-9
 end
 
 
@@ -74,7 +74,7 @@ end
 
     @test all(out .>= 0.0)
 
-    @test isapprox(sum(abs.(dy)), 0.0, atol = 1.0e-6)
+    @test norm(dy) < 1.0e-6
 end
 
 
