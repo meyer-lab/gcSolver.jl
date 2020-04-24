@@ -74,7 +74,7 @@ end
 
     @test all(out .>= 0.0)
 
-    @test isapprox(sum(abs.(dy)), 0.0, atol = 1.0e-6)
+    @test norm(dy) < 1.0e-9
 end
 
 
