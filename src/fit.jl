@@ -27,7 +27,7 @@ end
 """Takes in full unkvec and constructs it into full fit parameters vector - TODO move this"""
 function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
     kfbnd = 0.60
-    paramvec = zeros(T, 1, Nparams)
+    paramvec = zeros(T, Nparams)
     paramvec[1:3] = ILs
     paramvec[4] = unkVec[1] #kfwd
     paramvec[5] = kfbnd * 10.0 #k1rev
@@ -66,7 +66,7 @@ end
     sort!(df, (:Date, :Ligand, :Cell, :Dose, :Time))
     yVec = df.Mean #add in variance later
     cellVec = df.Cell
-    tpsVec = df.Time * 60.0
+    tpsVec = vec(df.Time * 60.0)
     ligs = df.Ligand
     doses = df.Dose
 
@@ -99,22 +99,24 @@ function resids(x::Vector{T}) where {T}
     #TODO add weights etc.
     ytrue, tps, expVec, ligVec = getyVec()
     yhat = similar(ytrue, T)
-    timepoints = []
-    append!(timepoints, tps[1])
-    for i = 2:size(tps)[1]
-        if tps[i] < tps[i - 1] #run model for multiple timepoints simultaneously.
-            vector = vec(fitParams(ligVec[i - 1, 1:3], x, expVec[i - 1, 1:5]))
-            yhat[(i - length(timepoints)):(i - 1)] = runCkinePSTAT(convert(Array{Float64}, timepoints), vector)
-            timepoints = []
-        else
-            append!(timepoints, tps[i])
-        end
-    end
-    #will miss last batch of data, fill that here
-    vector = vec(fitParams(ligVec[length(tps), 1:3], x, expVec[length(tps), 1:5]))
-    yhat[(length(tps) - length(timepoints) + 1):length(tps)] = runCkinePSTAT(convert(Array{Float64}, timepoints), vec(vector))
 
-    return norm(yhat .- ytrue)
+    increasing = tps[2:end] .> tps[1:(end - 1)]
+
+    i = 1
+    while i < length(tps)
+        jj = 1
+        while increasing[i + jj - 1] && i + jj - 1 < length(increasing)
+            jj += 1
+        end
+
+        idxs = i:(i + jj - 1)
+        vector = vec(fitParams(ligVec[i, 1:3], x, expVec[i, 1:5]))
+        yhat[idxs] = runCkinePSTAT(tps[idxs], vector)
+
+        i += jj
+    end
+
+    return norm(yhat - ytrue)
 end
 
 
