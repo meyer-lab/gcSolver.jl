@@ -26,9 +26,16 @@ end
 
 
 @testset "Run fitting." begin
-    outt = gcSolver.resids(gcSolver.getUnkVec())
-    # outtG = ForwardDiff.gradient(gcSolver.resids, gcSolver.getUnkVec())
+    p = gcSolver.getUnkVec()
+    outtG = similar(p)
 
-    # @test_broken isfinite(outt)
-    # @test_broken all(isfinite.(outtG))
+    outt = gcSolver.resids(p)
+    ForwardDiff.gradient!(outtG, gcSolver.resids, p)
+
+    @test isfinite(outt)
+    @test all(isfinite.(outtG))
+
+    # minOut = gcSolver.runFit(itern = 10)
+    # @test all(isfinite.(minOut))
+    # @test length(p) == length(minOut)
 end
