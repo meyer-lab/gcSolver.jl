@@ -109,6 +109,11 @@ function resids(x::Vector{T}) where {T}
             jj += 1
         end
 
+        # Fix the end case
+        if (i + jj - 1) == length(tps) - 1
+            jj += 1
+        end
+
         idxs = i:(i + jj - 1)
         vector = vec(fitParams(ligVec[i, 1:3], x, expVec[i, 1:5]))
         yhat[idxs] = runCkinePSTAT(tps[idxs], vector)
