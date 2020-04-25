@@ -126,9 +126,12 @@ end
 
 
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
-function runFit(; itern = 1E6)
+function runFit(; itern = 1000000)
     unkVecInit = getUnkVec()
-    fit = optimize(resids, unkVecInit, LBFGS(), Optim.Options(iterations = itern, show_trace = true))
+
+    opts = Optim.Options(outer_iterations = 2, iterations = itern, show_trace = true)
+    # TODO: Bounds are artificially tight right now
+    fit = optimize(resids, unkVecInit * 0.75, unkVecInit * 1.5, unkVecInit, Fminbox(GradientDescent()), opts, autodiff = :forward)
 
     return fit.minimizer
 end
