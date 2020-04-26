@@ -18,8 +18,6 @@ end
 
     retval = runCkineVarProp(tps, rxntfR, sigma)
 
-    @time runCkineVarProp(tps, rxntfR, sigma)
-
     @test length(retval) == length(tps)
     @test all(retval .>= 0.0)
 end

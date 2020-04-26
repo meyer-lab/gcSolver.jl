@@ -60,68 +60,58 @@ end
 
 """Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams"""
 @memoize function getyVec()
-    #import data into Julia Vector - should be X by 1 until variance is added
-
-    df = CSV.read(joinpath(dataDir, "MomentFitData.csv"), copycols = true)
-    sort!(df, (:Date, :Ligand, :Cell, :Dose, :Time))
-    yVec = df.Mean #add in variance later
-    cellVec = df.Cell
-    tpsVec = vec(df.Time * 60.0)
-    ligs = df.Ligand
-    doses = df.Dose
-
-    ligVec = zeros(size(df)[1], 3)
-    expVec = zeros(size(df)[1], 5)
-    exprDF = getExpression()
-
-    for i = 1:size(df)[1]
-        if ligs[i] == "IL2"
-            ligVec[i, 1] = doses[i]
-        else
-            ligVec[i, 2] = doses[i]
-        end
-        expVec[i, 1:5] = exprDF[!, Symbol(cellVec[i])]
-    end
-
-    return yVec, tpsVec, expVec, ligVec
+    return CSV.read(joinpath(dataDir, "MomentFitData.csv"), copycols = true)
 end
 
 
 """Gets expression vector for each cell type and puts it into dictionary"""
-function getExpression()
-    recDF = CSV.read(joinpath(dataDir, "FakeExpressionData.csv"), copycols = true)
-    return recDF
+@memoize function getExpression()
+    return CSV.read(joinpath(dataDir, "FakeExpressionData.csv"), copycols = true)
 end
 
 
 """Calculates squared error for a given unkVec"""
-function resids(x::Vector{T}) where {T}
-    #TODO add weights etc.
-    ytrue, tps, expVec, ligVec = getyVec()
-    yhat = similar(ytrue, T)
+function resids(x::Vector{T})::T where {T}
+    df = getyVec()
+    df = deepcopy(df) # Not sure if this is needed
 
-    increasing = tps[2:end] .> tps[1:(end - 1)]
+    exprDF = getExpression()
+    exprDF = deepcopy(exprDF) # Not sure if this is needed
 
-    i = 1
-    while i < length(tps)
-        jj = 1
-        while increasing[i + jj - 1] && i + jj - 1 < length(increasing)
-            jj += 1
+    df.Time *= 60.0
+    tps = unique(df.Time)
+    sort!(tps)
+
+    df.MeanPredict = similar(df.Mean, T)
+    df.MeanPredict .= -1
+
+    for ligand in unique(df.Ligand)
+        for dose in unique(df.Dose)
+            if ligand == "IL2"
+                ligVec = [dose, 0.0, 0.0]
+            elseif ligand == "IL15"
+                ligVec = [0.0, dose, 0.0]
+            end
+
+            for cell in unique(df.Cell)
+                vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
+                yhat = runCkinePSTAT(tps, vector)
+
+                for (ii, tt) in Iterators.enumerate(tps)
+                    idxs = (df.Dose .== dose) .& (df.Time .== tt) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
+
+                    df[idxs, :MeanPredict] .= yhat[ii]
+                end
+            end
         end
-
-        # Fix the end case
-        if (i + jj - 1) == length(tps) - 1
-            jj += 1
-        end
-
-        idxs = i:(i + jj - 1)
-        vector = vec(fitParams(ligVec[i, 1:3], x, expVec[i, 1:5]))
-        yhat[idxs] = runCkinePSTAT(tps[idxs], vector)
-
-        i += jj
     end
 
-    return norm(yhat - ytrue)
+    @assert all(df.MeanPredict .>= 0.0)
+
+    # Convert relative scale. TODO: Make this a parameter
+    conv = mean(df.Mean) / mean(df.MeanPredict)
+
+    return norm((df.MeanPredict * conv) - df.Mean)
 end
 
 
