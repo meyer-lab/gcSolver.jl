@@ -69,6 +69,11 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
         sol = reshape(sol[1], (1, Nspecies))
     end
 
+    if length(tps) > length(sol)
+        println("Solving failed with the following parameters.")
+        println(params)
+    end
+
     return sol
 end
 

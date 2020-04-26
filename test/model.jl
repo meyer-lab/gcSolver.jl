@@ -106,12 +106,3 @@ end
     temp = runCkine(tps, rxntfR)
     @test any(temp[1, :] .> 0.0)
 end
-
-
-@testset "Benchmark." begin
-    println("fullDeriv")
-    @time gcSolver.fullDeriv(zeros(gcSolver.Nspecies), ones(gcSolver.Nspecies), rxntfR, 0.0)
-
-    println("runCkine")
-    @time runCkine(tps, rxntfR)
-end
