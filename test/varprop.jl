@@ -9,13 +9,6 @@
 end
 
 
-@testset "Reasonable return from Hessian functions." begin
-    retval = gcSolver.runCkineHessian(tps, rxntfR)
-
-    # TODO: Check output
-end
-
-
 @testset "Run fitting." begin
     p = gcSolver.getUnkVec()
     outtG = similar(p)
