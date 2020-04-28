@@ -1,12 +1,13 @@
 using CSV
 using Memoize
+using DataFrames
 
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
 
 """Creates full vector of unknown values to be fit"""
 function getUnkVec()
-    #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
+    #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, initstat, k34, k35, k36, k37, k38, k39
     unkVecF = zeros(20)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
@@ -105,7 +106,6 @@ function resids(x::Vector{T})::T where {T}
             end
         end
     end
-
     @assert all(df.MeanPredict .>= 0.0)
 
     # Convert relative scale. TODO: Make this a parameter
@@ -124,4 +124,12 @@ function runFit(; itern = 1000000)
     fit = optimize(resids, unkVecInit * 0.75, unkVecInit * 1.5, unkVecInit, Fminbox(GradientDescent()), opts, autodiff = :forward)
 
     return fit.minimizer
+end
+
+
+function runFailFit()
+    fParamsdf = CSV.read(joinpath(dataDir, "FailParams.csv"))
+    badparams = convert(Matrix{Float64}, fParamsdf)
+    badparams = badparams[1, :]
+    resids(badparams)
 end

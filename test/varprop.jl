@@ -29,6 +29,8 @@ end
 
     outt = gcSolver.resids(p)
     ForwardDiff.gradient!(outtG, gcSolver.resids, p)
+    
+    @test_broken isfinite(gcSolver.runFailFit())
 
     @test isfinite(outt)
     @test all(isfinite.(outtG))
