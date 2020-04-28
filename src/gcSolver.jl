@@ -6,10 +6,12 @@ import ForwardDiff
 using Optim
 using Statistics
 import ModelingToolkit
+using DiffEqSensitivity
+import Zygote
 
 include("reaction.jl")
 
-const solTol = 1.0e-12
+const solTol = 1.0e-9
 
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
