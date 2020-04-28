@@ -127,12 +127,6 @@ function solveAutocrine(rIn::Vector)
     # Add base amount of STAT5
     y0[42] = r[11]
 
-    # Check if we're working with the no trafficking model
-    if r[1] == 0.0
-        y0[recIDX] = r[6:10]
-        return y0
-    end
-
     # Expand out trafficking terms
     kRec = r[4] * (1.0 - r[3])
     kDeg = r[5] * r[3]
