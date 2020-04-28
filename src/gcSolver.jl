@@ -9,7 +9,7 @@ import ModelingToolkit
 
 include("reaction.jl")
 
-const solTol = 1.0e-12
+const solTol = 1.0e-9
 
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
@@ -48,18 +48,17 @@ function runCkineSetup(tps::Vector{Float64}, params::Vector)
     checkInputs(tps, params)
     u0 = solveAutocrine(params)
 
-    # Remove receptor expression if we're modeling no-trafficking
-    if params[20] == 0.0
-        params[25:29] .= 0.0  # set receptor expression to 0.0
-    end
-
     return ODEProblem(modelFunc, u0, (0.0, maximum(tps)), params)
 end
 
 
 " Actually run the gc ODE model. "
-function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
-    prob = runCkineSetup(tps, params)
+function runCkine(tps::Vector{Float64}, params)::Matrix
+    if params isa Vector
+        prob = runCkineSetup(tps, params)
+    else
+        prob = params
+    end
 
     sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10 // 10); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
 
@@ -69,7 +68,7 @@ function runCkine(tps::Vector{Float64}, params::Vector)::Matrix
         sol = reshape(sol[1], (1, Nspecies))
     end
 
-    if length(tps) > length(sol)
+    if length(tps) > size(sol, 1)
         println("Solving failed with the following parameters.")
         println(params)
     end
