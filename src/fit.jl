@@ -24,7 +24,7 @@ function getUnkVec()
 end
 
 
-"""Takes in full unkvec and constructs it into full fit parameters vector - TODO move this"""
+""" Takes in full unkvec and constructs it into full fit parameters vector - TODO move this. """
 function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
     kfbnd = 0.60
     paramvec = zeros(T, Nparams)
@@ -58,19 +58,19 @@ function receptor_expression(receptor_abundance, endo, kRec, sortF, kDeg)
 end
 
 
-"""Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams"""
+""" Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams. """
 @memoize function getyVec()
     return CSV.read(joinpath(dataDir, "MomentFitData.csv"), copycols = true)
 end
 
 
-"""Gets expression vector for each cell type and puts it into dictionary"""
+""" Gets expression vector for each cell type and puts it into dictionary. """
 @memoize function getExpression()
     return CSV.read(joinpath(dataDir, "FakeExpressionData.csv"), copycols = true)
 end
 
 
-"""Calculates squared error for a given unkVec"""
+""" Calculates squared error for a given unkVec. """
 function resids(x::Vector{T})::T where {T}
     df = getyVec()
     df = deepcopy(df) # Not sure if this is needed
