@@ -6,8 +6,6 @@ import ForwardDiff
 using Optim
 using Statistics
 import ModelingToolkit
-using DiffEqSensitivity
-import Zygote
 
 include("reaction.jl")
 
@@ -62,7 +60,7 @@ function runCkine(tps::Vector{Float64}, params)::Matrix
         prob = params
     end
 
-    sol = concrete_solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10 // 10); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
+    sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10 // 10); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
