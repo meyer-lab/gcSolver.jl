@@ -17,92 +17,93 @@ function assertConservation(y)
     end
 end
 
+@testset "Model tests." begin
+    @testset "Reaction model mass conservation." begin
+        dy = zeros(gcSolver.halfL)
 
-@testset "Reaction model mass conservation." begin
-    dy = zeros(gcSolver.halfL)
+        gcSolver.dYdT(dy, copy(dy), rxntfR, ones(gcSolver.Nlig))
 
-    gcSolver.dYdT(dy, copy(dy), rxntfR, ones(gcSolver.Nlig))
-
-    # Check for conservation of each surface receptor
-    assertConservation(dy)
-end
-
-
-@testset "Full model mass conservation." begin
-    rr = copy(rxntfR)
-    rr[24:end] .= 0.0
-    dy = zeros(gcSolver.Nspecies)
-
-    gcSolver.fullDeriv(dy, copy(dy), rr, 0.0)
-
-    # Check for conservation of each surface receptor
-    assertConservation(dy)
-    # Check for conservation of each endosomal receptor
-    assertConservation(dy[(gcSolver.halfL + 1):end])
-end
+        # Check for conservation of each surface receptor
+        assertConservation(dy)
+    end
 
 
-@testset "Reproducibility." begin
-    output = runCkine(tps, rxntfR)
+    @testset "Full model mass conservation." begin
+        rr = copy(rxntfR)
+        rr[24:end] .= 0.0
+        dy = zeros(gcSolver.Nspecies)
 
-    @test ndims(output) == 2
-    @test output == runCkine(tps, rxntfR)
-end
+        gcSolver.fullDeriv(dy, copy(dy), rr, 0.0)
 
-
-@testset "Steady-state at t=0." begin
-    out = gcSolver.solveAutocrine(rxntfR)
-
-    rr = copy(rxntfR)
-    rr[1:(gcSolver.Nlig)] .= 0.0
-
-    dy = ones(gcSolver.Nspecies)
-
-    gcSolver.fullDeriv(dy, out, rr, 0.0)
-
-    @test all(out .>= 0.0)
-    @test norm(dy) < 1.0e-9
-end
+        # Check for conservation of each surface receptor
+        assertConservation(dy)
+        # Check for conservation of each endosomal receptor
+        assertConservation(dy[(gcSolver.halfL + 1):end])
+    end
 
 
-@testset "Equilibrium." begin
-    out = runCkine([100000.0], rxntfR)
+    @testset "Reproducibility." begin
+        output = runCkine(tps, rxntfR)
 
-    dy = ones(gcSolver.Nspecies)
-
-    gcSolver.fullDeriv(dy, out[1, :], rxntfR, 0.0)
-
-    @test all(out .>= 0.0)
-
-    @test norm(dy) < 1.0e-6
-end
+        @test ndims(output) == 2
+        @test output == runCkine(tps, rxntfR)
+    end
 
 
-@testset "Detailed balance using no-trafficking model." begin
-    rxntfRR = copy(rxntfR)
-    rxntfRR[20:21] .= 0.0  # set endo and activeEndo to 0.0
-    out = vec(runCkine([1000000.0], rxntfRR))
+    @testset "Steady-state at t=0." begin
+        out = gcSolver.solveAutocrine(rxntfR)
 
-    J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, rxntfRR, 0.0), ones(gcSolver.Nspecies), out)
+        rr = copy(rxntfR)
+        rr[1:(gcSolver.Nlig)] .= 0.0
 
-    # Slice out just the surface species
-    GK = J[1:(gcSolver.halfL), 1:(gcSolver.halfL)] * diagm(vec(out[1:(gcSolver.halfL)]))
+        dy = ones(gcSolver.Nspecies)
 
-    @test norm(GK - transpose(GK)) < 1.0e-9
-end
+        gcSolver.fullDeriv(dy, out, rr, 0.0)
 
-
-@testset "Make sure no endosomal species are found when endo=0." begin
-    rxntfRR = copy(rxntfR)
-    rxntfRR[20:21] .= 0.0  # set endo and activeEndo to 0.0
-
-    yOut = runCkine(tps, rxntfRR)
-
-    @test all(isapprox(sum(abs.(yOut[:, (gcSolver.halfL + 1):(2 * gcSolver.halfL)])), 0.0, atol = 1.0e-6))
-end
+        @test all(out .>= 0.0)
+        @test norm(dy) < 1.0e-9
+    end
 
 
-@testset "Test that there is at least 1 non-zero species at T=0." begin
-    temp = runCkine(tps, rxntfR)
-    @test any(temp[1, :] .> 0.0)
+    @testset "Equilibrium." begin
+        out = runCkine([100000.0], rxntfR)
+
+        dy = ones(gcSolver.Nspecies)
+
+        gcSolver.fullDeriv(dy, out[1, :], rxntfR, 0.0)
+
+        @test all(out .>= 0.0)
+
+        @test norm(dy) < 1.0e-6
+    end
+
+
+    @testset "Detailed balance using no-trafficking model." begin
+        rxntfRR = copy(rxntfR)
+        rxntfRR[20:21] .= 0.0  # set endo and activeEndo to 0.0
+        out = vec(runCkine([1000000.0], rxntfRR))
+
+        J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, rxntfRR, 0.0), ones(gcSolver.Nspecies), out)
+
+        # Slice out just the surface species
+        GK = J[1:(gcSolver.halfL), 1:(gcSolver.halfL)] * diagm(vec(out[1:(gcSolver.halfL)]))
+
+        @test norm(GK - transpose(GK)) < 1.0e-9
+    end
+
+
+    @testset "Make sure no endosomal species are found when endo=0." begin
+        rxntfRR = copy(rxntfR)
+        rxntfRR[20:21] .= 0.0  # set endo and activeEndo to 0.0
+
+        yOut = runCkine(tps, rxntfRR)
+
+        @test all(isapprox(sum(abs.(yOut[:, (gcSolver.halfL + 1):(2 * gcSolver.halfL)])), 0.0, atol = 1.0e-6))
+    end
+
+
+    @testset "Test that there is at least 1 non-zero species at T=0." begin
+        temp = runCkine(tps, rxntfR)
+        @test any(temp[1, :] .> 0.0)
+    end
 end

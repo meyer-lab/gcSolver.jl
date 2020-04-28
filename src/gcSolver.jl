@@ -107,6 +107,27 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     return diag(transpose(jac) * sigma * jac)
 end
 
+
+" Calculate the Hessian of the model. "
+function runCkineHessian(tps::Vector, params::Vector)::Array
+    checkInputs(tps, params)
+
+    # Sigma is the covariance matrix of the input parameters
+    function hF(tt::Float64, x)::Real
+        pp = vcat(params[1:27], x, params[33:end])
+        return runCkinePSTAT([tt], pp)[1]
+    end
+
+    H = zeros(5, 5, length(tps))
+
+    for ii in 1:length(tps)
+        ForwardDiff.hessian!(view(H, :, :, ii), (x) -> hF(tps[ii], x), params[28:32])
+    end
+
+    return H
+end
+
+
 include("fit.jl")
 
 export runCkine, runCkineVarProp
