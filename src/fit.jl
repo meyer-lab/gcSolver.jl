@@ -10,15 +10,15 @@ function getUnkVec()
     unkVecF = zeros(20)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
-    unkVecF[2:7] .= 0.679
+    unkVecF[2:7] .= 0.1
     unkVecF[8] = 1.0
     unkVecF[9] = 0.1
     unkVecF[10] = 0.678
-    unkVecF[11] = 0.1
+    unkVecF[11] = 0.2
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
-    unkVecF[14] = 30000.0
-    unkVecF[15:20] .= 0.0679 # pSTAT Rates
+    unkVecF[14] = 1.0
+    unkVecF[15:20] .= 0.001 # pSTAT Rates
 
     return unkVecF
 end
@@ -52,9 +52,8 @@ end
 
 
 """ Uses receptor abundance (from flow) and trafficking rates to calculate receptor expression rate at steady state. """
-function receptor_expression(receptor_abundance, endo, kRec, sortF, kDeg)
-    rec_ex = (receptor_abundance * endo) / (1.0 + ((kRec * (1.0 - sortF)) / (kDeg * sortF)))
-    return rec_ex
+function receptor_expression(abundance, ke, kᵣ, sortF, kD)
+    return abundance * ke / (1.0 + (kᵣ * (1.0 - sortF) / kD / sortF))
 end
 
 
@@ -72,8 +71,12 @@ end
 
 """ Calculates squared error for a given unkVec. """
 function resids(x::Vector{T})::T where {T}
+    @assert all(x .>= 0.0)
     df = getyVec()
     df = deepcopy(df) # Not sure if this is needed
+
+    # XXX: Just fit to Tregs for now
+    df = df[df.Cell .== "Treg", :]
 
     exprDF = getExpression()
     exprDF = deepcopy(exprDF) # Not sure if this is needed
@@ -83,10 +86,10 @@ function resids(x::Vector{T})::T where {T}
     sort!(tps)
 
     df.MeanPredict = similar(df.Mean, T)
-    df.MeanPredict .= -1
 
     for ligand in unique(df.Ligand)
-        for dose in unique(df.Dose)
+        # Put the highest dose first so we catch a solving error early
+        for dose in reverse(sort(unique(df.Dose)))
             if ligand == "IL2"
                 ligVec = [dose, 0.0, 0.0]
             elseif ligand == "IL15"
@@ -95,7 +98,16 @@ function resids(x::Vector{T})::T where {T}
 
             for cell in unique(df.Cell)
                 vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
-                yhat = runCkinePSTAT(tps, vector)
+                
+                local yhat
+                try yhat = runCkine(tps, vector, pSTAT5 = true)
+                catch e
+                    if typeof(e) <: AssertionError
+                        return Inf
+                    else
+                        rethrow(e)
+                    end
+                end
 
                 for (ii, tt) in Iterators.enumerate(tps)
                     idxs = (df.Dose .== dose) .& (df.Time .== tt) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
@@ -117,11 +129,12 @@ end
 
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
 function runFit(; itern = 1000000)
-    unkVecInit = getUnkVec()
+    unk0 = log.(getUnkVec())
+    low = fill(-Inf, size(unk0))
+    high = fill(0.1, size(unk0))
 
     opts = Optim.Options(outer_iterations = 2, iterations = itern, show_trace = true)
-    # TODO: Bounds are artificially tight right now
-    fit = optimize(resids, unkVecInit * 0.75, unkVecInit * 1.5, unkVecInit, Fminbox(GradientDescent()), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(exp.(x)), low, high, unk0, Fminbox(GradientDescent()), opts, autodiff = :forward)
 
     return fit.minimizer
 end

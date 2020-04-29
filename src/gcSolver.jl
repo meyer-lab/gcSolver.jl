@@ -9,7 +9,7 @@ import ModelingToolkit
 
 include("reaction.jl")
 
-const solTol = 1.0e-9
+const solTol = 1.0e-6
 
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
@@ -19,9 +19,9 @@ end
 " Check that we haven't been provided anything ridiculous by the user. "
 function checkInputs(tps::Vector{Float64}, params::Vector)
     @assert all(tps .>= 0.0)
+    @assert params[22] < 1.0
     @assert length(params) == Nparams
     @assert all(params .>= 0.0)
-    @assert params[22] < 1.0
 end
 
 
@@ -53,14 +53,20 @@ end
 
 
 " Actually run the gc ODE model. "
-function runCkine(tps::Vector{Float64}, params)::Matrix
+function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
     if params isa Vector
         prob = runCkineSetup(tps, params)
     else
         prob = params
     end
 
-    sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10 // 10); saveat = tps, reltol = solTol, isoutofdomain = domainDef).u
+    if pSTAT5
+        sidx = [43, 44, 45]
+    else
+        sidx = nothing
+    end
+
+    sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10 // 10); saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
@@ -70,22 +76,16 @@ function runCkine(tps::Vector{Float64}, params)::Matrix
 
     if length(tps) > size(sol, 1)
         println("Solving failed with the following parameters.")
-        println(params)
+        println(ForwardDiff.value.(params))
+        @assert length(tps) == size(sol, 1)
+    end
+
+    if pSTAT5
+        # Summation of active species
+        return vec(sol[:, 1] + 2 * (sol[:, 2] + sol[:, 3]))
     end
 
     return sol
-end
-
-
-" Converts the ODE solution to a predicted amount of pSTAT. "
-function runCkinePSTAT(tps::Vector{Float64}, params::Vector)::Vector
-    sol = runCkine(tps, params)
-
-    # Summation of active species
-    pSTAT = sol[:, 43] + 2 * (sol[:, 44] + sol[:, 45])
-
-    @assert length(pSTAT) == length(tps)
-    return vec(pSTAT)
 end
 
 
@@ -96,7 +96,7 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
         pp = vcat(params[1:27], x, params[33:end])
-        return runCkinePSTAT(tps, pp)
+        return runCkine(tps, pp, pSTAT5 = true)
     end
 
     jac = zeros(5, length(tps))
@@ -114,7 +114,7 @@ function runCkineHessian(tps::Vector, params::Vector)::Array
     # Sigma is the covariance matrix of the input parameters
     function hF(tt::Float64, x)::Real
         pp = vcat(params[1:27], x, params[33:end])
-        return runCkinePSTAT([tt], pp)[1]
+        return runCkine([tt], pp, pSTAT5 = true)[1]
     end
 
     H = zeros(5, 5, length(tps))
