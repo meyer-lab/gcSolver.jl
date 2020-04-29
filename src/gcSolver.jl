@@ -19,9 +19,9 @@ end
 " Check that we haven't been provided anything ridiculous by the user. "
 function checkInputs(tps::Vector{Float64}, params::Vector)
     @assert all(tps .>= 0.0)
+    @assert params[22] < 1.0
     @assert length(params) == Nparams
     @assert all(params .>= 0.0)
-    @assert params[22] < 1.0
 end
 
 

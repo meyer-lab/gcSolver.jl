@@ -1,5 +1,6 @@
 using CSV
 using Memoize
+import StatsFuns
 
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
@@ -17,8 +18,8 @@ function getUnkVec()
     unkVecF[11] = 0.1
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
-    unkVecF[14] = 30000.0
-    unkVecF[15:20] .= 0.0679 # pSTAT Rates
+    unkVecF[14] = 30.0
+    unkVecF[15:20] .= 0.001 # pSTAT Rates
 
     return unkVecF
 end
@@ -52,9 +53,8 @@ end
 
 
 """ Uses receptor abundance (from flow) and trafficking rates to calculate receptor expression rate at steady state. """
-function receptor_expression(receptor_abundance, endo, kRec, sortF, kDeg)
-    rec_ex = (receptor_abundance * endo) / (1.0 + ((kRec * (1.0 - sortF)) / (kDeg * sortF)))
-    return rec_ex
+function receptor_expression(abundance, ke, kᵣ, sortF, kD)
+    return abundance * ke / (1.0 + ((kᵣ * (1.0 - sortF)) / (kD * sortF)))
 end
 
 
@@ -72,6 +72,7 @@ end
 
 """ Calculates squared error for a given unkVec. """
 function resids(x::Vector{T})::T where {T}
+    @assert all(x .>= 0.0)
     df = getyVec()
     df = deepcopy(df) # Not sure if this is needed
 
@@ -83,7 +84,6 @@ function resids(x::Vector{T})::T where {T}
     sort!(tps)
 
     df.MeanPredict = similar(df.Mean, T)
-    df.MeanPredict .= -1
 
     for ligand in unique(df.Ligand)
         for dose in unique(df.Dose)
@@ -95,7 +95,7 @@ function resids(x::Vector{T})::T where {T}
 
             for cell in unique(df.Cell)
                 vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
-                yhat = runCkinePSTAT(tps, vector)
+                yhat = runCkine(tps, vector, pSTAT5 = true)
 
                 for (ii, tt) in Iterators.enumerate(tps)
                     idxs = (df.Dose .== dose) .& (df.Time .== tt) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
