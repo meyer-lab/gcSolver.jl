@@ -18,7 +18,7 @@ function getUnkVec()
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
     unkVecF[14] = 30000.0
-    unkVecF[15:20] .= 0.679 # pSTAT Rates
+    unkVecF[15:20] .= 0.0679 # pSTAT Rates
 
     return unkVecF
 end
