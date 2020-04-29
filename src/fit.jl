@@ -1,6 +1,5 @@
 using CSV
 using Memoize
-import StatsFuns
 
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
@@ -86,7 +85,8 @@ function resids(x::Vector{T})::T where {T}
     df.MeanPredict = similar(df.Mean, T)
 
     for ligand in unique(df.Ligand)
-        for dose in unique(df.Dose)
+        # Put the highest dose first so we catch a solving error early
+        for dose in reverse(sort(unique(df.Dose)))
             if ligand == "IL2"
                 ligVec = [dose, 0.0, 0.0]
             elseif ligand == "IL15"
@@ -95,7 +95,16 @@ function resids(x::Vector{T})::T where {T}
 
             for cell in unique(df.Cell)
                 vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
-                yhat = runCkine(tps, vector, pSTAT5 = true)
+                
+                local yhat
+                try yhat = runCkine(tps, vector, pSTAT5 = true)
+                catch e
+                    if typeof(e) <: AssertionError
+                        return Inf
+                    else
+                        rethrow(e)
+                    end
+                end
 
                 for (ii, tt) in Iterators.enumerate(tps)
                     idxs = (df.Dose .== dose) .& (df.Time .== tt) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
@@ -117,11 +126,12 @@ end
 
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
 function runFit(; itern = 1000000)
-    unkVecInit = getUnkVec()
+    unk0 = log.(getUnkVec())
+    low = fill(-Inf, size(unk0))
+    high = fill(4.0, size(unk0))
 
     opts = Optim.Options(outer_iterations = 2, iterations = itern, show_trace = true)
-    # TODO: Bounds are artificially tight right now
-    fit = optimize(resids, unkVecInit * 0.75, unkVecInit * 1.5, unkVecInit, Fminbox(GradientDescent()), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(exp.(x)), low, high, unk0, Fminbox(GradientDescent()), opts, autodiff = :forward)
 
     return fit.minimizer
 end
