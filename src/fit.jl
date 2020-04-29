@@ -10,14 +10,14 @@ function getUnkVec()
     unkVecF = zeros(20)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
-    unkVecF[2:7] .= 0.679
+    unkVecF[2:7] .= 0.1
     unkVecF[8] = 1.0
     unkVecF[9] = 0.1
     unkVecF[10] = 0.678
-    unkVecF[11] = 0.1
+    unkVecF[11] = 0.2
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
-    unkVecF[14] = 30.0
+    unkVecF[14] = 1.0
     unkVecF[15:20] .= 0.001 # pSTAT Rates
 
     return unkVecF
@@ -53,7 +53,7 @@ end
 
 """ Uses receptor abundance (from flow) and trafficking rates to calculate receptor expression rate at steady state. """
 function receptor_expression(abundance, ke, kᵣ, sortF, kD)
-    return abundance * ke / (1.0 + ((kᵣ * (1.0 - sortF)) / (kD * sortF)))
+    return abundance * ke / (1.0 + (kᵣ * (1.0 - sortF) / kD / sortF))
 end
 
 
@@ -74,6 +74,9 @@ function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
     df = getyVec()
     df = deepcopy(df) # Not sure if this is needed
+
+    # XXX: Just fit to Tregs for now
+    df = df[df.Cell .== "Treg", :]
 
     exprDF = getExpression()
     exprDF = deepcopy(exprDF) # Not sure if this is needed
@@ -128,7 +131,7 @@ end
 function runFit(; itern = 1000000)
     unk0 = log.(getUnkVec())
     low = fill(-Inf, size(unk0))
-    high = fill(4.0, size(unk0))
+    high = fill(0.1, size(unk0))
 
     opts = Optim.Options(outer_iterations = 2, iterations = itern, show_trace = true)
     fit = optimize((x) -> resids(exp.(x)), low, high, unk0, Fminbox(GradientDescent()), opts, autodiff = :forward)
