@@ -119,7 +119,7 @@ function runCkineHessian(tps::Vector, params::Vector)::Array
 
     H = zeros(5, 5, length(tps))
 
-    for ii in 1:length(tps)
+    for ii = 1:length(tps)
         ForwardDiff.hessian!(view(H, :, :, ii), (x) -> hF(tps[ii], x), params[28:32])
     end
 
