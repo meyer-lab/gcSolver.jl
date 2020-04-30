@@ -98,9 +98,10 @@ function resids(x::Vector{T})::T where {T}
 
             for cell in unique(df.Cell)
                 vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
-                
+
                 local yhat
-                try yhat = runCkine(tps, vector, pSTAT5 = true)
+                try
+                    yhat = runCkine(tps, vector, pSTAT5 = true)
                 catch e
                     if typeof(e) <: AssertionError
                         return Inf
