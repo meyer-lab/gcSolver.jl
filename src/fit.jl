@@ -7,7 +7,7 @@ const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """Creates full vector of unknown values to be fit"""
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    unkVecF = zeros(20)
+    unkVecF = zeros(21)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
     unkVecF[2:7] .= 0.1
@@ -19,6 +19,7 @@ function getUnkVec()
     unkVecF[13] = 0.13
     unkVecF[14] = 1.0
     unkVecF[15:20] .= 0.001 # pSTAT Rates
+    unkVecF[21] = 0.5
 
     return unkVecF
 end
@@ -51,6 +52,21 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
 end
 
 
+"""Adjusts the binding activity of ligand to match that of mutein"""
+function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
+    affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
+    dfRow = affDF[affDF[:, 1] .== ligand, :]
+    paramVec[5] = dfRow.IL2RaKD[1]
+
+    bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[8]
+    for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5 ,k10, k11
+        paramVec[ii] *= bgAdjust
+    end
+
+    return paramVec
+end
+
+
 """ Uses receptor abundance (from flow) and trafficking rates to calculate receptor expression rate at steady state. """
 function receptor_expression(abundance, ke, kᵣ, sortF, kD)
     return abundance * ke / (1.0 + (kᵣ * (1.0 - sortF) / kD / sortF))
@@ -59,7 +75,7 @@ end
 
 """ Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams. """
 @memoize function getyVec()
-    return CSV.read(joinpath(dataDir, "MomentFitData.csv"), copycols = true)
+    return CSV.read(joinpath(dataDir, "WTMuteinsMoments.csv"), copycols = true)
 end
 
 
@@ -77,6 +93,9 @@ function resids(x::Vector{T})::T where {T}
 
     # XXX: Just fit to Tregs for now
     df = df[df.Cell .== "Treg", :]
+    #get rid of IL15 and missing mutein
+    df = df[df.Ligand .!= "R38Q/H16N", :]
+    df = df[df.Ligand .!= "IL15", :]
 
     exprDF = getExpression()
     exprDF = deepcopy(exprDF) # Not sure if this is needed
@@ -90,15 +109,12 @@ function resids(x::Vector{T})::T where {T}
     for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
         for dose in reverse(sort(unique(df.Dose)))
-            if ligand == "IL2"
-                ligVec = [dose, 0.0, 0.0]
-            elseif ligand == "IL15"
-                ligVec = [0.0, dose, 0.0]
-            end
-
+            ligVec = [dose, 0.0, 0.0]
             for cell in unique(df.Cell)
                 vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
-
+                if ligand != "IL2"
+                    vector = mutAffAdjust(vector, ligand)
+                end
                 local yhat
                 try
                     yhat = runCkine(tps, vector, pSTAT5 = true)
@@ -122,7 +138,7 @@ function resids(x::Vector{T})::T where {T}
     @assert all(df.MeanPredict .>= 0.0)
 
     # Convert relative scale. TODO: Make this a parameter
-    conv = mean(df.Mean) / mean(df.MeanPredict)
+    conv = x[21]
 
     return norm((df.MeanPredict * conv) - df.Mean)
 end
