@@ -7,7 +7,7 @@ const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """Creates full vector of unknown values to be fit"""
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    unkVecF = zeros(20)
+    unkVecF = zeros(21)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
     unkVecF[2:7] .= 0.1
@@ -19,6 +19,7 @@ function getUnkVec()
     unkVecF[13] = 0.13
     unkVecF[14] = 1.0
     unkVecF[15:20] .= 0.001 # pSTAT Rates
+    unkVecF[21] = 0.5
 
     return unkVecF
 end
@@ -48,6 +49,21 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
     paramvec[31:36] = unkVec[15:20]
 
     return paramvec
+end
+
+
+"""Adjusts the binding activity of ligand to match that of mutein"""
+function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
+    affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
+    dfRow = affDF[affDF[:, 1] .== ligand, :]
+    paramVec[5] = dfRow.IL2RaKD
+
+    bgAdjust = (dfRow.IL2RBGKD * 0.6) / paramVec[8]
+    for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5 ,k10, k11
+        paramVec[ii] *= bg_adjust
+    end
+
+    return paramVec
 end
 
 
@@ -122,7 +138,7 @@ function resids(x::Vector{T})::T where {T}
     @assert all(df.MeanPredict .>= 0.0)
 
     # Convert relative scale. TODO: Make this a parameter
-    conv = mean(df.Mean) / mean(df.MeanPredict)
+    conv = unkVec[21]
 
     return norm((df.MeanPredict * conv) - df.Mean)
 end
