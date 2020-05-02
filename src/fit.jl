@@ -75,7 +75,7 @@ end
 
 """ Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams. """
 @memoize function getyVec()
-    return CSV.read(joinpath(dataDir, "MomentFitData.csv"), copycols = true)
+    return CSV.read(joinpath(dataDir, "WTMuteinsMoments.csv"), copycols = true)
 end
 
 
@@ -93,6 +93,9 @@ function resids(x::Vector{T})::T where {T}
 
     # XXX: Just fit to Tregs for now
     df = df[df.Cell .== "Treg", :]
+    #get rid of IL15 and missing mutein
+    df = df[df.Ligand .!= "R38Q/H16N", :]
+    df = df[df.Ligand .!= "IL15", :]
 
     exprDF = getExpression()
     exprDF = deepcopy(exprDF) # Not sure if this is needed
@@ -106,15 +109,12 @@ function resids(x::Vector{T})::T where {T}
     for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
         for dose in reverse(sort(unique(df.Dose)))
-            if ligand == "IL2"
-                ligVec = [dose, 0.0, 0.0]
-            elseif ligand == "IL15"
-                ligVec = [0.0, dose, 0.0]
-            end
-
+            ligVec = [dose, 0.0, 0.0]
             for cell in unique(df.Cell)
                 vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
-
+                if ligand != "IL2"
+                    vector = muAFfAdjust(vector, ligand)
+                end
                 local yhat
                 try
                     yhat = runCkine(tps, vector, pSTAT5 = true)
