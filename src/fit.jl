@@ -56,11 +56,11 @@ end
 function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
     affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
     dfRow = affDF[affDF[:, 1] .== ligand, :]
-    paramVec[5] = dfRow.IL2RaKD
+    paramVec[5] = dfRow.IL2RaKD[1]
 
-    bgAdjust = (dfRow.IL2RBGKD * 0.6) / paramVec[8]
+    bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[8]
     for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5 ,k10, k11
-        paramVec[ii] *= bg_adjust
+        paramVec[ii] *= bgAdjust
     end
 
     return paramVec
@@ -113,7 +113,7 @@ function resids(x::Vector{T})::T where {T}
             for cell in unique(df.Cell)
                 vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
                 if ligand != "IL2"
-                    vector = muAFfAdjust(vector, ligand)
+                    vector = mutAffAdjust(vector, ligand)
                 end
                 local yhat
                 try
@@ -138,7 +138,7 @@ function resids(x::Vector{T})::T where {T}
     @assert all(df.MeanPredict .>= 0.0)
 
     # Convert relative scale. TODO: Make this a parameter
-    conv = unkVec[21]
+    conv = x[21]
 
     return norm((df.MeanPredict * conv) - df.Mean)
 end
