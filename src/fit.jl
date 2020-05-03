@@ -51,10 +51,10 @@ end
 function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
     affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
     dfRow = affDF[affDF[:, 1] .== ligand, :]
-    paramVec[5] = dfRow.IL2RaKD[1]
+    paramVec[3] = dfRow.IL2RaKD[1]
 
-    bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[8]
-    for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5 ,k10, k11
+    bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[6]
+    for ii in [4, 5, 6, 7, 8] # Adjust k2, k4, k5 ,k10, k11
         paramVec[ii] *= bgAdjust
     end
 
