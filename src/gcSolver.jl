@@ -9,10 +9,10 @@ import ModelingToolkit
 
 include("reaction.jl")
 
-const solTol = 1.0e-6
+const solTol = 1.0e-5
 
 function domainDef(u, p, t)
-    return any(x -> x < -solTol, u)
+    return any(x -> x < 0.0, u)
 end
 
 
@@ -44,11 +44,11 @@ end
 const modelFunc = modelCompile()
 
 
-function runCkineSetup(tps::Vector{Float64}, params::Vector)
-    checkInputs(tps, params)
-    u0 = solveAutocrine(params)
+function runCkineSetup(tps::Vector{Float64}, p::Vector{T}) where {T}
+    checkInputs(tps, p)
+    u0 = solveAutocrine(p)
 
-    return ODEProblem(modelFunc, u0, (0.0, maximum(tps)), params)
+    return ODEProblem(modelFunc, u0, convert(T, maximum(tps)), p)
 end
 
 
@@ -61,12 +61,12 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
     end
 
     if pSTAT5
-        sidx = [43, 44, 45]
+        sidx = @SVector [43, 44, 45]
     else
         sidx = nothing
     end
 
-    sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10 // 10); saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
+    sol = solve(prob, AutoTsit5(KenCarp5(), stiffalgfirst = true); saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
