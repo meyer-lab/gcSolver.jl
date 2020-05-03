@@ -1,6 +1,6 @@
 
 @testset "Reasonable return from varprop function." begin
-    sigma = Matrix{Int}(I, 5, 5)
+    sigma = Matrix{Int}(I, 3, 3)
 
     retval = runCkineVarProp(tps, rxntfR, sigma)
 
@@ -15,6 +15,8 @@ end
 
     outt = gcSolver.resids(p)
     ForwardDiff.gradient!(outtG, gcSolver.resids, p)
+
+    @time ForwardDiff.gradient!(outtG, gcSolver.resids, p)
 
     @test isfinite(outt)
     @test all(isfinite.(outtG))

@@ -3,12 +3,9 @@
 function assertConservation(y)
     # These are all 0-indexed, so add 1
     consList = [
-        [1, 4, 5, 7, 8, 11, 12, 14, 15],  # IL2Rb
+        [1, 4, 5, 7, 8],  # IL2Rb
         [0, 3, 5, 6, 8],  # IL2Ra
-        [9, 10, 12, 13, 15],  # IL15Ra
-        [16, 17, 18],  # IL7Ra
-        [2, 6, 7, 8, 13, 14, 15, 18],
-    ] #gc
+        [2, 6, 7, 8]] #gc
 
     # Check for conservation of species sum
     for ii in range(1, stop = length(consList))
@@ -30,8 +27,8 @@ end
 
     @testset "Full model mass conservation." begin
         rr = copy(rxntfR)
-        rr[24:end] .= 0.0
-        dy = zeros(gcSolver.Nspecies)
+        rr[10:end] .= 0.0
+        dy = ones(gcSolver.Nspecies)
 
         gcSolver.fullDeriv(dy, copy(dy), rr, 0.0)
 
@@ -54,7 +51,7 @@ end
         out = gcSolver.solveAutocrine(rxntfR)
 
         rr = copy(rxntfR)
-        rr[1:(gcSolver.Nlig)] .= 0.0
+        rr[1:gcSolver.Nlig] .= 0.0
 
         dy = ones(gcSolver.Nspecies)
 
@@ -80,7 +77,7 @@ end
 
     @testset "Detailed balance using no-trafficking model." begin
         prob = gcSolver.runCkineSetup([1000000.0], deepcopy(rxntfR))
-        prob.p[20:end] .= 0.0 # Set everything outside of binding reactions to 0
+        prob.p[10:end] .= 0.0 # Set everything outside of binding reactions to 0
         prob.u0[(gcSolver.halfL + 1):end] .= 0.0 # Set endosomal species to 0
 
         out = vec(runCkine([1000000.0], prob))

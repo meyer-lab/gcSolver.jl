@@ -29,24 +29,19 @@ end
 function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
     kfbnd = 0.60
     paramvec = zeros(T, Nparams)
-    paramvec[1:3] = ILs
-    paramvec[4] = unkVec[1] #kfwd
-    paramvec[5] = kfbnd * 10.0 #k1rev
-    paramvec[6] = kfbnd * 144.0 #k2rev
-    paramvec[7] = unkVec[2] #k4rev
-    paramvec[8] = unkVec[3] #k5rev
-    paramvec[9] = 12.0 * paramvec[8] / 1.5 #k10
-    paramvec[10] = 63.0 * paramvec[8] / 1.5 #k11
-    paramvec[11] = kfbnd * 0.065 #k13
-    paramvec[12] = kfbnd * 438.0 #k14
-    paramvec[13:16] = unkVec[4:7] #k16, k16, k17, k22
-    paramvec[17] = kfbnd * 59.0 #k23
-    paramvec[18] = unkVec[8] #k25
-    paramvec[19] = 5.0 #endoadjust
-    paramvec[20:24] = unkVec[9:13]
-    paramvec[25:29] = receptor_expression(recAbundances, unkVec[9], unkVec[11], unkVec[12], unkVec[13])
-    paramvec[30] = unkVec[14]
-    paramvec[31:36] = unkVec[15:20]
+    paramvec[1] = ILs
+    paramvec[2] = unkVec[1] #kfwd
+    paramvec[3] = kfbnd * 10.0 #k1rev
+    paramvec[4] = kfbnd * 144.0 #k2rev
+    paramvec[5] = unkVec[2] #k4rev
+    paramvec[6] = unkVec[3] #k5rev
+    paramvec[7] = 12.0 * paramvec[8] / 1.5 #k10
+    paramvec[8] = 63.0 * paramvec[8] / 1.5 #k11
+    paramvec[9] = 5.0 #endoadjust
+    paramvec[10:14] = unkVec[9:13]
+    paramvec[15:17] = receptor_expression(recAbundances, unkVec[9], unkVec[11], unkVec[12], unkVec[13])[1:3]
+    paramvec[18] = unkVec[14]
+    paramvec[19:24] = unkVec[15:20]
 
     return paramvec
 end
@@ -108,9 +103,8 @@ function resids(x::Vector{T})::T where {T}
     Threads.@threads for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
         for dose in reverse(sort(unique(df.Dose)))
-            ligVec = [dose, 0.0, 0.0]
             for cell in unique(df.Cell)
-                vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
+                vector = vec(fitParams(dose, x, exprDF[!, Symbol(cell)]))
                 if ligand != "IL2"
                     vector = mutAffAdjust(vector, ligand)
                 end

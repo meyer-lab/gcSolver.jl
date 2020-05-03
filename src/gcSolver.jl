@@ -61,7 +61,7 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
     end
 
     if pSTAT5
-        sidx = [43, 44, 45]
+        sidx = [21, 22, 23]
     else
         sidx = nothing
     end
@@ -95,12 +95,12 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
 
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
-        pp = vcat(params[1:27], x, params[33:end])
+        pp = vcat(params[1:14], x, params[18:end])
         return runCkine(tps, pp, pSTAT5 = true)
     end
 
-    jac = zeros(5, length(tps))
-    ForwardDiff.jacobian!(jac, jacF, params[28:32])
+    jac = zeros(3, length(tps))
+    ForwardDiff.jacobian!(jac, jacF, params[15:17])
 
     # Just return the diagonal for the marginal variance
     return diag(transpose(jac) * sigma * jac)
@@ -113,14 +113,14 @@ function runCkineHessian(tps::Vector, params::Vector)::Array
 
     # Sigma is the covariance matrix of the input parameters
     function hF(tt::Float64, x)::Real
-        pp = vcat(params[1:27], x, params[33:end])
+        pp = vcat(params[1:14], x, params[18:end])
         return runCkine([tt], pp, pSTAT5 = true)[1]
     end
 
-    H = zeros(5, 5, length(tps))
+    H = zeros(3, 3, length(tps))
 
     for ii = 1:length(tps)
-        ForwardDiff.hessian!(view(H, :, :, ii), (x) -> hF(tps[ii], x), params[28:32])
+        ForwardDiff.hessian!(view(H, :, :, ii), (x) -> hF(tps[ii], x), params[15:17])
     end
 
     return H
