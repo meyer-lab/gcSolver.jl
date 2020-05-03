@@ -98,7 +98,6 @@ function resids(x::Vector{T})::T where {T}
     df = df[df.Ligand .!= "IL15", :]
 
     exprDF = getExpression()
-    exprDF = deepcopy(exprDF) # Not sure if this is needed
 
     df.Time *= 60.0
     tps = unique(df.Time)
@@ -106,7 +105,7 @@ function resids(x::Vector{T})::T where {T}
 
     df.MeanPredict = similar(df.Mean, T)
 
-    for ligand in unique(df.Ligand)
+    Threads.@threads for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
         for dose in reverse(sort(unique(df.Dose)))
             ligVec = [dose, 0.0, 0.0]
@@ -137,10 +136,8 @@ function resids(x::Vector{T})::T where {T}
 
     @assert all(df.MeanPredict .>= 0.0)
 
-    # Convert relative scale. TODO: Make this a parameter
-    conv = x[21]
-
-    return norm((df.MeanPredict * conv) - df.Mean)
+    # Convert relative scale.
+    return norm((df.MeanPredict * x[21]) - df.Mean)
 end
 
 
