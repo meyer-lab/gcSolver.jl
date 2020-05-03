@@ -90,7 +90,7 @@ end
         # Slice out just the surface species
         GK = J[1:(gcSolver.halfL), 1:(gcSolver.halfL)] * diagm(vec(out[1:(gcSolver.halfL)]))
 
-        @test norm(GK - transpose(GK)) < 1.0e-9
+        @test norm(GK - transpose(GK)) < 1.0e-7
     end
 
 
