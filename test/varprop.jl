@@ -15,7 +15,7 @@ end
 
     outt = gcSolver.resids(p)
     ForwardDiff.gradient!(outtG, gcSolver.resids, p)
-    
+
     @time ForwardDiff.gradient!(outtG, gcSolver.resids, p)
 
     @test isfinite(outt)
