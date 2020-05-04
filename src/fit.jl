@@ -39,7 +39,7 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
     paramvec[10] = 63.0 * paramvec[8] / 1.5 #k11
     paramvec[11] = kfbnd * 0.065 #k13
     paramvec[12] = kfbnd * 438.0 #k14
-    paramvec[13:16] = unkVec[4:7] #k16, k16, k17, k22
+    paramvec[13:16] = unkVec[4:7] #k15, k16, k17, k22
     paramvec[17] = kfbnd * 59.0 #k23
     paramvec[18] = unkVec[8] #k25
     paramvec[19] = 5.0 #endoadjust

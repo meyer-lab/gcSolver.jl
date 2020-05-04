@@ -10,6 +10,7 @@ import ModelingToolkit
 include("reaction.jl")
 
 const solTol = 1.0e-5
+const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
 
 function domainDef(u, p, t)
     return any(x -> x < 0.0, u)
@@ -61,12 +62,12 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
     end
 
     if pSTAT5
-        sidx = @SVector [43, 44, 45]
+        sidx = pSTATidx
     else
         sidx = nothing
     end
 
-    sol = solve(prob, AutoTsit5(KenCarp5(), stiffalgfirst = true); saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
+    sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
