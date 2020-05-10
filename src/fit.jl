@@ -134,7 +134,6 @@ function resids(x::Vector{T})::T where {T}
         end
     end
 
-    println((df.MeanPredict * x[21] * 1e6) - df.Mean)
     @assert all(df.MeanPredict .>= 0.0)
 
     # Convert relative scale.
@@ -148,7 +147,6 @@ function runFit(; itern = 1000000)
     low = fill(-Inf, size(unk0))
     high = fill(0.1, size(unk0))
 
-    println("hi")
     opts = Optim.Options(outer_iterations = 2, iterations = itern, show_trace = true)
     fit = optimize((x) -> resids(exp.(x)), low, high, unk0, Fminbox(GradientDescent()), opts, autodiff = :forward)
 
