@@ -6,6 +6,7 @@ import ForwardDiff
 using Optim
 using Statistics
 import ModelingToolkit
+using Gadfly
 
 include("reaction.jl")
 
@@ -125,6 +126,13 @@ function runCkineHessian(tps::Vector, params::Vector)::Array
     end
 
     return H
+end
+
+
+include("figures/figureJ1.jl")
+
+function figureAll()
+    figureJ1()
 end
 
 
