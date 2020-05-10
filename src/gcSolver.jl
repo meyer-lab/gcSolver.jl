@@ -65,7 +65,6 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
     else
         sidx = nothing
     end
-    #AutoVern7
 
     sol = solve(prob, AutoTsit5(Rodas5(); nonstifftol = 10 // 10); saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
 
