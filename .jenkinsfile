@@ -17,6 +17,7 @@ pipeline {
     }
     stage('Build Figures') {
       steps {
+        sh 'make all'
         archiveArtifacts artifacts: '*.svg', onlyIfSuccessful: true
       }
     }
