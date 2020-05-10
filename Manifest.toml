@@ -122,18 +122,6 @@ git-tree-sha1 = "8d967a46a301749931985ce4a40819c21a979305"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
 version = "6.32.0"
 
-[[DiffEqDevTools]]
-deps = ["DiffEqBase", "DiffEqNoiseProcess", "Distributed", "LinearAlgebra", "Logging", "NLsolve", "RecipesBase", "RecursiveArrayTools", "Statistics"]
-git-tree-sha1 = "78925ee0b24ae9ab23cd8875ce9544c7bf1aec0b"
-uuid = "f3b72e0c-5b89-59e1-b016-84e28bfd966d"
-version = "2.19.0"
-
-[[DiffEqNoiseProcess]]
-deps = ["DataStructures", "DiffEqBase", "LinearAlgebra", "Random", "RandomNumbers", "RecipesBase", "RecursiveArrayTools", "Requires", "ResettableStacks", "StaticArrays", "Statistics"]
-git-tree-sha1 = "b50157cc76e506e946ac897a6b94bdc7d3f34ba3"
-uuid = "77a26b50-5914-5dd7-bc55-306e6241c503"
-version = "3.10.0"
-
 [[DiffResults]]
 deps = ["StaticArrays"]
 git-tree-sha1 = "da24935df8e0c6cf28de340b958f6aac88eaa0cc"
@@ -475,12 +463,6 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
-[[RandomNumbers]]
-deps = ["Random", "Requires"]
-git-tree-sha1 = "441e6fc35597524ada7f85e13df1f4e10137d16f"
-uuid = "e6cf234a-135c-5ec9-84dd-332b85af5143"
-version = "1.4.0"
-
 [[RecipesBase]]
 git-tree-sha1 = "54f8ceb165a0f6d083f0d12cb4996f5367c6edbc"
 uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
@@ -509,12 +491,6 @@ deps = ["UUIDs"]
 git-tree-sha1 = "d37400976e98018ee840e0ca4f9d20baa231dc6b"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.0.1"
-
-[[ResettableStacks]]
-deps = ["StaticArrays"]
-git-tree-sha1 = "d19e9c93de6020a96dbb2820567c78d0ab8f7248"
-uuid = "ae5879a3-cd67-5da8-be7f-38c6eb64a37b"
-version = "1.0.0"
 
 [[Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "UUIDs", "Unicode"]
