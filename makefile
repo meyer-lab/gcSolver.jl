@@ -1,5 +1,5 @@
 
-all: figureJ1.svg output/
+all: figureJ1.svg
 venv: venv/bin/activate
 
 venv/bin/activate: requirements.txt
