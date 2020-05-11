@@ -7,7 +7,13 @@ rxntfR = ones(gcSolver.Nparams) * 0.2
 
 prob = gcSolver.runCkineSetup([500.0], rxntfR)
 
-setups = [Dict(:alg => AutoTsit5(Rodas4())), Dict(:alg => AutoTsit5(Rodas4P())), Dict(:alg => AutoTsit5(Rodas5()))]
+setups = [
+    Dict(:alg => AutoTsit5(Rodas5())),
+    Dict(:alg => AutoTsit5(Kvaerno5())),
+    Dict(:alg => AutoVern9(Rodas5())),
+    Dict(:alg => AutoVern9(KenCarp5())),
+    Dict(:alg => AutoVern9(Kvaerno5())),
+]
 
 test_sol = solve(prob, AutoTsit5(Rodas5()), reltol = 1.0e-16, abstol = 1.0e-16)
 

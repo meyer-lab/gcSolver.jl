@@ -59,7 +59,7 @@ function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
     paramVec[5] = dfRow.IL2RaKD[1]
 
     bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[8]
-    for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5 ,k10, k11
+    for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5, k10, k11
         paramVec[ii] *= bgAdjust
     end
 
@@ -137,7 +137,7 @@ function resids(x::Vector{T})::T where {T}
     @assert all(df.MeanPredict .>= 0.0)
 
     # Convert relative scale.
-    return norm((df.MeanPredict * x[21]) - df.Mean)
+    return norm((df.MeanPredict * x[21] * 1e6) - df.Mean)
 end
 
 
