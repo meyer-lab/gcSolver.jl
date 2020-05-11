@@ -1,6 +1,5 @@
 
-all: figureJ1.svg output/depletion/manuscript.html output/translation/manuscript.html
-
+all: figureJ1.svg output/
 venv: venv/bin/activate
 
 venv/bin/activate: requirements.txt
