@@ -137,6 +137,7 @@ end
 
 
 include("fit.jl")
+include("mlp.jl")
 
 export runCkine, runCkineVarProp
 
