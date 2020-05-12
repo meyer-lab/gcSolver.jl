@@ -1,15 +1,21 @@
-""" This file builds the depletion manuscript, Figure 1. """
+""" This figure builds the experimental/model data overlay. """
+
+using CSV
+
+const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
+responseDF = CSV.read(joinpath(dataDir, "WTMuteinsMoments.csv"), copycols = true)
 
 """ Plot an example isobologram. """
 function trialplot()
     X = [1, 2, 3]
     Y = [1, 2, 3]
-    pl = plot(x = X, y = Y)
+    pl = plot(x=X, y=Y);
     return pl
 end
 
 
 function figureJ1()
+    print(responseDF[1:10])
     p1 = trialplot()
     p2 = trialplot()
     p3 = trialplot()
