@@ -4,7 +4,7 @@
 function trialplot()
     X = [1, 2, 3]
     Y = [1, 2, 3]
-    pl = plot(x=X, y=Y);
+    pl = plot(x = X, y = Y)
     return pl
 end
 
