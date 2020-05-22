@@ -4,7 +4,7 @@ using Memoize
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
 
-"""Creates full vector of unknown values to be fit"""
+""" Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
     unkVecF = zeros(21)
@@ -52,7 +52,7 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
 end
 
 
-"""Adjusts the binding activity of ligand to match that of mutein"""
+""" Adjusts the binding activity of ligand to match that of mutein """
 function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
     affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
     dfRow = affDF[affDF[:, 1] .== ligand, :]
@@ -152,3 +152,7 @@ function runFit(; itern = 1000000)
 
     return fit.minimizer
 end
+
+include("figures/figureJ1.jl")
+
+export getExpression, getUnkVec, fitParams
