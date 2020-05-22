@@ -89,7 +89,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         #Gives back 36 parameter long
         iterParams = fitParams(doseLevel, unkVec, cellSpecAbund)
         #gives you pstat results
-        pstatResults = runCkine(time, iterParams, pSTAT5 = true)
+        pstatResults = runCkine(time, iterParams, pSTAT5 = true) .* unkVec[21] .* 10e6
         for indx = 1:length(time)
         #use dataframe and push row into it - enter data into data frame
             push!(predictDF, (dose, time[indx], pstatResults[indx]))
@@ -130,7 +130,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         end
     end
 
-    pl1 = plot(layer(x=Xhalf, y=Yhalf, Theme(default_color="green")), layer(x=Xhalfp, y=Yhalfp, Geom.line, Theme(default_color="green")), layer(x=X1, y=Y1, Theme(default_color="blue")), layer(x=X1p, y=Y1p, Geom.line, Theme(default_color="blue")), layer(x=X2, y=Y2, Theme(default_color="red")), layer(x=X2p, y=Y2p, Geom.line, Theme(default_color="red")), layer(x=X4, y=Y4, Theme(default_color="orange")), layer(x=X4p, y=Y4p, Geom.line, Theme(default_color="orange")), Guide.manual_color_key("Legend", ["0.5 Hours", "1 Hour", "2 Hours", "4 Hours"], ["green", "blue", "red", "orange"]), Scale.y_log10, Guide.title("Dose Response Curves"), Guide.xlabel("Dose"), Guide.ylabel("Pstat Level"))
+    pl1 = plot(layer(x=Xhalf, y=Yhalf, Theme(default_color="green")), layer(x=Xhalfp, y=Yhalfp, Geom.line, Theme(default_color="green")), layer(x=X1, y=Y1, Theme(default_color="blue")), layer(x=X1p, y=Y1p, Geom.line, Theme(default_color="blue")), layer(x=X2, y=Y2, Theme(default_color="red")), layer(x=X2p, y=Y2p, Geom.line, Theme(default_color="red")), layer(x=X4, y=Y4, Theme(default_color="orange")), layer(x=X4p, y=Y4p, Geom.line, Theme(default_color="orange")), Guide.manual_color_key("Legend", ["0.5 Hours", "1 Hour", "2 Hours", "4 Hours"], ["green", "blue", "red", "orange"]), Scale.y_log10, Guide.title("Dose Response Curves"), Guide.xlabel("Dose"), Guide.ylabel("Pstat Level"), Scale.x_log10)
     
     return pl1
 end
