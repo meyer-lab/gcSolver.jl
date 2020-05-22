@@ -95,10 +95,42 @@ function doseResPlot(ligandName, cellType, date, unkVec)
             push!(predictDF, (dose, time[indx], pstatResults[indx]))
         end
     end
-    #should contain all 48 of prediction^, next step is plot it lines using gadfly (4 separate lines depending on time entry), should be something like plot(layer = line, data = predictDF, x=dose, y = pstatresponse, hue/color=Time), prob using predictDF
     
-            
-    pl1 = plot(layer(x=Xhalf, y=Yhalf, Theme(default_color="green")), layer(x=X1, y=Y1, Theme(default_color="blue")), layer(x=X2, y=Y2, Theme(default_color="red")), layer(x=X4, y=Y4, Theme(default_color="orange")), Guide.manual_color_key("Legend", ["0.5 Hours", "1 Hour", "2 Hours", "4 Hours"], ["green", "blue", "red", "orange"]), Guide.title("Dose Response Curves at Various Times"), Guide.xlabel("Dose"), Guide.ylabel("Pstat Level"))
+    #should contain all 48 of prediction^, next step is plot it lines using gadfly (4 separate lines depending on time entry), should be something like plot(layer = line, data = predictDF, x=dose, y = pstatresponse, hue/color=Time)
+    
+    Xhalfp = zeros(12)
+    Yhalfp = copy(Xhalfp)
+    X1p = copy(Xhalfp)
+    Y1p = copy(Xhalfp)
+    X2p = copy(Xhalfp)
+    Y2p = copy(Xhalfp)
+    X4p = copy(Xhalfp)
+    Y4p = copy(Xhalfp)
+    iHalfp = 1
+    i1p = 1
+    i2p = 1
+    i4p = 1
+    for indp = 1:size(predictDF)[1]
+        if predictDF[indp,"time"] == 30
+            Xhalfp[iHalfp] = predictDF[indp,"Dose"]
+            Yhalfp[iHalfp] = predictDF[indp,"pSTAT"]
+            iHalfp += 1
+        elseif predictDF[indp,"time"] == 60
+            X1p[i1p] = predictDF[indp,"Dose"]
+            Y1p[i1p] = predictDF[indp,"pSTAT"]
+            i1p += 1
+        elseif predictDF[indp,"time"] == 120
+            X2p[i2p] = predictDF[indp,"Dose"]
+            Y2p[i2p] = predictDF[indp,"pSTAT"]
+            i2p += 1
+        elseif predictDF[indp,"time"] == 240
+            X4p[i4p] = predictDF[indp,"Dose"]
+            Y4p[i4p] = predictDF[indp,"pSTAT"]
+            i4p += 1
+        end
+    end
+
+    pl1 = plot(layer(x=Xhalf, y=Yhalf, Theme(default_color="green")), layer(x=Xhalfp, y=Yhalfp, Geom.line, Theme(default_color="green")), layer(x=X1, y=Y1, Theme(default_color="blue")), layer(x=X1p, y=Y1p, Geom.line, Theme(default_color="blue")), layer(x=X2, y=Y2, Theme(default_color="red")), layer(x=X2p, y=Y2p, Geom.line, Theme(default_color="red")), layer(x=X4, y=Y4, Theme(default_color="orange")), layer(x=X4p, y=Y4p, Geom.line, Theme(default_color="orange")), Guide.manual_color_key("Legend", ["0.5 Hours", "1 Hour", "2 Hours", "4 Hours"], ["green", "blue", "red", "orange"]), Scale.y_log10, Guide.title("Dose Response Curves"), Guide.xlabel("Dose"), Guide.ylabel("Pstat Level"))
     
     return pl1
 end
