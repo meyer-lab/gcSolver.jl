@@ -17,25 +17,25 @@ end
 function doseResPlot(ligandName, cellType, date, unkVec)
     time = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
-    doseVec = Matrix(doseVec)
+    doseVec = doseVec[:, 1]
     receptorDF = getExpression()
     """cellSpecAbund = receptorDF[!, symbol(cellType)] that Brian gave me says symbol not defined""" 
     cellSpecAbund = receptorDF[!, cellType]
     """predictDF = DataFrames(Dose = Float64[], time = Float64[], pSTAT = Float64[]) says objects of type Module are not callable"""
     predictDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
-    global Xhalf = zeros(12)
-    Yhalf = zeros(12)
-    X1 = zeros(12)
-    Y1 = zeros(12)
-    X2 = zeros(12)
-    Y2 = zeros(12)
-    X4 = zeros(12)
-    Y4 = zeros(12)
+    Xhalf = zeros(12)
+    Yhalf = copy(Xhalf)
+    X1 = copy(Xhalf)
+    Y1 = copy(Xhalf)
+    X2 = copy(Xhalf)
+    Y2 = copy(Xhalf)
+    X4 = copy(Xhalf)
+    Y4 = copy(Xhalf)
     iHalf = 1
     i1 = 1
     i2 = 1
     i4 = 1
-    for ind = 1:2640
+    for ind = 1:size(responseDF)[1]
         ligand = responseDF[ind,"Ligand"]
         if ligand == ligandName
             cell = responseDF[ind,"Cell"]
@@ -50,7 +50,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
                     """println("datesuccess")"""
                     if responseDF[ind,"Time"] == 0.5
                         """println("timesuccess")"""
-                        global Xhalf[iHalf] = responseDF[ind,"Dose"]
+                        Xhalf[iHalf] = responseDF[ind,"Dose"]
                         Yhalf[iHalf] = responseDF[ind,"Mean"]
                         iHalf += 1;
                     end
@@ -74,35 +74,28 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         end
     end
     
-    println("doseVec = ", doseVec)
-    doseVec = zeros(float64, 12, 3)
-    """for ILdose in doseVec gave error - AbstractDataFrame is not iterable. Use eachrow(df) to get a row iterator or eachcol(df) to get a column iterator"""
-    row1 = 1
-    row2 = 1
-    for index = 1:size(doseVec, 1)
-        """check if ligand name is IL2"""
-        if doseVec[index,9] == "IL2"
-            """put ILdose into first slot"""
-            doseLevel[row1, :] = [doseVec[index,1], 0, 0]
-            row1 += 1
-            elseif doseVec[index,9] == "IL15"
-            """put into second slot"""
-            doseLevel[row2, :] = [0, doseVec[index,1], 0]
-            row2 += 1
-            end
+    #for ILdose in doseVec gave error - AbstractDataFrame is not iterable. Use eachrow(df) to get a row iterator or eachcol(df) to get a column iterator
+
+    for (i, dose) in enumerate(doseVec)
+        #check if ligand name is IL2
+        if ligandName == "IL2"
+            #put ILdose into first slot
+            doseLevel = [dose, 0, 0]
+        elseif ligandName == "IL15"
+            #put into second slot
+            doseLevel = [0, dose, 0]
         end
-        println("doseLevel = ", doseLevel)
     
-        """Gives back 36 parameter long"""
+        #Gives back 36 parameter long
         iterParams = fitParams(doseLevel, unkVec, cellSpecAbund)
-        """gives you pstat resutls"""
+        #gives you pstat results
         pstatResults = runCkine(time, iterParams, pSTAT5 = true)
         for indx = 1:length(time)
-        """use dataframe and push row into it - enter data into data frame"""
-            push!(predictDF, (doseVec[index,1], time[indx], pstatResults[indx]))
+        #use dataframe and push row into it - enter data into data frame
+            push!(predictDF, (dose, time[indx], pstatResults[indx]))
         end
     end
-    """should contain all 48 of prediction^, next step is plot it lines using gadfly (4 separate lines depending on time entry), should be something like plot(layer = line, data = predictDF, x=dose, y = pstatresponse, hue/color=Time), prob using predictDF"""
+    #should contain all 48 of prediction^, next step is plot it lines using gadfly (4 separate lines depending on time entry), should be something like plot(layer = line, data = predictDF, x=dose, y = pstatresponse, hue/color=Time), prob using predictDF
     
             
     pl1 = plot(layer(x=Xhalf, y=Yhalf, Theme(default_color="green")), layer(x=X1, y=Y1, Theme(default_color="blue")), layer(x=X2, y=Y2, Theme(default_color="red")), layer(x=X4, y=Y4, Theme(default_color="orange")), Guide.manual_color_key("Legend", ["0.5 Hours", "1 Hour", "2 Hours", "4 Hours"], ["green", "blue", "red", "orange"]), Guide.title("Dose Response Curves at Various Times"), Guide.xlabel("Dose"), Guide.ylabel("Pstat Level"))
@@ -116,11 +109,11 @@ function figureJ1()
     p1 = doseResPlot("IL2", "Thelper", "2019-03-19", unkVec)
     draw(SVG("figureJ1.svg", 1000px, 800px), p1)
     
-    """p1 = trialplot()
-    p2 = trialplot()
-    p3 = trialplot()
-    p4 = trialplot()
+    #p1 = trialplot()
+    #p2 = trialplot()
+    #p3 = trialplot()
+    #p4 = trialplot()
     
 
-    draw(SVG("figureJ1.svg", 1000px, 800px), gridstack([p1 p2; p3 p4]))"""
+    #draw(SVG("figureJ1.svg", 1000px, 800px), gridstack([p1 p2; p3 p4]))
 end
