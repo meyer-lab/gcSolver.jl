@@ -33,9 +33,9 @@ function modelCompile()
     params = ones(Nparams) * 0.1
 
     prob = ODEProblem(fullDeriv, u0, (0.0, 1.0), params)
-    deMT, varsMT, paramsMT = ModelingToolkit.modelingtoolkitize(prob)
+    deMT = ModelingToolkit.modelingtoolkitize(prob)
 
-    f_iip = eval(ModelingToolkit.generate_function(deMT, varsMT, paramsMT)[2])
+    f_iip = eval(ModelingToolkit.generate_function(deMT)[2])
     tgrad_iip = eval(ModelingToolkit.generate_tgrad(deMT)[2])
     jac = eval(ModelingToolkit.generate_jacobian(deMT)[2])
 
