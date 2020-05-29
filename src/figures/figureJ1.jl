@@ -1,6 +1,4 @@
-""" This figure builds the experimental/model data overlay. """
-
-using CSV
+""" This file builds the depletion manuscript, Figure 1. """
 
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 responseDF = CSV.read(joinpath(dataDir, "WTMuteinsMoments.csv"), copycols = true)

@@ -153,6 +153,4 @@ function runFit(; itern = 1000000)
     return fit.minimizer
 end
 
-include("figures/figureJ1.jl")
-
 export getExpression, getUnkVec, fitParams
