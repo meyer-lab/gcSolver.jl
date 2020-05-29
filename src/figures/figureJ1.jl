@@ -23,15 +23,14 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     realDataDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
     predictDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
     
-    for ind = 1:size(responseDF)[1]
-        if ligandName == responseDF[ind,"Ligand"]
-            if cellType == responseDF[ind,"Cell"]
-                if date == string(responseDF[ind,"Date"])   
-                    push!(realDataDF, (responseDF[ind,"Dose"], responseDF[ind,"Time"], responseDF[ind,"Mean"]))                    
-                end
-            end
-        end
+    filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
+    filter!(row -> row["Cell"] .== cellType, filtFrame)
+    filter!(row -> string(row["Date"]) .== date, filtFrame)
+    
+    for ind = 1:size(filtFrame)[1] 
+        push!(realDataDF, (filtFrame[ind,"Dose"], filtFrame[ind,"Time"], filtFrame[ind,"Mean"]))       
     end
+    print(realDataDF)
 
     for (i, dose) in enumerate(doseVec)
         #check if ligand name is IL2
