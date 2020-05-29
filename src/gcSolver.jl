@@ -7,8 +7,10 @@ using Optim
 using Statistics
 import ModelingToolkit
 using Gadfly
+using CSV
 
 include("reaction.jl")
+include("figures/figureJ1.jl")
 
 const solTol = 1.0e-5
 const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
