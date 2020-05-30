@@ -7,7 +7,7 @@ responseDF = CSV.read(joinpath(dataDir, "WTMuteinsMoments.csv"), copycols = true
 function trialplot()
     X = [1, 2, 3]
     Y = [1, 2, 3]
-    pl = plot(x=X, y=Y);
+    pl = plot(x = X, y = Y)
     return pl
 end
 
@@ -20,13 +20,13 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     cellSpecAbund = receptorDF[!, cellType]
     realDataDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
     predictDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
-    
+
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
     filter!(row -> string(row["Date"]) .== date, filtFrame)
-    
-    for ind = 1:size(filtFrame)[1] 
-        push!(realDataDF, (filtFrame[ind,"Dose"], filtFrame[ind,"Time"], filtFrame[ind,"Mean"]))       
+
+    for ind = 1:size(filtFrame)[1]
+        push!(realDataDF, (filtFrame[ind, "Dose"], filtFrame[ind, "Time"], filtFrame[ind, "Mean"]))
     end
     print(realDataDF)
 
@@ -39,19 +39,29 @@ function doseResPlot(ligandName, cellType, date, unkVec)
             #put into second slot
             doseLevel = [0, dose, 0]
         end
-    
+
         #Gives back 36 parameter long
         iterParams = fitParams(doseLevel, unkVec, cellSpecAbund)
         #gives you pstat results
         pstatResults = runCkine(time, iterParams, pSTAT5 = true) .* unkVec[21] .* 10e6
         for indx = 1:length(time)
-        #use dataframe and push row into it - enter data into data frame
+            #use dataframe and push row into it - enter data into data frame
             push!(predictDF, (dose, time[indx] / 60, pstatResults[indx]))
         end
-    end    
-    
-    pl1 = plot(layer(realDataDF, x=:Dose, y=:pSTAT, color=:time, Geom.point), layer(predictDF, x=:Dose, y=:pSTAT, color=:time, Geom.line), Scale.x_log10, Scale.y_log10, Guide.title("Dose Response Curves"), Guide.xlabel("Dose"), Guide.ylabel("Pstat Level"), Scale.color_discrete(), Guide.colorkey(title="Time (hr)", labels=["0.5","1","2","4"]))
-    
+    end
+
+    pl1 = plot(
+        layer(realDataDF, x = :Dose, y = :pSTAT, color = :time, Geom.point),
+        layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
+        Scale.x_log10,
+        Scale.y_log10,
+        Guide.title("Dose Response Curves"),
+        Guide.xlabel("Dose"),
+        Guide.ylabel("Pstat Level"),
+        Scale.color_discrete(),
+        Guide.colorkey(title = "Time (hr)", labels = ["0.5", "1", "2", "4"]),
+    )
+
     return pl1
 end
 
@@ -60,12 +70,12 @@ function figureJ1()
     unkVec = getUnkVec()
     p1 = doseResPlot("IL2", "Thelper", "2019-03-19", unkVec)
     draw(SVG("figureJ1.svg", 1000px, 800px), p1)
-    
+
     #p1 = trialplot()
     #p2 = trialplot()
     #p3 = trialplot()
     #p4 = trialplot()
-    
+
 
     #draw(SVG("figureJ1.svg", 1000px, 800px), gridstack([p1 p2; p3 p4]))
 end
