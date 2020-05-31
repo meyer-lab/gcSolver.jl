@@ -14,9 +14,9 @@ version = "0.3.3"
 
 [[Adapt]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "c88cfc7f9c1f9f8633cddf0b56e86302b70f64c5"
+git-tree-sha1 = "fd04049c7dd78cfef0b06cdc1f0f181467655712"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "1.0.1"
+version = "1.1.0"
 
 [[ArnoldiMethod]]
 deps = ["DelimitedFiles", "LinearAlgebra", "Random", "SparseArrays", "StaticArrays", "Test"]
@@ -236,9 +236,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
 deps = ["ArrayInterface", "ChainRulesCore", "ConsoleProgressMonitor", "DataStructures", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LabelledArrays", "LinearAlgebra", "Logging", "LoggingExtras", "MuladdMacro", "Parameters", "Printf", "ProgressLogging", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TerminalLoggers", "TreeViews", "ZygoteRules"]
-git-tree-sha1 = "b269aefc5885524cd885f4bee9a233e7b6b6b6e5"
+git-tree-sha1 = "2ca9ee844cb2c907f870e2f1972556b64e4994df"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.35.2"
+version = "6.36.1"
 
 [[DiffEqJump]]
 deps = ["Compat", "DataStructures", "DiffEqBase", "FunctionWrappers", "LinearAlgebra", "Parameters", "PoissonRandom", "Random", "RandomNumbers", "RecursiveArrayTools", "StaticArrays", "Statistics", "TreeViews"]
@@ -358,9 +358,9 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[GPUArrays]]
 deps = ["AbstractFFTs", "Adapt", "LinearAlgebra", "Printf", "Random", "Serialization"]
-git-tree-sha1 = "5f90fd4385ae86ab56cdd9bd4717f7bd2ff2acdf"
+git-tree-sha1 = "d887693eb1bd5e1fd573262a978745481895ec7d"
 uuid = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
-version = "3.4.0"
+version = "3.4.1"
 
 [[GPUCompiler]]
 deps = ["Cthulhu", "DataStructures", "InteractiveUtils", "LLVM", "Libdl", "TimerOutputs"]
@@ -454,9 +454,9 @@ version = "0.21.0"
 
 [[JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "4ab65b7deb5af83f022f26ad3351a3bd5d80c6e2"
+git-tree-sha1 = "adfa56c6a1066d3baadb5d2a070d0f966d880a6d"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.7.16"
+version = "0.7.17"
 
 [[JuliaVariables]]
 deps = ["MLStyle", "NameResolution"]
@@ -506,7 +506,6 @@ uuid = "1d6d02ad-be62-4b6b-8a6d-2f90e265016e"
 version = "0.1.2"
 
 [[LibGit2]]
-deps = ["Printf"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
 [[Libdl]]
@@ -544,9 +543,9 @@ version = "0.4.1"
 
 [[LoopVectorization]]
 deps = ["DocStringExtensions", "LinearAlgebra", "OffsetArrays", "SIMDPirates", "SLEEFPirates", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "525d6a27998afeac6b30a92e5cd3bfe4ae246652"
+git-tree-sha1 = "132e6b82e3434a04992a0be60e194f817101c846"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.8.1"
+version = "0.8.2"
 
 [[LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
@@ -671,9 +670,9 @@ version = "1.2.0"
 
 [[OrdinaryDiffEq]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "ExponentialUtilities", "FiniteDiff", "ForwardDiff", "GenericSVD", "LinearAlgebra", "Logging", "MacroTools", "MuladdMacro", "NLsolve", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
-git-tree-sha1 = "941ff997c52f0d2eefae0629c38fbf6123275ac6"
+git-tree-sha1 = "ce564fc314cfb04b253431d8fb5d602d2142744d"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "5.38.3"
+version = "5.39.1"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
@@ -694,7 +693,7 @@ uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "1.0.4"
 
 [[Pkg]]
-deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
+deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Test", "UUIDs"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[PoissonRandom]]
@@ -975,9 +974,9 @@ version = "1.2.1"
 
 [[VectorizationBase]]
 deps = ["CpuId", "LinearAlgebra"]
-git-tree-sha1 = "13463c5703d9e75b2eab93f6c94239426af49221"
+git-tree-sha1 = "56423de8e50e538727b2e4f12ba247ef7339d1be"
 uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
-version = "0.12.3"
+version = "0.12.4"
 
 [[VertexSafeGraphs]]
 deps = ["LightGraphs"]
