@@ -81,7 +81,7 @@ end
 
 """ Gets expression vector for each cell type and puts it into dictionary. """
 @memoize function getExpression()
-    return CSV.read(joinpath(dataDir, "FakeExpressionData.csv"), copycols = true)
+    return CSV.read(joinpath(dataDir, "FarhatRecQuantData.csv"), copycols = true)
 end
 
 
@@ -98,6 +98,7 @@ function resids(x::Vector{T})::T where {T}
     df = df[df.Ligand .!= "IL15", :]
 
     exprDF = getExpression()
+    tens = [10, 10, 10, 0, 10]
 
     df.Time *= 60.0
     tps = unique(df.Time)
@@ -110,7 +111,7 @@ function resids(x::Vector{T})::T where {T}
         for dose in reverse(sort(unique(df.Dose)))
             ligVec = [dose, 0.0, 0.0]
             for cell in unique(df.Cell)
-                vector = vec(fitParams(ligVec, x, exprDF[!, Symbol(cell)]))
+                vector = vec(fitParams(ligVec, x, tens .^ exprDF[!, Symbol(cell)]))
                 if ligand != "IL2"
                     vector = mutAffAdjust(vector, ligand)
                 end
