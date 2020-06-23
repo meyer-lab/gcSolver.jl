@@ -7,7 +7,7 @@ const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    unkVecF = zeros(21)
+    unkVecF = zeros(24)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
     unkVecF[2:7] .= 0.1
@@ -17,16 +17,19 @@ function getUnkVec()
     unkVecF[11] = 0.2
     unkVecF[12] = 0.01
     unkVecF[13] = 0.13
-    unkVecF[14] = 1.0
-    unkVecF[15:20] .= 0.001 # pSTAT Rates
-    unkVecF[21] = 0.5
+    unkVecF[14] = 2.0 # initial Treg stat
+    unkVecF[15] = 0.5 # initial Thelp stat
+    unkVecF[16] = 0.2 # initial NK stat
+    unkVecF[17] = 0.2 # initial CD8 stat
+    unkVecF[18:23] .= 0.001 # pSTAT Rates
+    unkVecF[24] = 0.2
 
     return unkVecF
 end
 
 
 """ Takes in full unkvec and constructs it into full fit parameters vector - TODO move this. """
-function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
+function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) where {T}
     kfbnd = 0.60
     paramvec = zeros(T, Nparams)
     paramvec[1:3] = ILs
@@ -45,8 +48,16 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances) where {T}
     paramvec[19] = 5.0 #endoadjust
     paramvec[20:24] = unkVec[9:13]
     paramvec[25:29] = receptor_expression(recAbundances, unkVec[9], unkVec[11], unkVec[12], unkVec[13])
-    paramvec[30] = unkVec[14]
-    paramvec[31:36] = unkVec[15:20]
+    if CellType == "Treg"
+        paramvec[30] = unkVec[14] #initial stat
+    elseif CellType == "Thelper"
+        paramvec[30] = unkVec[15] #initial stat
+    elseif CellType == "NK"
+        paramvec[30] = unkVec[16] #initial stat
+    elseif CellType == "CD8"
+        paramvec[30] = unkVec[17] #initial stat
+    end
+    paramvec[31:36] = unkVec[18:23]
 
     return paramvec
 end
@@ -56,7 +67,7 @@ end
 function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
     affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
     dfRow = affDF[affDF[:, 1] .== ligand, :]
-    paramVec[5] = dfRow.IL2RaKD[1]
+    paramVec[5] = dfRow.IL2RaKD[1] * 0.6
 
     bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[8]
     for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5, k10, k11
@@ -92,7 +103,7 @@ function resids(x::Vector{T})::T where {T}
     df = deepcopy(df) # Not sure if this is needed
 
     # XXX: Just fit to Tregs for now
-    df = df[df.Cell .== "Treg", :]
+    #df = df[df.Cell .== "Treg", :]
     #get rid of IL15 and missing mutein
     df = df[df.Ligand .!= "R38Q/H16N", :]
     df = df[df.Ligand .!= "IL15", :]
@@ -111,13 +122,17 @@ function resids(x::Vector{T})::T where {T}
         for dose in reverse(sort(unique(df.Dose)))
             ligVec = [dose, 0.0, 0.0]
             for cell in unique(df.Cell)
-                vector = vec(fitParams(ligVec, x, tens .^ exprDF[!, Symbol(cell)]))
+                vector = vec(fitParams(ligVec, x, tens .^ exprDF[!, Symbol(cell)], cell))
                 if ligand != "IL2"
                     vector = mutAffAdjust(vector, ligand)
                 end
                 local yhat
                 try
                     yhat = runCkine(tps, vector, pSTAT5 = true)
+                    #println(cell)
+                    #println(ligand)
+                    #println(dose)
+                    #println(yhat * x[24] * 1e6)
                 catch e
                     if typeof(e) <: AssertionError
                         return Inf
@@ -128,17 +143,16 @@ function resids(x::Vector{T})::T where {T}
 
                 for (ii, tt) in Iterators.enumerate(tps)
                     idxs = (df.Dose .== dose) .& (df.Time .== tt) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
-
                     df[idxs, :MeanPredict] .= yhat[ii]
                 end
             end
         end
     end
-
+    
     @assert all(df.MeanPredict .>= 0.0)
-
+    CSV.write("/home/brianoj/gcSolver.jl/data/fitTry.csv", x)
     # Convert relative scale.
-    return norm((df.MeanPredict * x[21] * 1e6) - df.Mean)
+    return norm((df.MeanPredict * x[24] * 1e6) - df.Mean)
 end
 
 
@@ -146,7 +160,7 @@ end
 function runFit(; itern = 1000000)
     unk0 = log.(getUnkVec())
     low = fill(-Inf, size(unk0))
-    high = fill(0.1, size(unk0))
+    high = fill(0.7, size(unk0))
 
     opts = Optim.Options(outer_iterations = 2, iterations = itern, show_trace = true)
     fit = optimize((x) -> resids(exp.(x)), low, high, unk0, Fminbox(GradientDescent()), opts, autodiff = :forward)

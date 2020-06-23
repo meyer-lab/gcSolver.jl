@@ -28,7 +28,6 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     for ind = 1:size(filtFrame)[1]
         push!(realDataDF, (filtFrame[ind, "Dose"], filtFrame[ind, "Time"], filtFrame[ind, "Mean"]))
     end
-    print(realDataDF)
 
     for (i, dose) in enumerate(doseVec)
         #check if ligand name is IL2
@@ -41,9 +40,9 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         end
 
         #Gives back 36 parameter long
-        iterParams = fitParams(doseLevel, unkVec, cellSpecAbund)
+        iterParams = fitParams(doseLevel, unkVec, cellSpecAbund, cellType)
         #gives you pstat results
-        pstatResults = runCkine(time, iterParams, pSTAT5 = true) .* unkVec[21] .* 10e6
+        pstatResults = runCkine(time, iterParams, pSTAT5 = true) .* unkVec[24] .* 10e6
         for indx = 1:length(time)
             #use dataframe and push row into it - enter data into data frame
             push!(predictDF, (dose, time[indx] / 60, pstatResults[indx]))
@@ -67,8 +66,9 @@ end
 
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ1()
-    unkVec = getUnkVec()
-    p1 = doseResPlot("IL2", "Thelper", "2019-03-19", unkVec)
+    fitVec = CSV.read(joinpath(dataDir, "fitTry.csv"))
+    fitVec = convert(Vector{Float64}, fitVec[!, :value])
+    p1 = doseResPlot("IL2", "Treg", "2019-03-19", fitVec)
     draw(SVG("figureJ1.svg", 1000px, 800px), p1)
 
     #p1 = trialplot()
