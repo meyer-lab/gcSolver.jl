@@ -17,6 +17,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[:, 1]
     receptorDF = getExpression()
+    tens = [10, 10, 10, 0, 10]
     cellSpecAbund = receptorDF[!, cellType]
     realDataDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
     predictDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
@@ -31,18 +32,22 @@ function doseResPlot(ligandName, cellType, date, unkVec)
 
     for (i, dose) in enumerate(doseVec)
         #check if ligand name is IL2
-        if ligandName == "IL2"
-            #put ILdose into first slot
-            doseLevel = [dose, 0, 0]
-        elseif ligandName == "IL15"
+
+        if ligandName == "IL15"
             #put into second slot
             doseLevel = [0, dose, 0]
+        else
+            #put ILdose into first slot
+            doseLevel = [dose, 0, 0]
         end
 
         #Gives back 36 parameter long
-        iterParams = fitParams(doseLevel, unkVec, cellSpecAbund, cellType)
+        iterParams = fitParams(doseLevel, unkVec, tens .^ cellSpecAbund, cellType)
+        if ligandName != "IL2" && ligandName != "IL15"
+            iterParams = mutAffAdjust(iterParams, ligandName)
+        end
         #gives you pstat results
-        pstatResults = runCkine(time, iterParams, pSTAT5 = true) .* unkVec[24] .* 10e6
+        pstatResults = runCkine(time, iterParams, pSTAT5 = true) .* unkVec[24] .* 1e6
         for indx = 1:length(time)
             #use dataframe and push row into it - enter data into data frame
             push!(predictDF, (dose, time[indx] / 60, pstatResults[indx]))
@@ -53,8 +58,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         layer(realDataDF, x = :Dose, y = :pSTAT, color = :time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
         Scale.x_log10,
-        Scale.y_log10,
-        Guide.title("Dose Response Curves"),
+        Guide.title(string(cellType, " Response to ", ligandName)),
         Guide.xlabel("Dose"),
         Guide.ylabel("Pstat Level"),
         Scale.color_discrete(),
@@ -69,13 +73,22 @@ function figureJ1()
     fitVec = CSV.read(joinpath(dataDir, "fitTry.csv"))
     fitVec = convert(Vector{Float64}, fitVec[!, :value])
     p1 = doseResPlot("IL2", "Treg", "2019-03-19", fitVec)
-    draw(SVG("figureJ1.svg", 1000px, 800px), p1)
+    p2 = doseResPlot("IL2", "Thelper", "2019-03-19", fitVec)
+    p3 = doseResPlot("IL2", "NK", "2019-03-15", fitVec)
+    p4 = doseResPlot("IL2", "CD8", "2019-03-15", fitVec)
+    p5 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
+    p6 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
+    p7 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
+    p8 = doseResPlot("WT N-term", "CD8", "2019-05-02", fitVec)
+    p9 = doseResPlot("H16N N-term", "Treg", "2019-04-19", fitVec)
+    p10 = doseResPlot("H16N N-term", "Thelper", "2019-04-19", fitVec)
+    p11 = doseResPlot("H16N N-term", "NK", "2019-05-02", fitVec)
+    p12 = doseResPlot("H16N N-term", "CD8", "2019-05-02", fitVec)
+    p13 = doseResPlot("R38Q N-term", "Treg", "2019-04-19", fitVec)
+    p14 = doseResPlot("R38Q N-term", "Thelper", "2019-04-19", fitVec)
+    p15 = doseResPlot("R38Q N-term", "NK", "2019-05-02", fitVec)
+    p16 = doseResPlot("R38Q N-term", "CD8", "2019-05-02", fitVec)
 
-    #p1 = trialplot()
-    #p2 = trialplot()
-    #p3 = trialplot()
-    #p4 = trialplot()
-
-
-    #draw(SVG("figureJ1.svg", 1000px, 800px), gridstack([p1 p2; p3 p4]))
+    #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
+    draw(SVG("figureJ1.svg", 2000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16]))
 end

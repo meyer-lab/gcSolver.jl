@@ -129,10 +129,6 @@ function resids(x::Vector{T})::T where {T}
                 local yhat
                 try
                     yhat = runCkine(tps, vector, pSTAT5 = true)
-                    #println(cell)
-                    #println(ligand)
-                    #println(dose)
-                    #println(yhat * x[24] * 1e6)
                 catch e
                     if typeof(e) <: AssertionError
                         return Inf
@@ -150,7 +146,7 @@ function resids(x::Vector{T})::T where {T}
     end
     
     @assert all(df.MeanPredict .>= 0.0)
-    CSV.write("/home/brianoj/gcSolver.jl/data/fitTry.csv", x)
+    #CSV.write("/home/brianoj/gcSolver.jl/data/fitTry.csv", x)
     # Convert relative scale.
     return norm((df.MeanPredict * x[24] * 1e6) - df.Mean)
 end
