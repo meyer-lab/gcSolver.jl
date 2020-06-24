@@ -1,14 +1,5 @@
-using Flux
-using Flux.Data: DataLoader
-using Flux: @epochs
 using DataFrames
 import StatsBase: indicatormat
-import NNlib
-
-
-function build_model()
-    return Chain(Dense(8, 256, NNlib.sigmoid), Dropout(0.05), Dense(256, 1))
-end
 
 
 function getMLPdata()
@@ -33,31 +24,5 @@ function getMLPdata()
         fullDataX[!, iiName] = vec(hotEnc[ii, :])
     end
 
-    return Float32.(transpose(Matrix(fullDataX))), Float32.(fullDataY)
-end
-
-
-function loss_all(XX, yy, model)
-    println(cor(vec(model(XX)), yy))
-
-    return norm(model(XX) .- yy)
-end
-
-
-function train()
-    # Load Data
-    XX, y = getMLPdata()
-
-    train_loader = DataLoader(XX, y, batchsize = length(y) / 2, shuffle = true)
-
-    # Construct model
-    m = build_model()
-    loss(xIn, yyIn) = norm(m(xIn) .- yyIn)
-    evalcb = () -> @show(loss_all(XX, y, m))
-
-    ## Training
-    # Keep getting ~1264
-    @epochs 40000 Flux.train!(loss, params(m), train_loader, ADAM(), cb = evalcb)
-
-    return y, m(XX)
+    return fullDataX, fullDataY
 end
