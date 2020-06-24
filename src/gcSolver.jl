@@ -10,7 +10,6 @@ using Gadfly
 using CSV
 
 include("reaction.jl")
-include("figures/figureJ1.jl")
 
 const solTol = 1.0e-5
 const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
@@ -139,7 +138,7 @@ end
 
 
 include("fit.jl")
-include("mlp.jl")
+include("gprocess.jl")
 
 export runCkine, runCkineVarProp
 
