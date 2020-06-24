@@ -1,4 +1,5 @@
 using DataFrames
+using GaussianProcesses
 import StatsBase: indicatormat
 
 
@@ -24,5 +25,21 @@ function getMLPdata()
         fullDataX[!, iiName] = vec(hotEnc[ii, :])
     end
 
-    return fullDataX, fullDataY
+    return Matrix(fullDataX), Matrix(fullDataY)
+end
+
+
+function gaussianTest()
+    X, y = getMLPdata()
+
+    mZero = MeanZero()
+    kern = Matern(5/2,[0.0,0.0],0.0) + SE(0.0,0.0)
+
+    gp = GP(X, y, mZero, kern, -2.0)
+
+    print(gp)
+
+    optimize!(gp)
+
+    print(gp)
 end

@@ -102,8 +102,6 @@ function resids(x::Vector{T})::T where {T}
     df = getyVec()
     df = deepcopy(df) # Not sure if this is needed
 
-    # XXX: Just fit to Tregs for now
-    #df = df[df.Cell .== "Treg", :]
     #get rid of IL15 and missing mutein
     df = df[df.Ligand .!= "R38Q/H16N", :]
     df = df[df.Ligand .!= "IL15", :]
