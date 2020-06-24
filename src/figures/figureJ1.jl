@@ -29,6 +29,8 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     for ind = 1:size(filtFrame)[1]
         push!(realDataDF, (filtFrame[ind, "Dose"], filtFrame[ind, "Time"], filtFrame[ind, "Mean"]))
     end
+    realDataDF = groupby(realDataDF, [:time, :Dose])
+    realDataDF = combine(realDataDF, :pSTAT => mean)
 
     for (i, dose) in enumerate(doseVec)
         #check if ligand name is IL2
@@ -55,14 +57,14 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     end
 
     pl1 = plot(
-        layer(realDataDF, x = :Dose, y = :pSTAT, color = :time, Geom.point),
+        layer(realDataDF, x = :Dose, y = :pSTAT_mean, color = :time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
         Scale.x_log10,
         Guide.title(string(cellType, " Response to ", ligandName)),
         Guide.xlabel("Dose"),
-        Guide.ylabel("Pstat Level"),
+        Guide.ylabel("pSTAT Level"),
         Scale.color_discrete(),
-        Guide.colorkey(title = "Time (hr)", labels = ["0.5", "1", "2", "4"]),
+        Guide.colorkey(title = "Time (hr)", labels = ["4", "2", "1", "0.5"]),
     )
 
     return pl1
@@ -88,7 +90,6 @@ function figureJ1()
     p14 = doseResPlot("R38Q N-term", "Thelper", "2019-04-19", fitVec)
     p15 = doseResPlot("R38Q N-term", "NK", "2019-05-02", fitVec)
     p16 = doseResPlot("R38Q N-term", "CD8", "2019-05-02", fitVec)
-
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
     draw(SVG("figureJ1.svg", 2000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16]))
 end
