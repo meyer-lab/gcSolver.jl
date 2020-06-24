@@ -3,7 +3,7 @@ using GaussianProcesses
 import StatsBase: indicatormat
 
 
-function getMLPdata()
+function getGPdata()
     yData = getyVec()
     affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
 
@@ -25,21 +25,19 @@ function getMLPdata()
         fullDataX[!, iiName] = vec(hotEnc[ii, :])
     end
 
-    return Matrix(fullDataX), Matrix(fullDataY)
+    return Matrix(fullDataX), fullDataY
 end
 
 
 function gaussianTest()
-    X, y = getMLPdata()
+    X, y = getGPdata()
 
     mZero = MeanZero()
-    kern = Matern(5/2,[0.0,0.0],0.0) + SE(0.0,0.0)
+    kern = SE(0.0, 0.0)
 
-    gp = GP(X, y, mZero, kern, -2.0)
-
-    print(gp)
+    gp = GP(X', y, mZero, kern)
 
     optimize!(gp)
 
-    print(gp)
+    μ, σ2 = predict_f(gp, X[1:2, :]')
 end
