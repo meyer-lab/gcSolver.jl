@@ -142,7 +142,7 @@ function resids(x::Vector{T})::T where {T}
             end
         end
     end
-    
+
     @assert all(df.MeanPredict .>= 0.0)
     #CSV.write("/home/brianoj/gcSolver.jl/data/fitTry.csv", x)
     # Convert relative scale.
