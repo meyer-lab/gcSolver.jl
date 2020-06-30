@@ -7,7 +7,9 @@ using Optim
 using Statistics
 import ModelingToolkit
 using Gadfly
-using CSV
+import CSV
+using DataFrames
+using Memoize
 
 include("reaction.jl")
 

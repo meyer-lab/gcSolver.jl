@@ -1,6 +1,3 @@
-using CSV
-using Memoize
-
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
 
