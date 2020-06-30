@@ -1,11 +1,10 @@
-using DataFrames
 using GaussianProcesses
 import StatsBase: indicatormat
 
 
 function getGPdata()
     yData = getyVec()
-    affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
+    affDF = DataFrame!(CSV.File(joinpath(dataDir, "mutAffData.csv")))
 
     fullData = innerjoin(yData, affDF, on = :Ligand => :Mutein)
 

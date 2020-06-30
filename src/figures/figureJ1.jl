@@ -1,7 +1,7 @@
 """ This file builds the depletion manuscript, Figure 1. """
 
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-responseDF = CSV.read(joinpath(dataDir, "WTMuteinsMoments.csv"), copycols = true)
+responseDF = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
 
 """ Plot an example isobologram. """
 function trialplot()

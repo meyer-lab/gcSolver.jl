@@ -1,6 +1,3 @@
-using CSV
-using Memoize
-
 const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
 
@@ -65,7 +62,7 @@ end
 
 """ Adjusts the binding activity of ligand to match that of mutein """
 function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
-    affDF = CSV.read(joinpath(dataDir, "mutAffData.csv"), copycols = true)
+    affDF = DataFrame!(CSV.File(joinpath(dataDir, "mutAffData.csv")))
     dfRow = affDF[affDF[:, 1] .== ligand, :]
     paramVec[5] = dfRow.IL2RaKD[1] * 0.6
 
@@ -86,13 +83,13 @@ end
 
 """ Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams. """
 @memoize function getyVec()
-    return CSV.read(joinpath(dataDir, "WTMuteinsMoments.csv"), copycols = true)
+    return DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
 end
 
 
 """ Gets expression vector for each cell type and puts it into dictionary. """
 @memoize function getExpression()
-    return CSV.read(joinpath(dataDir, "FarhatRecQuantData.csv"), copycols = true)
+    return DataFrame!(CSV.File(joinpath(dataDir, "FarhatRecQuantData.csv")))
 end
 
 
