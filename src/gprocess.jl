@@ -24,19 +24,47 @@ function getGPdata()
         fullDataX[!, iiName] = vec(hotEnc[ii, :])
     end
 
-    return Matrix(fullDataX), fullDataY
+    return Matrix(fullDataX), vec(fullDataY), fullData
+end
+
+
+" Assemble Gaussian process model. "
+function gaussianProcess(X, y::Vector)
+    mZero = MeanZero()
+    kern = SE(0.0, 0.0)
+
+    gp = GP(X, y, mZero, kern)
+
+    optimize!(gp)
+
+    return gp
 end
 
 
 function gaussianTest()
-    X, y = getGPdata()
+    X, y, _ = getGPdata()
 
-    mZero = MeanZero()
-    kern = SE(0.0, 0.0)
-
-    gp = GP(X', y, mZero, kern)
-
-    optimize!(gp)
+    gp = gaussianProcess(X', y)
 
     μ, σ2 = predict_f(gp, X[1:2, :]')
+end
+
+
+function LOOmutein()
+    X, y, df = getGPdata()
+
+    muteins = unique(df.Ligand)
+    y_pred = zeros(length(y))
+
+    for mutein in muteins
+        X_train = X[df.Ligand .!== mutein, :]
+        y_train = y[df.Ligand .!== mutein]
+
+        gp = gaussianProcess(X_train', y_train)
+
+        yp, _ = predict_f(gp, X[df.Ligand .== mutein, :]')
+        y_pred[df.Ligand .== mutein] .= yp
+    end
+
+    println(cor(y, y_pred))
 end
