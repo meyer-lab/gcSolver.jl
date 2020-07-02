@@ -89,7 +89,7 @@ end
 
 """ Gets expression vector for each cell type and puts it into dictionary. """
 @memoize function getExpression()
-    return DataFrame!(CSV.File(joinpath(dataDir, "FarhatRecQuantData.csv")))
+    return DataFrame!(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
 end
 
 
