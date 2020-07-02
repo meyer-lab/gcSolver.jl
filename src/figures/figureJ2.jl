@@ -1,18 +1,9 @@
 """ This file builds the depletion manuscript, Figure 2. """
 
-const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-responseDF = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
-
-""" Plot an example isobologram. """
-function trialplot2()
-    X = [1, 2, 3]
-    Y = [1, 2, 3]
-    pl = plot(x = X, y = Y)
-    return pl
-end
 
 # Plot of dose response curves
 function doseResPlot2(ligandName, cellType, date, unkVec)
+    responseDF = importData()
     tps = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[:, 1]
@@ -96,23 +87,18 @@ end
 function figureJ2()
     fitVec = CSV.read(joinpath(dataDir, "fitTry.csv"))
     fitVec = convert(Vector{Float64}, fitVec[!, :value])
-    p1 = doseResPlot2("IL2", "Treg", "2019-03-19", fitVec)
-    """p1 = doseResPlot2("IL2", "Treg", "2019-03-19", fitVec)
-    p2 = doseResPlot2("IL2", "Thelper", "2019-03-19", fitVec)
-    p3 = doseResPlot2("IL2", "NK", "2019-03-15", fitVec)
-    p4 = doseResPlot2("IL2", "CD8", "2019-03-15", fitVec)
-    p5 = doseResPlot2("WT N-term", "Treg", "2019-04-19", fitVec)
-    p6 = doseResPlot2("WT N-term", "Thelper", "2019-04-19", fitVec)
-    p7 = doseResPlot2("WT N-term", "NK", "2019-05-02", fitVec)
-    p8 = doseResPlot2("WT N-term", "CD8", "2019-05-02", fitVec)
-    p9 = doseResPlot2("H16N N-term", "Treg", "2019-04-19", fitVec)
-    p10 = doseResPlot2("H16N N-term", "Thelper", "2019-04-19", fitVec)
-    p11 = doseResPlot2("H16N N-term", "NK", "2019-05-02", fitVec)
-    p12 = doseResPlot2("H16N N-term", "CD8", "2019-05-02", fitVec)
-    p13 = doseResPlot2("R38Q N-term", "Treg", "2019-04-19", fitVec)
-    p14 = doseResPlot2("R38Q N-term", "Thelper", "2019-04-19", fitVec)
-    p15 = doseResPlot2("R38Q N-term", "NK", "2019-05-02", fitVec)
-    p16 = doseResPlot2("R38Q N-term", "CD8", "2019-05-02", fitVec)"""
-    draw(SVG("figureJ2.svg", 1000px, 800px), p1)
-    #draw(SVG("figureJ2.svg", 2000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16]))
+    p1 = doseResPlot2("WT N-term", "Treg", "2019-04-19", fitVec)
+    p2 = doseResPlot2("WT N-term", "Thelper", "2019-04-19", fitVec)
+    p3 = doseResPlot2("WT N-term", "NK", "2019-05-02", fitVec)
+    p4 = doseResPlot2("WT N-term", "CD8", "2019-05-02", fitVec)
+    p5 = doseResPlot2("H16N N-term", "Treg", "2019-04-19", fitVec)
+    p6 = doseResPlot2("H16N N-term", "Thelper", "2019-04-19", fitVec)
+    p7 = doseResPlot2("H16N N-term", "NK", "2019-05-02", fitVec)
+    p8 = doseResPlot2("H16N N-term", "CD8", "2019-05-02", fitVec)
+    p9 = doseResPlot2("R38Q N-term", "Treg", "2019-04-19", fitVec)
+    p10 = doseResPlot2("R38Q N-term", "Thelper", "2019-04-19", fitVec)
+    p11 = doseResPlot2("R38Q N-term", "NK", "2019-05-02", fitVec)
+    p12 = doseResPlot2("R38Q N-term", "CD8", "2019-05-02", fitVec)
+    #draw(SVG("figureJ2.svg", 1000px, 800px), p1)
+    draw(SVG("figureJ2.svg", 2000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12]))
 end
