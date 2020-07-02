@@ -3,28 +3,14 @@ import StatsBase: indicatormat
 
 
 function getGPdata()
-    yData = getyVec()
-    affDF = DataFrame!(CSV.File(joinpath(dataDir, "mutAffData.csv")))
+    fullData = importData()
 
-    fullData = innerjoin(yData, affDF, on = :Ligand => :Mutein)
-
-    # Hot encode cell types
-    hotEnc = indicatormat(fullData.Cell)
-    hotEncName = sort(unique(fullData.Cell))
-
-    fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD]]
+    fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
     fullDataY = log10.(fullData.Mean .+ 1.0)
 
-    fullDataX[!, :Dose] = log10.(fullDataX[!, :Dose])
-    fullDataX[!, :IL2RaKD] = log10.(fullDataX[!, :IL2RaKD])
-    fullDataX[!, :IL2RBGKD] = log10.(fullDataX[!, :IL2RBGKD])
+    fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]] = log10.(fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]])
 
-    # Encode the cell types with one-hot
-    for (ii, iiName) in enumerate(hotEncName)
-        fullDataX[!, iiName] = vec(hotEnc[ii, :])
-    end
-
-    return Matrix(fullDataX), vec(fullDataY), fullData
+    return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
 end
 
 

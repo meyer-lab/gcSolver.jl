@@ -1,52 +1,37 @@
 """ This file builds the depletion manuscript, Figure 1. """
 
-const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-responseDF = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
-
-""" Plot an example isobologram. """
-function trialplot()
-    X = [1, 2, 3]
-    Y = [1, 2, 3]
-    pl = plot(x = X, y = Y)
-    return pl
-end
-
 # Plot of dose response curves
 function doseResPlot(ligandName, cellType, date, unkVec)
+    responseDF = importData()
     time = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[:, 1]
-    receptorDF = getExpression()
-    tens = [10, 10, 10, 0, 10]
-    cellSpecAbund = receptorDF[!, cellType]
-    realDataDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
+
     predictDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
     filter!(row -> string(row["Date"]) .== date, filtFrame)
 
-    for ind = 1:size(filtFrame)[1]
-        push!(realDataDF, (filtFrame[ind, "Dose"], filtFrame[ind, "Time"], filtFrame[ind, "Mean"]))
-    end
-    realDataDF = groupby(realDataDF, [:time, :Dose])
-    realDataDF = combine(realDataDF, :pSTAT => mean)
+    realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
+    realDataDF = groupby(realDataDF, [:Time, :Dose])
+    realDataDF = combine(realDataDF, :Mean => mean)
+    println(realDataDF)
 
     for (i, dose) in enumerate(doseVec)
-        #check if ligand name is IL2
 
+        # Place ligand dose
         if ligandName == "IL15"
-            #put into second slot
             doseLevel = [0, dose, 0]
         else
-            #put ILdose into first slot
             doseLevel = [dose, 0, 0]
         end
 
         #Gives back 36 parameter long
-        iterParams = fitParams(doseLevel, unkVec, tens .^ cellSpecAbund, cellType)
+        idxx = findfirst(responseDF.Cell .== cellType)
+        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cellType)
         if ligandName != "IL2" && ligandName != "IL15"
-            iterParams = mutAffAdjust(iterParams, ligandName)
+            iterParams = mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
         end
         #gives you pstat results
         pstatResults = runCkine(time, iterParams, pSTAT5 = true) .* unkVec[24] .* 1e6
@@ -56,8 +41,9 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         end
     end
 
+    #print(realDataDF.Mean_mean)
     pl1 = plot(
-        layer(realDataDF, x = :Dose, y = :pSTAT_mean, color = :time, Geom.point),
+        layer(realDataDF, x = :Dose, y = :Mean_mean, color = :Time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
         Scale.x_log10,
         Guide.title(string(cellType, " Response to ", ligandName)),
@@ -72,24 +58,21 @@ end
 
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ1()
-    fitVec = CSV.read(joinpath(dataDir, "fitTry.csv"))
+    fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :value])
-    p1 = doseResPlot("IL2", "Treg", "2019-03-19", fitVec)
-    p2 = doseResPlot("IL2", "Thelper", "2019-03-19", fitVec)
-    p3 = doseResPlot("IL2", "NK", "2019-03-15", fitVec)
-    p4 = doseResPlot("IL2", "CD8", "2019-03-15", fitVec)
-    p5 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
-    p6 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
-    p7 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
-    p8 = doseResPlot("WT N-term", "CD8", "2019-05-02", fitVec)
-    p9 = doseResPlot("H16N N-term", "Treg", "2019-04-19", fitVec)
-    p10 = doseResPlot("H16N N-term", "Thelper", "2019-04-19", fitVec)
-    p11 = doseResPlot("H16N N-term", "NK", "2019-05-02", fitVec)
-    p12 = doseResPlot("H16N N-term", "CD8", "2019-05-02", fitVec)
-    p13 = doseResPlot("R38Q N-term", "Treg", "2019-04-19", fitVec)
-    p14 = doseResPlot("R38Q N-term", "Thelper", "2019-04-19", fitVec)
-    p15 = doseResPlot("R38Q N-term", "NK", "2019-05-02", fitVec)
-    p16 = doseResPlot("R38Q N-term", "CD8", "2019-05-02", fitVec)
+    p1 = doseResPlot("IL2", "Treg", "2019-04-19", fitVec)
+    p1 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
+    p2 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
+    p3 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
+    p4 = doseResPlot("WT N-term", "CD8", "2019-05-02", fitVec)
+    p5 = doseResPlot("H16N N-term", "Treg", "2019-04-19", fitVec)
+    p6 = doseResPlot("H16N N-term", "Thelper", "2019-04-19", fitVec)
+    p7 = doseResPlot("H16N N-term", "NK", "2019-05-02", fitVec)
+    p8 = doseResPlot("H16N N-term", "CD8", "2019-05-02", fitVec)
+    p9 = doseResPlot("R38Q N-term", "Treg", "2019-04-19", fitVec)
+    p10 = doseResPlot("R38Q N-term", "Thelper", "2019-04-19", fitVec)
+    p11 = doseResPlot("R38Q N-term", "NK", "2019-05-02", fitVec)
+    p12 = doseResPlot("R38Q N-term", "CD8", "2019-05-02", fitVec)
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
-    draw(SVG("figureJ1.svg", 2000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16]))
+    draw(SVG("figureJ1.svg", 2000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12]))
 end
