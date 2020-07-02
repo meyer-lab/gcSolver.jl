@@ -16,6 +16,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
     realDataDF = groupby(realDataDF, [:Time, :Dose])
     realDataDF = combine(realDataDF, :Mean => mean)
+    println(realDataDF)
 
     for (i, dose) in enumerate(doseVec)
 
@@ -40,6 +41,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         end
     end
 
+    #print(realDataDF.Mean_mean)
     pl1 = plot(
         layer(realDataDF, x = :Dose, y = :Mean_mean, color = :Time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
@@ -58,22 +60,18 @@ end
 function figureJ1()
     fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :value])
-    p1 = doseResPlot("IL2", "Treg", "2019-03-19", fitVec)
-    p2 = doseResPlot("IL2", "Thelper", "2019-03-19", fitVec)
-    p3 = doseResPlot("IL2", "NK", "2019-03-15", fitVec)
-    p4 = doseResPlot("IL2", "CD8", "2019-03-15", fitVec)
-    p5 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
-    p6 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
-    p7 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
-    p8 = doseResPlot("WT N-term", "CD8", "2019-05-02", fitVec)
-    p9 = doseResPlot("H16N N-term", "Treg", "2019-04-19", fitVec)
-    p10 = doseResPlot("H16N N-term", "Thelper", "2019-04-19", fitVec)
-    p11 = doseResPlot("H16N N-term", "NK", "2019-05-02", fitVec)
-    p12 = doseResPlot("H16N N-term", "CD8", "2019-05-02", fitVec)
-    p13 = doseResPlot("R38Q N-term", "Treg", "2019-04-19", fitVec)
-    p14 = doseResPlot("R38Q N-term", "Thelper", "2019-04-19", fitVec)
-    p15 = doseResPlot("R38Q N-term", "NK", "2019-05-02", fitVec)
-    p16 = doseResPlot("R38Q N-term", "CD8", "2019-05-02", fitVec)
+    p1 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
+    p2 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
+    p3 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
+    p4 = doseResPlot("WT N-term", "CD8", "2019-05-02", fitVec)
+    p5 = doseResPlot("H16N N-term", "Treg", "2019-04-19", fitVec)
+    p6 = doseResPlot("H16N N-term", "Thelper", "2019-04-19", fitVec)
+    p7 = doseResPlot("H16N N-term", "NK", "2019-05-02", fitVec)
+    p8 = doseResPlot("H16N N-term", "CD8", "2019-05-02", fitVec)
+    p9 = doseResPlot("R38Q N-term", "Treg", "2019-04-19", fitVec)
+    p10 = doseResPlot("R38Q N-term", "Thelper", "2019-04-19", fitVec)
+    p11 = doseResPlot("R38Q N-term", "NK", "2019-05-02", fitVec)
+    p12 = doseResPlot("R38Q N-term", "CD8", "2019-05-02", fitVec)
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
-    draw(SVG("figureJ1.svg", 2000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16]))
+    draw(SVG("figureJ1.svg", 2000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12]))
 end
