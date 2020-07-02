@@ -20,6 +20,6 @@ end
 """ Import the saved fit. """
 function importFit()
 	dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-	fitVec = CSV.read(joinpath(dataDir, "fitTry.csv"))
+	fitVec = DataFrame!(CSV.File(joinpath(dataDir, "fitTry.csv")))
 	return fitVec
 end

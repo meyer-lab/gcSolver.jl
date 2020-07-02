@@ -18,19 +18,17 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     realDataDF = combine(realDataDF, :Mean => mean)
 
     for (i, dose) in enumerate(doseVec)
-        #check if ligand name is IL2
 
+        # Place ligand dose
         if ligandName == "IL15"
-            #put into second slot
             doseLevel = [0, dose, 0]
         else
-            #put ILdose into first slot
             doseLevel = [dose, 0, 0]
         end
 
         #Gives back 36 parameter long
         idxx = findfirst(responseDF.Cell .== cellType)
-        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cellType)
+        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cellType)
         if ligandName != "IL2" && ligandName != "IL15"
             iterParams = mutAffAdjust(iterParams, ligandName)
         end
