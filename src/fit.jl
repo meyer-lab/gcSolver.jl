@@ -1,5 +1,3 @@
-const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-
 
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
@@ -61,9 +59,7 @@ end
 
 
 """ Adjusts the binding activity of ligand to match that of mutein """
-function mutAffAdjust(paramVec::Vector{T}, ligand::String) where {T}
-    affDF = DataFrame!(CSV.File(joinpath(dataDir, "mutAffData.csv")))
-    dfRow = affDF[affDF[:, 1] .== ligand, :]
+function mutAffAdjust(paramVec::Vector{T}, dfRow) where {T}
     paramVec[5] = dfRow.IL2RaKD[1] * 0.6
 
     bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[8]
@@ -81,30 +77,14 @@ function receptor_expression(abundance, ke, kᵣ, sortF, kD)
 end
 
 
-""" Constructs full vector of pSTAT means and variances to fit to, and returns expression levels for use with fitparams. """
-@memoize function getyVec()
-    return DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
-end
-
-
-""" Gets expression vector for each cell type and puts it into dictionary. """
-@memoize function getExpression()
-    return DataFrame!(CSV.File(joinpath(dataDir, "FarhatRecQuantData.csv")))
-end
-
-
 """ Calculates squared error for a given unkVec. """
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
-    df = getyVec()
-    df = deepcopy(df) # Not sure if this is needed
+    df = importData()
 
     #get rid of IL15 and missing mutein
     df = df[df.Ligand .!= "R38Q/H16N", :]
     df = df[df.Ligand .!= "IL15", :]
-
-    exprDF = getExpression()
-    tens = [10, 10, 10, 0, 10]
 
     df.Time *= 60.0
     tps = unique(df.Time)
@@ -117,9 +97,10 @@ function resids(x::Vector{T})::T where {T}
         for dose in reverse(sort(unique(df.Dose)))
             ligVec = [dose, 0.0, 0.0]
             for cell in unique(df.Cell)
-                vector = vec(fitParams(ligVec, x, tens .^ exprDF[!, Symbol(cell)], cell))
+                idxx = findfirst(df.Cell .== cell)
+                vector = vec(fitParams(ligVec, x, 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cell))
                 if ligand != "IL2"
-                    vector = mutAffAdjust(vector, ligand)
+                    vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
                 end
                 local yhat
                 try
