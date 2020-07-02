@@ -1,13 +1,5 @@
 """ This file builds the depletion manuscript, Figure 1. """
 
-""" Plot an example isobologram. """
-function trialplot()
-    X = [1, 2, 3]
-    Y = [1, 2, 3]
-    pl = plot(x = X, y = Y)
-    return pl
-end
-
 # Plot of dose response curves
 function doseResPlot(ligandName, cellType, date, unkVec)
     responseDF = importData()
