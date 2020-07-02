@@ -1,8 +1,5 @@
 """ This file builds the depletion manuscript, Figure 1. """
 
-const dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-responseDF = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
-
 """ Plot an example isobologram. """
 function trialplot()
     X = [1, 2, 3]
@@ -13,6 +10,7 @@ end
 
 # Plot of dose response curves
 function doseResPlot(ligandName, cellType, date, unkVec)
+    responseDF = importData()
     time = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[:, 1]
@@ -72,7 +70,7 @@ end
 
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ1()
-    fitVec = CSV.read(joinpath(dataDir, "fitTry.csv"))
+    fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :value])
     p1 = doseResPlot("IL2", "Treg", "2019-03-19", fitVec)
     p2 = doseResPlot("IL2", "Thelper", "2019-03-19", fitVec)

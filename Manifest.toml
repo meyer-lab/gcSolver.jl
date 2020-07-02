@@ -92,12 +92,6 @@ git-tree-sha1 = "bd1e56ac59d408c63ea26ab23aab78f827f13511"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 version = "0.9.1"
 
-[[CodeTracking]]
-deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "cab4da992adc0a64f63fa30d2db2fd8bec40cab4"
-uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "0.5.11"
-
 [[ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
 git-tree-sha1 = "cd19496d8943326b752d1712afd6ab79c7514d28"
@@ -286,9 +280,6 @@ git-tree-sha1 = "c139e3f4c75dc489a493627c7ee44befc177420f"
 uuid = "442a2c76-b920-505d-bb47-c5924d526838"
 version = "0.4.2"
 
-[[FileWatching]]
-uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
-
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
 git-tree-sha1 = "bf726ba7ce99e00d10bf63c031285fb9ab3676ae"
@@ -417,12 +408,6 @@ git-tree-sha1 = "b34d7cef7b337321e97d22242c3c2b91f476748e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.0"
 
-[[JuliaInterpreter]]
-deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "39f9712eea6bb1de783cfc9d9b1687d6272694d8"
-uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.7.23"
-
 [[JuliaVariables]]
 deps = ["MLStyle", "NameResolution"]
 git-tree-sha1 = "8868479ff35ab98588ed0a529a9c2a4f8bda3bd6"
@@ -513,23 +498,11 @@ git-tree-sha1 = "dcf606ad6b3d1ffe03bcb45e9948a02f7b837513"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
 version = "0.8.8"
 
-[[LoweredCodeUtils]]
-deps = ["JuliaInterpreter"]
-git-tree-sha1 = "1b632dc108106101a9909db7be8f8b32ed8d02f7"
-uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "0.4.6"
-
 [[MKL_jll]]
 deps = ["IntelOpenMP_jll", "Libdl", "Pkg"]
 git-tree-sha1 = "0ce9a7fa68c70cf83c49d05d2c04d91b47404b08"
 uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
 version = "2020.1.216+0"
-
-[[MLBase]]
-deps = ["IterTools", "Random", "Reexport", "StatsBase", "Test"]
-git-tree-sha1 = "f63a8d37429568b8c4384d76c4a96fc2897d6ddf"
-uuid = "f0e99cf1-93fa-52ec-9ecc-5026115318e0"
-version = "0.8.0"
 
 [[MLStyle]]
 git-tree-sha1 = "67f9a88611bc79f992aa705d9bbc833a2547dec7"
@@ -556,12 +529,6 @@ deps = ["MacroTools", "Test"]
 git-tree-sha1 = "75a54abd10709c01f1b86b84ec225d26e840ed58"
 uuid = "e89f7d12-3494-54d1-8411-f7d8b9ae1f27"
 version = "0.5.0"
-
-[[Memoize]]
-deps = ["MacroTools"]
-git-tree-sha1 = "62c5ae937a0d28704de3c300ae022e17a8903802"
-uuid = "c03570c3-d221-55d1-a50c-7939bbd78826"
-version = "0.4.3"
 
 [[Missings]]
 deps = ["DataAPI"]
@@ -764,12 +731,6 @@ deps = ["UUIDs"]
 git-tree-sha1 = "d37400976e98018ee840e0ca4f9d20baa231dc6b"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.0.1"
-
-[[Revise]]
-deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "UUIDs", "Unicode"]
-git-tree-sha1 = "0992d4643e27b2deb9f2e4ec7a56b7033813a027"
-uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "2.7.3"
 
 [[Rmath]]
 deps = ["Random", "Rmath_jll"]

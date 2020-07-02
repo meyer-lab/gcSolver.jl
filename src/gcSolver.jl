@@ -9,9 +9,9 @@ import ModelingToolkit
 using Gadfly
 import CSV
 using DataFrames
-using Memoize
 
 include("reaction.jl")
+include("dataImport.jl")
 
 const solTol = 1.0e-5
 const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
