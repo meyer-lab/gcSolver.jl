@@ -13,6 +13,7 @@ function importData()
 
     fullData = innerjoin(yData, affDF, on = :Ligand => :Mutein)
     fullData = leftjoin(fullData, exprDF, on = :Cell)
+    print(fullData)
 
     return fullData
 end

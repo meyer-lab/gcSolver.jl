@@ -60,6 +60,7 @@ end
 function figureJ1()
     fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :value])
+    p1 = doseResPlot("IL2", "Treg", "2019-04-19", fitVec)
     p1 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
     p2 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
     p3 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
