@@ -15,7 +15,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
 
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
     realDataDF = groupby(realDataDF, [:Time, :Dose])
-    realDataDF = combine(realDataDF, :pSTAT => mean)
+    realDataDF = combine(realDataDF, :Mean => mean)
 
     for (i, dose) in enumerate(doseVec)
         #check if ligand name is IL2
@@ -43,7 +43,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     end
 
     pl1 = plot(
-        layer(realDataDF, x = :Dose, y = :pSTAT_mean, color = :Time, Geom.point),
+        layer(realDataDF, x = :Dose, y = :Mean_mean, color = :Time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
         Scale.x_log10,
         Guide.title(string(cellType, " Response to ", ligandName)),
