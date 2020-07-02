@@ -14,20 +14,15 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     time = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[:, 1]
-    receptorDF = getExpression()
-    tens = [10, 10, 10, 0, 10]
-    cellSpecAbund = receptorDF[!, cellType]
-    realDataDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
+
     predictDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
     filter!(row -> string(row["Date"]) .== date, filtFrame)
 
-    for ind = 1:size(filtFrame)[1]
-        push!(realDataDF, (filtFrame[ind, "Dose"], filtFrame[ind, "Time"], filtFrame[ind, "Mean"]))
-    end
-    realDataDF = groupby(realDataDF, [:time, :Dose])
+    realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
+    realDataDF = groupby(realDataDF, [:Time, :Dose])
     realDataDF = combine(realDataDF, :pSTAT => mean)
 
     for (i, dose) in enumerate(doseVec)
@@ -42,7 +37,8 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         end
 
         #Gives back 36 parameter long
-        iterParams = fitParams(doseLevel, unkVec, tens .^ cellSpecAbund, cellType)
+        idxx = findfirst(responseDF.Cell .== cellType)
+        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cellType)
         if ligandName != "IL2" && ligandName != "IL15"
             iterParams = mutAffAdjust(iterParams, ligandName)
         end
@@ -55,7 +51,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     end
 
     pl1 = plot(
-        layer(realDataDF, x = :Dose, y = :pSTAT_mean, color = :time, Geom.point),
+        layer(realDataDF, x = :Dose, y = :pSTAT_mean, color = :Time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
         Scale.x_log10,
         Guide.title(string(cellType, " Response to ", ligandName)),
