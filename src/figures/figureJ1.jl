@@ -17,7 +17,6 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
     realDataDF = groupby(realDataDF, [:Time, :Dose])
     realDataDF = combine(realDataDF, :Mean => mean)
-    println(realDataDF)
 
     for (i, dose) in enumerate(doseVec)
 

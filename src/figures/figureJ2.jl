@@ -7,21 +7,17 @@ function doseResPlot2(ligandName, cellType, date, unkVec)
     tps = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[:, 1]
-    receptorDF = getExpression()
-    tens = [10, 10, 10, 0, 10]
-    cellSpecAbund = receptorDF[!, cellType]
-    #realDataDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
+
     predictDF = DataFrame(Dose = Float64[], tps = Float64[], sensitivity = Float64[])
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
     filter!(row -> string(row["Date"]) .== date, filtFrame)
 
-    """for ind = 1:size(filtFrame)[1]
-        push!(realDataDF, (filtFrame[ind, "Dose"], filtFrame[ind, "Time"], filtFrame[ind, "Mean"]))
-    end
-    realDataDF = groupby(realDataDF, [:time, :Dose])
-    realDataDF = combine(realDataDF, :pSTAT => mean)"""
+    realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
+    realDataDF = groupby(realDataDF, [:Time, :Dose])
+    realDataDF = combine(realDataDF, :Mean => mean)
+
 
     for (i, dose) in enumerate(doseVec)
         #check if ligand name is IL2
@@ -35,23 +31,19 @@ function doseResPlot2(ligandName, cellType, date, unkVec)
         end
 
         #Gives back 36 parameter long
-        iterParams = fitParams(doseLevel, unkVec, tens .^ cellSpecAbund, cellType)
+        idxx = findfirst(responseDF.Cell .== cellType)
+        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cellType)
         if ligandName != "IL2" && ligandName != "IL15"
-            iterParams = mutAffAdjust(iterParams, ligandName)
+            iterParams = mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
         end
-        #gives you pstat results
-        #pstatResults = runCkine(time, iterParams, pSTAT5 = true) .* unkVec[24] .* 1e6
-        #println("iterParams = ", iterParams)
-        #println("tps = ", tps)
+
         jacResults = runRecJac(tps, iterParams)
         
         for indx = 1:length(tps)
             #use dataframe and push row into it - enter data into data frame
-            push!(predictDF, (dose, tps[indx] / 60, jacResults[indx]))
+            push!(predictDF, (dose, tps[indx] / 60, jacResults[1, indx]))
         end
     end
-    
-    
 
     pl1 = plot(
         layer(predictDF, x = :Dose, y = :sensitivity, color = :tps, Geom.line),
@@ -77,7 +69,7 @@ function runRecJac(tps::Vector, params::Vector)
 
     jac = zeros(5, length(tps))
     ForwardDiff.jacobian!(jac, jacF, params[25:29])
-    println("jac = ", jac)
+    println(jac)
     return jac
 end
 
@@ -85,7 +77,7 @@ end
     
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ2()
-    fitVec = CSV.read(joinpath(dataDir, "fitTry.csv"))
+    fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :value])
     p1 = doseResPlot2("WT N-term", "Treg", "2019-04-19", fitVec)
     p2 = doseResPlot2("WT N-term", "Thelper", "2019-04-19", fitVec)
