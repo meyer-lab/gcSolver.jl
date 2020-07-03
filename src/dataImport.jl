@@ -1,9 +1,9 @@
 
 """ Import all of the data into one dataframe. """
 function importData()
-	dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
+    dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
-	yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
+    yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
     affDF = DataFrame!(CSV.File(joinpath(dataDir, "mutAffData.csv")))
     exprDF = DataFrame!(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
 
@@ -19,7 +19,7 @@ end
 
 """ Import the saved fit. """
 function importFit()
-	dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-	fitVec = DataFrame!(CSV.File(joinpath(dataDir, "fitTry.csv")))
-	return fitVec
+    dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
+    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "fitTry.csv")))
+    return fitVec
 end
