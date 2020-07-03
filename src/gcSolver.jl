@@ -133,6 +133,7 @@ end
 
 
 include("figures/figureJ1.jl")
+include("figures/figureJ2.jl")
 
 function figureAll()
     figureJ1()

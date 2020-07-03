@@ -1,5 +1,6 @@
 """ This file builds the depletion manuscript, Figure 1. """
 
+
 # Plot of dose response curves
 function doseResPlot(ligandName, cellType, date, unkVec)
     responseDF = importData()
@@ -16,7 +17,6 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
     realDataDF = groupby(realDataDF, [:Time, :Dose])
     realDataDF = combine(realDataDF, :Mean => mean)
-    println(realDataDF)
 
     for (i, dose) in enumerate(doseVec)
 
