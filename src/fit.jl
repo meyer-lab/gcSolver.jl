@@ -1,5 +1,7 @@
 using BlackBoxOptim
 
+dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
+
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
@@ -123,7 +125,7 @@ function resids(x::Vector{T})::T where {T}
         end
     end
 
-    @assert all(df.MeanPredict .>= 0.0)
+    #@assert all(df.MeanPredict .>= 0.0)
     dateFilt1 = filter(row -> string(row["Date"]) .== "2019-04-19", df)
     dateFilt2 = filter(row -> string(row["Date"]) .== "2019-05-02", df)
     dateFilt1.MeanPredict = dateFilt1.MeanPredict * x[24] * 1e6
@@ -140,14 +142,15 @@ function runFit(; itern = 1000000)
     unk0 = log.(getUnkVec())
     low = fill(-Inf, size(unk0))
     high = fill(0.7, size(unk0))
-    low = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]
+    low = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]
     high = [0.001, 0.1, 1., 0.2, 0.2, 0.2, 0.2, 2., 0.1, 2., 0.2, 0.2, 0.3, 2.5, 2.5, 0.2, 0.5, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.4, 0.4]
 
-    res = bboptimize(resids; SearchRange=collect(zip(low, high)), TraceMode = :verbose, NumDimensions = 25)
+    res = bboptimize(resids; SearchRange=collect(zip(low, high)), TraceMode = :verbose, NumDimensions = 25, MaxTime=36000)
     bboxBest = best_candidate(res)
-    CSV.write(joinpath(dataDir, "BBoxResults.csv"), bboxBest)
+    bboxBestDF = DataFrame(Fit = bboxBest)
+    CSV.write(joinpath(dataDir, "BBoxResults.csv"), bboxBestDF)
 
-    return res.minimizer
+    return bboxBestDF
 end
 
 export getExpression, getUnkVec, fitParams
