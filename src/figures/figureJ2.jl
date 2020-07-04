@@ -45,7 +45,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec)
         end
     end
 
-    pl1 = plot(
+    pl1 = gdf.plot(
         layer(predictDF, x = :Dose, y = :sensitivity, color = :tps, Geom.line),
         Scale.x_log10,
         Guide.title(string(cellType, " Response to ", ligandName)),
