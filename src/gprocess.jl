@@ -55,7 +55,7 @@ function LOOmutein()
         muteinList[df.Ligand .== mutein] .= mutein
     end
     CVDF = DataFrame(Y_pred=y_pred, Yreal=y, Ligand=muteinList)
-    CVplt = plot(
+    CVplt = gdf.plot(
         layer(CVDF, x = :Yreal, y = :Y_pred, color = :Ligand, Geom.point),
         Guide.title(string("Leave-One-Mutein-Out CV")),
         Guide.xlabel("Actual pSTAT"),
@@ -86,6 +86,7 @@ function LOOcell()
         cellList[df.Cell .== cell] .= cell
     end
     CVDF = DataFrame(Y_pred=y_pred, Yreal=y, Cell=cellList)
+
     CVplt = gdf.plot(
         layer(CVDF, x = :Yreal, y = :Y_pred, color = :Cell, Geom.point),
         Guide.title(string("Leave-One-Cell-Out CV")),
