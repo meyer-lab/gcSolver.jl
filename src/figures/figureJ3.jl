@@ -38,7 +38,7 @@ function gpPlot(ligandName, cellType)
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
         μs[i, :], σ²s[i, :] = predict_f(gp, xMat')
-        plt.plot!(doseVec, [μs[i, :] μs[i, :]], fillrange=[μs[i, :].-σ²s[i, :] μs[i, :].+σ²s[i, :]], fillalpha=0.3, c=colors[i], xscale = :log10, label="")
+        plt.plot!(doseVec, [μs[i, :] μs[i, :]], fillrange=[μs[i, :].-σ²s[i, :] μs[i, :].+σ²s[i, :]], fillalpha=0.3, c=colors[i], xscale = :log10, label="", title = string(cellType, " Response to ", ligandName, " GP Model"), titlefontsize=9)
         plt.plot!(doseVec, μs[i, :], c=colors[i], xscale = :log10, label=ITtime, legend=:bottomright)
         
         if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1)) > 0
@@ -70,5 +70,5 @@ function figureJ3()
     p12 = gpPlot("R38Q N-term", "CD8")
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
     ffig = plt.plot(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, layout = l, size = (1200, 1200))
-    plt.svg(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ3.svg"))
+    plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ3.svg"))
 end
