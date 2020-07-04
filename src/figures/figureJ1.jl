@@ -42,7 +42,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     end
 
     #print(realDataDF.Mean_mean)
-    pl1 = plot(
+    pl1 = gdf.plot(
         layer(realDataDF, x = :Dose, y = :Mean_mean, color = :Time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
         Scale.x_log10,

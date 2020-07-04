@@ -6,7 +6,8 @@ import ForwardDiff
 using Optim
 using Statistics
 import ModelingToolkit
-using Gadfly
+using Gadfly; gdf = Gadfly
+using Plots; plt = Plots
 import CSV
 using DataFrames
 
@@ -134,9 +135,12 @@ end
 
 include("figures/figureJ1.jl")
 include("figures/figureJ2.jl")
+include("figures/figureJ3.jl")
 
 function figureAll()
     figureJ1()
+    figureJ2()
+    figureJ3()
 end
 
 
