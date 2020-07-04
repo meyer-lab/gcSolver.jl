@@ -59,8 +59,7 @@ end
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ1()
     fitVec = importFit()
-    fitVec = convert(Vector{Float64}, fitVec[!, :value])
-    p1 = doseResPlot("IL2", "Treg", "2019-04-19", fitVec)
+    fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
     p1 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
     p2 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
     p3 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
