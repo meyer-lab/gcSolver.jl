@@ -1,5 +1,6 @@
 """ This file builds the depletion manuscript, Figure 1. """
 
+
 # Plot of dose response curves
 function doseResPlot(ligandName, cellType, date, unkVec)
     responseDF = importData()
@@ -16,7 +17,6 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
     realDataDF = groupby(realDataDF, [:Time, :Dose])
     realDataDF = combine(realDataDF, :Mean => mean)
-    println(realDataDF)
 
     for (i, dose) in enumerate(doseVec)
 
@@ -29,7 +29,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
 
         #Gives back 36 parameter long
         idxx = findfirst(responseDF.Cell .== cellType)
-        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cellType)
+        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]), cellType)
         if ligandName != "IL2" && ligandName != "IL15"
             iterParams = mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
         end
@@ -42,7 +42,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     end
 
     #print(realDataDF.Mean_mean)
-    pl1 = plot(
+    pl1 = gdf.plot(
         layer(realDataDF, x = :Dose, y = :Mean_mean, color = :Time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
         Scale.x_log10,

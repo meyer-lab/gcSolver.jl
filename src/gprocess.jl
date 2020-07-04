@@ -1,4 +1,5 @@
 using GaussianProcesses
+using Gadfly; gdf = Gadfly
 import StatsBase: indicatormat
 
 
@@ -41,6 +42,7 @@ function LOOmutein()
 
     muteins = unique(df.Ligand)
     y_pred = zeros(length(y))
+    muteinList = Array{String}(undef, length(y))
 
     for mutein in muteins
         X_train = X[df.Ligand .!== mutein, :]
@@ -50,7 +52,49 @@ function LOOmutein()
 
         yp, _ = predict_f(gp, X[df.Ligand .== mutein, :]')
         y_pred[df.Ligand .== mutein] .= yp
+        muteinList[df.Ligand .== mutein] .= mutein
     end
+    CVDF = DataFrame(Y_pred=y_pred, Yreal=y, Ligand=muteinList)
+    CVplt = gdf.plot(
+        layer(CVDF, x = :Yreal, y = :Y_pred, color = :Ligand, Geom.point),
+        Guide.title(string("Leave-One-Mutein-Out CV")),
+        Guide.xlabel("Actual pSTAT"),
+        Guide.ylabel("Predicted pSTAT"),
+        Scale.color_discrete(),
+        Guide.colorkey(title = "Ligand"),
+    )
+    draw(SVG("LOMOcv.svg", 600px, 600px), CVplt)
+    println(cor(y, y_pred))
+end
 
+
+function LOOcell()
+    X, y, df = getGPdata()
+
+    cells = unique(df.Cell)
+    y_pred = zeros(length(y))
+    cellList = Array{String}(undef, length(y))
+
+    for cell in cells
+        X_train = X[df.Cell .!== cell, :]
+        y_train = y[df.Cell .!== cell]
+
+        gp = gaussianProcess(X_train', y_train)
+
+        yp, _ = predict_f(gp, X[df.Cell .== cell, :]')
+        y_pred[df.Cell .== cell] .= yp
+        cellList[df.Cell .== cell] .= cell
+    end
+    CVDF = DataFrame(Y_pred=y_pred, Yreal=y, Cell=cellList)
+
+    CVplt = gdf.plot(
+        layer(CVDF, x = :Yreal, y = :Y_pred, color = :Cell, Geom.point),
+        Guide.title(string("Leave-One-Cell-Out CV")),
+        Guide.xlabel("Actual pSTAT"),
+        Guide.ylabel("Predicted pSTAT"),
+        Scale.color_discrete(),
+        Guide.colorkey(title = "Cell Type"),
+    )
+    draw(SVG("LOCOcv.svg", 600px, 600px), CVplt)
     println(cor(y, y_pred))
 end

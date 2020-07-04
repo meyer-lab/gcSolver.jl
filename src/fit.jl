@@ -102,7 +102,7 @@ function resids(x::Vector{T})::T where {T}
             ligVec = [dose, 0.0, 0.0]
             for cell in unique(df.Cell)
                 idxx = findfirst(df.Cell .== cell)
-                vector = vec(fitParams(ligVec, x, 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cell))
+                vector = vec(fitParams(ligVec, x, 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]), cell))
                 if ligand != "IL2"
                     vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
                 end
