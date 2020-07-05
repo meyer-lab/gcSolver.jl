@@ -1,6 +1,7 @@
 """ This file builds the depletion manuscript, Figure 1. """
 
-using Plots; plt = Plots
+using Plots;
+plt = Plots;
 
 # Plot of dose response curves
 function gpPlot(ligandName, cellType)
@@ -16,18 +17,18 @@ function gpPlot(ligandName, cellType)
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
     realDataDF = groupby(realDataDF, [:Time, :Dose])
     realDataDF = combine(realDataDF, :Mean => mean)
-    
+
     fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
-    intrinsLevels =  identity.(convert(Matrix, fullDataX)[1, 3:9])
+    intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:9])
     xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
-    
+
     #Train data
     X, y, df = getGPdata()
     gp = gaussianProcess(X', y)
-    colors=["aqua", "coral", "darkorchid", "goldenrod"]
+    colors = ["aqua", "coral", "darkorchid", "goldenrod"]
     μs = zeros(length(time), length(doseVec))
     σ²s = similar(μs)
-    
+
     pl1 = plt.plot()
 
     for (i, ITtime) in enumerate(time)
@@ -38,15 +39,25 @@ function gpPlot(ligandName, cellType)
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
         μs[i, :], σ²s[i, :] = predict_f(gp, xMat')
-        plt.plot!(doseVec, [μs[i, :] μs[i, :]], fillrange=[μs[i, :].-σ²s[i, :] μs[i, :].+σ²s[i, :]], fillalpha=0.3, c=colors[i], xscale = :log10, label="", title = string(cellType, " Response to ", ligandName, " GP Model"), titlefontsize=9)
-        plt.plot!(doseVec, μs[i, :], c=colors[i], xscale = :log10, label=ITtime, legend=:bottomright)
-        
+        plt.plot!(
+            doseVec,
+            [μs[i, :] μs[i, :]],
+            fillrange = [μs[i, :] .- σ²s[i, :] μs[i, :] .+ σ²s[i, :]],
+            fillalpha = 0.3,
+            c = colors[i],
+            xscale = :log10,
+            label = "",
+            title = string(cellType, " Response to ", ligandName, " GP Model"),
+            titlefontsize = 9,
+        )
+        plt.plot!(doseVec, μs[i, :], c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright)
+
         if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1)) > 0
-            plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1), c=colors[i], xscale = :log10, label="")   
+            plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1), c = colors[i], xscale = :log10, label = "")
         end
-        
+
     end
-    
+
     ylabel!("pSTAT")
     xlabel!("Dose (nM)")
 
@@ -55,7 +66,7 @@ end
 
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ3()
-    l = @layout [a b c d ; e f g h ; j i k l]
+    l = @layout [a b c d; e f g h; j i k l]
     p1 = gpPlot("WT N-term", "Treg")
     p2 = gpPlot("WT N-term", "Thelper")
     p3 = gpPlot("WT N-term", "NK")

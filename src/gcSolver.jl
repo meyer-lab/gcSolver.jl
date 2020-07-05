@@ -6,8 +6,10 @@ import ForwardDiff
 using Optim
 using Statistics
 import ModelingToolkit
-using Gadfly; gdf = Gadfly
-using Plots; plt = Plots
+using Gadfly
+gdf = Gadfly
+using Plots
+plt = Plots
 import CSV
 using DataFrames
 
