@@ -32,13 +32,13 @@ function doseResPlot2(ligandName, cellType, date, unkVec)
 
         #Gives back 36 parameter long
         idxx = findfirst(responseDF.Cell .== cellType)
-        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra , :IL2Rb , :IL7Ra, :gc]]), cellType)
+        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]), cellType)
         if ligandName != "IL2" && ligandName != "IL15"
             iterParams = mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
         end
 
         jacResults = runRecJac(tps, iterParams)
-        
+
         for indx = 1:length(tps)
             #use dataframe and push row into it - enter data into data frame
             push!(predictDF, (dose, tps[indx] / 60, jacResults[1, indx]))
@@ -60,7 +60,7 @@ end
 
 function runRecJac(tps::Vector, params::Vector)
     checkInputs(tps, params)
-    
+
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
         pp = vcat(params[1:24], x, params[30:end])
@@ -74,7 +74,7 @@ function runRecJac(tps::Vector, params::Vector)
 end
 
 
-    
+
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ2()
     fitVec = importFit()
