@@ -19,7 +19,8 @@ end
 
 """ Import the saved fit. """
 function importFit()
-    dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "fitTry.csv")))
-    return fitVec
+	dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
+	fitVec = DataFrame!(CSV.File(joinpath(dataDir, "BBoxResults.csv")))
+	return fitVec
+
 end
