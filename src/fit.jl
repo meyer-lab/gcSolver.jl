@@ -142,10 +142,10 @@ function runFit(; itern = 1000000)
     unk0 = log.(getUnkVec())
     low = fill(-Inf, size(unk0))
     high = fill(0.7, size(unk0))
-    low = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]
-    high = [0.001, 0.1, 1., 0.2, 0.2, 0.2, 0.2, 2., 0.1, 2., 0.2, 0.2, 0.3, 2.5, 2.5, 0.2, 0.5, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.4, 0.4]
+    low = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    high = [0.001, 0.1, 1.0, 0.2, 0.2, 0.2, 0.2, 2.0, 0.1, 2.0, 0.2, 0.2, 0.3, 2.5, 2.5, 0.2, 0.5, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.4, 0.4]
 
-    res = bboptimize(resids; SearchRange=collect(zip(low, high)), TraceMode = :verbose, NumDimensions = 25, MaxTime=36000)
+    res = bboptimize(resids; SearchRange = collect(zip(low, high)), TraceMode = :verbose, NumDimensions = 25, MaxTime = 36000)
     bboxBest = best_candidate(res)
     bboxBestDF = DataFrame(Fit = bboxBest)
     CSV.write(joinpath(dataDir, "BBoxResults.csv"), bboxBestDF)
