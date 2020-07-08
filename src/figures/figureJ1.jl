@@ -60,6 +60,7 @@ end
 function figureJ1()
     fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
+    """
     p1 = doseResPlot("IL2", "Treg", "2019-03-19", fitVec)
     p2 = doseResPlot("IL2", "Thelper", "2019-03-19", fitVec)
     p3 = doseResPlot("IL2", "NK", "2019-03-15", fitVec)
@@ -72,6 +73,7 @@ function figureJ1()
     p10 = doseResPlot("R38Q/H16N", "Thelper", "2019-04-19", fitVec)
     p11 = doseResPlot("R38Q/H16N", "NK", "2019-05-02", fitVec)
     p12 = doseResPlot("R38Q/H16N", "CD8", "2019-05-02", fitVec)
+    """
     p13 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
     p14 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
     p15 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
@@ -85,5 +87,5 @@ function figureJ1()
     p23 = doseResPlot("R38Q N-term", "NK", "2019-05-02", fitVec)
     p24 = doseResPlot("R38Q N-term", "CD8", "2019-05-02", fitVec)
     #draw(SVG("figureJ2.svg", 1000px, 800px), p1)
-    draw(SVG("figureJ2.svg", 4000px, 1600px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
+    draw(SVG("figureJ2.svg", 4000px, 1600px), gridstack([p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
 end
