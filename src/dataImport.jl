@@ -4,7 +4,7 @@ function importData()
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
     yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
-    affDF = DataFrame!(CSV.File(joinpath(dataDir, "mutAffData.csv")))
+    affDF = DataFrame!(CSV.File(joinpath(dataDir, "WTmutAffData.csv")))
     exprDF = DataFrame!(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
 
     exprDF = stack(exprDF, [:Treg, :Thelper, :NK, :CD8]; variable_name = "Cell")
