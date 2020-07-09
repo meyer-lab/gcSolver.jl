@@ -7,10 +7,17 @@ import StatsBase: indicatormat
 function getGPdata()
     fullData = importData()
 
+    hotEnc = indicatormat(fullData.Cell)
+    hotEncName = sort(unique(fullData.Cell))
+
     fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
     fullDataY = log10.(fullData.Mean .+ 1.0)
 
     fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]] = log10.(fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]])
+
+    for (ii, iiName) in enumerate(hotEncName)
+        fullDataX[!, iiName] = vec(hotEnc[ii, :])
+    end
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
 end
@@ -98,4 +105,18 @@ function LOOcell()
     )
     draw(SVG("LOCOcv.svg", 600px, 600px), CVplt)
     println(cor(y, y_pred))
+end
+
+function cellHotEnc(cellType)
+    if cellType == "CD8"
+        return [1, 0, 0, 0]
+    elseif cellType == "NK"
+        return [0, 1, 0, 0]
+    elseif cellType == "Thelper"
+        return [0, 0, 1, 0]
+    elseif cellType == "Treg"
+        return [0, 0, 0, 1]
+    else
+        error("Unrecognized Cell Type")
+    end
 end
