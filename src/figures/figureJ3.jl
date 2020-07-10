@@ -48,7 +48,7 @@ function gpPlot(ligandName, cellType, gp)
             title = string(cellType, " Response to ", ligandName, " GP Model"),
             titlefontsize = 9,
         )
-        plt.plot!(doseVec, μs[i, :], c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize=5, markersize=5)
+        plt.plot!(doseVec, μs[i, :], c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
 
         if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1)) > 0
             plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1), c = colors[i], xscale = :log10, label = "")
@@ -92,6 +92,33 @@ function figureJ3()
     p23 = gpPlot("R38Q N-term", "NK", trainedGP)
     p24 = gpPlot("R38Q N-term", "CD8", trainedGP)
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
-    ffig = plt.plot(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, layout = l, size = (1200, 2000))
+    ffig = plt.plot(
+        p1,
+        p2,
+        p3,
+        p4,
+        p5,
+        p6,
+        p7,
+        p8,
+        p9,
+        p10,
+        p11,
+        p12,
+        p13,
+        p14,
+        p15,
+        p16,
+        p17,
+        p18,
+        p19,
+        p20,
+        p21,
+        p22,
+        p23,
+        p24,
+        layout = l,
+        size = (1200, 2000),
+    )
     plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ3.svg"))
 end
