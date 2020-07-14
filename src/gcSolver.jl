@@ -144,7 +144,7 @@ function figureAll()
     figureJ1()
     figureJ2()
     figureJ3()
-    figureJ4()
+    figureJ5()
 end
 
 
