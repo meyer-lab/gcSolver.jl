@@ -120,3 +120,21 @@ function cellHotEnc(cellType)
         error("Unrecognized Cell Type")
     end
 end
+
+function runCkineVarPropGP(gp, xRow, sigma)::Vector
+
+    # Sigma is the covariance matrix of the input parameters
+    function jacF(x)
+        
+        pp = vcat(xRow[1:5], x[1:2], xRow[8], x[3], xRow[10:end])
+        pp = reshape(pp, (13, 1))
+        μ, σ² = predict_f(gp, pp)
+        return μ
+    end
+
+    jac = zeros(3, 1)
+    ForwardDiff.jacobian!(jac, jacF, append!(xRow[6:7], xRow[9]))
+
+    # Just return the diagonal for the marginal variance
+    return diag(transpose(jac) * sigma * jac)
+end
