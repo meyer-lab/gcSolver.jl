@@ -15,12 +15,9 @@ function cellTypeContr(gp, realType, compType)
     # returns tuple of arrays
     
     #modify RealX
-    for ind = 10:13
-        hotEnc = cellHotEnc(compType)
-        for indx = length(hotEnc)
-            realX[ind,indx] = hotEnc[indx]
-        end
-    end
+    hotEnc = cellHotEnc(compType)
+    realX[:, 10:13] = repeat(hotEnc, outer = [1, size(realX)[1]])'
+
     #realX[10:13,:] = cellHotEnc(compType)
     compPreds = predict_f(gp, realX')
 
@@ -73,5 +70,5 @@ function figureJ4()
     p11 = cellTypeContr(trainedGP, "CD8", "Thelper")
     p12 = cellTypeContr(trainedGP, "CD8", "NK")
     
-    draw(SVG("figureJ4.svg", 4000px, 1600px), gridstack([p1 p2 p3; p4 p5 p6; p7 p8 p9; p10 p11 p12]))
+    draw(SVG("figureJ4.svg", 2500px, 1600px), gridstack([p1 p2 p3; p4 p5 p6; p7 p8 p9; p10 p11 p12]))
 end
