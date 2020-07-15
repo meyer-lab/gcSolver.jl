@@ -56,8 +56,8 @@ function gpPlot(ligandName, cellType, gp)
 
     end
 
-    ylabel!("pSTAT")
-    xlabel!("Dose (nM)")
+    ylabel!("pSTAT", yguidefontsize=7)
+    xlabel!("Dose (nM)", xguidefontsize=7)
 
     return pl1
 end
@@ -118,7 +118,7 @@ function figureJ3()
         p23,
         p24,
         layout = l,
-        size = (1200, 2000),
+        size = (1600, 2400),
     )
     plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ3.svg"))
 end
