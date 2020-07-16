@@ -43,13 +43,21 @@ function gpPlotVar(ligandName, cellType, gp)
         plt.plot!(doseVec, vars, c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
 
         if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Variance_mean .+ 1)) > 0
-            plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Variance_mean .+ 1), c = colors[i], xscale = :log10, label = "", title = string(cellType, " Response to ", ligandName, " GP Model"), titlefontsize = 9)
+            plt.scatter!(
+                doseVec,
+                log10.(realDataDF[realDataDF.Time .== ITtime, :].Variance_mean .+ 1),
+                c = colors[i],
+                xscale = :log10,
+                label = "",
+                title = string(cellType, " Response to ", ligandName, " GP Model"),
+                titlefontsize = 9,
+            )
         end
 
     end
 
-    ylabel!("log pSTAT Variance", yguidefontsize=7)
-    xlabel!("Dose (nM)", xguidefontsize=7)
+    ylabel!("log pSTAT Variance", yguidefontsize = 7)
+    xlabel!("Dose (nM)", xguidefontsize = 7)
 
     return pl1
 end
