@@ -24,3 +24,30 @@ function importFit()
     return fitVec
 
 end
+
+"""Creates Sigma for Var Propagation"""
+function getSigma(cellType)
+    dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
+    sigma = zeros(3, 3)
+
+    momentDF = DataFrame!(CSV.File(joinpath(dataDir, "receptor_moments.csv")))
+    covDF = DataFrame!(CSV.File(joinpath(dataDir, "receptor_covariances.csv")))
+
+    momentDF = momentDF[!, ["Cell Type", "Receptor", "Variance"]]
+    momentDF = groupby(momentDF, ["Cell Type", "Receptor"])
+    momentDF = combine(momentDF, :Variance => mean)
+    filter!(row -> row["Cell Type"] .== cellType, momentDF)
+    for i in 1:3
+        sigma[i, i] = momentDF[i, "Variance_mean"]
+    end
+
+    covDF = covDF[!, ["Cell Type", "CD25:Receptor", "Covariance"]]
+    covDF = groupby(covDF, ["Cell Type", "CD25:Receptor"])
+    covDF = combine(covDF, :Covariance => mean)
+    filter!(row -> row["Cell Type"] .== "Treg", covDF)
+    for i in 2:3
+        sigma[1, i] = sigma[i, 1] = covDF[i-1, "Covariance_mean"]
+    end
+
+    return sigma
+end
