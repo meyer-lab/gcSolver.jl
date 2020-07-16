@@ -1,4 +1,5 @@
 using GaussianProcesses
+import GaussianProcesses: predict_LOO
 using Gadfly;
 gdf = Gadfly;
 import StatsBase: indicatormat
@@ -42,6 +43,31 @@ function gaussianTest()
     gp = gaussianProcess(X', y)
 
     μ, σ2 = predict_f(gp, X[1:2, :]')
+end
+
+
+
+function LOOCV()
+    X, y, df = getGPdata()
+
+    muteins = unique(df.Ligand)
+    y_pred = zeros(length(y))
+    muteinList = Array{String}(undef, length(y))
+    gp = gaussianProcess(X', y)
+
+    y_pred, _ = GaussianProcesses.predict_LOO(gp)
+    muteinList = df.Ligand
+    CVDF = DataFrame(Y_pred = y_pred, Yreal = y, Ligand = muteinList)
+    print(first(CVDF, 50))
+    CVplt = gdf.plot(
+        layer(CVDF, x = :Yreal, y = :Y_pred, color = :Ligand, Geom.point),
+        Guide.xlabel("Actual pSTAT (log 10)"),
+        Guide.ylabel("Predicted pSTAT (log 10)"),
+        Scale.color_discrete(),
+        Guide.colorkey(title = "Ligand"),
+    )
+    draw(SVG("LOOOcv.svg", 600px, 600px), CVplt)
+    println(cor(y, y_pred))
 end
 
 
