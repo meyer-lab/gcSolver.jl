@@ -6,7 +6,7 @@ function doseResPlot(ligandName, cellType, date, unkVec)
     responseDF = importData()
     time = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
-    doseVec = doseVec[:, 1]
+    doseVec = doseVec[!, :Dose]
 
     predictDF = DataFrame(Dose = Float64[], time = Float64[], pSTAT = Float64[])
 
@@ -41,7 +41,6 @@ function doseResPlot(ligandName, cellType, date, unkVec)
         end
     end
 
-    #print(realDataDF.Mean_mean)
     pl1 = gdf.plot(
         layer(realDataDF, x = :Dose, y = :Mean_mean, color = :Time, Geom.point),
         layer(predictDF, x = :Dose, y = :pSTAT, color = :time, Geom.line),
@@ -61,31 +60,31 @@ function figureJ1()
     fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
     """
-    p1 = doseResPlot("IL2", "Treg", "2019-03-19", fitVec)
-    p2 = doseResPlot("IL2", "Thelper", "2019-03-19", fitVec)
-    p3 = doseResPlot("IL2", "NK", "2019-03-15", fitVec)
-    p4 = doseResPlot("IL2", "CD8", "2019-03-15", fitVec)
-    p5 = doseResPlot("IL15", "Treg", "2019-03-19", fitVec)
-    p6 = doseResPlot("IL15", "Thelper", "2019-03-19", fitVec)
-    p7 = doseResPlot("IL15", "NK", "2019-03-15", fitVec)
-    p8 = doseResPlot("IL15", "CD8", "2019-03-15", fitVec)
-    p9 = doseResPlot("R38Q/H16N", "Treg", "2019-04-19", fitVec)
-    p10 = doseResPlot("R38Q/H16N", "Thelper", "2019-04-19", fitVec)
-    p11 = doseResPlot("R38Q/H16N", "NK", "2019-05-02", fitVec)
-    p12 = doseResPlot("R38Q/H16N", "CD8", "2019-05-02", fitVec)
+    p1 = doseResPlot("IL2", "Treg", "3/19/2019", fitVec)
+    p2 = doseResPlot("IL2", "Thelper", "3/19/2019", fitVec)
+    p3 = doseResPlot("IL2", "NK", "3/15/2019", fitVec)
+    p4 = doseResPlot("IL2", "CD8", "3/15/2019", fitVec)
+    p5 = doseResPlot("IL15", "Treg", "3/19/2019", fitVec)
+    p6 = doseResPlot("IL15", "Thelper", "3/19/2019", fitVec)
+    p7 = doseResPlot("IL15", "NK", "3/15/2019", fitVec)
+    p8 = doseResPlot("IL15", "CD8", "3/15/2019", fitVec)
+    p9 = doseResPlot("R38Q/H16N", "Treg", "4/19/2019", fitVec)
+    p10 = doseResPlot("R38Q/H16N", "Thelper", "4/19/2019", fitVec)
+    p11 = doseResPlot("R38Q/H16N", "NK", "5/02/2019", fitVec)
+    p12 = doseResPlot("R38Q/H16N", "CD8", "3/19/2019", fitVec)
     """
-    p13 = doseResPlot("WT N-term", "Treg", "2019-04-19", fitVec)
-    p14 = doseResPlot("WT N-term", "Thelper", "2019-04-19", fitVec)
-    p15 = doseResPlot("WT N-term", "NK", "2019-05-02", fitVec)
-    p16 = doseResPlot("WT N-term", "CD8", "2019-05-02", fitVec)
-    p17 = doseResPlot("H16N N-term", "Treg", "2019-04-19", fitVec)
-    p18 = doseResPlot("H16N N-term", "Thelper", "2019-04-19", fitVec)
-    p19 = doseResPlot("H16N N-term", "NK", "2019-05-02", fitVec)
-    p20 = doseResPlot("H16N N-term", "CD8", "2019-05-02", fitVec)
-    p21 = doseResPlot("R38Q N-term", "Treg", "2019-04-19", fitVec)
-    p22 = doseResPlot("R38Q N-term", "Thelper", "2019-04-19", fitVec)
-    p23 = doseResPlot("R38Q N-term", "NK", "2019-05-02", fitVec)
-    p24 = doseResPlot("R38Q N-term", "CD8", "2019-05-02", fitVec)
+    p13 = doseResPlot("WT N-term", "Treg", "4/19/2019", fitVec)
+    p14 = doseResPlot("WT N-term", "Thelper", "4/19/2019", fitVec)
+    p15 = doseResPlot("WT N-term", "NK", "5/2/2019", fitVec)
+    p16 = doseResPlot("WT N-term", "CD8", "5/2/2019", fitVec)
+    p17 = doseResPlot("H16N N-term", "Treg", "4/19/2019", fitVec)
+    p18 = doseResPlot("H16N N-term", "Thelper", "4/19/2019", fitVec)
+    p19 = doseResPlot("H16N N-term", "NK", "5/2/2019", fitVec)
+    p20 = doseResPlot("H16N N-term", "CD8", "5/2/2019", fitVec)
+    p21 = doseResPlot("R38Q N-term", "Treg", "4/19/2019", fitVec)
+    p22 = doseResPlot("R38Q N-term", "Thelper", "4/19/2019", fitVec)
+    p23 = doseResPlot("R38Q N-term", "NK", "5/2/2019", fitVec)
+    p24 = doseResPlot("R38Q N-term", "CD8", "5/2/2019", fitVec)
     #draw(SVG("figureJ2.svg", 1000px, 800px), p1)
-    draw(SVG("figureJ2.svg", 4000px, 1600px), gridstack([p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
+    draw(SVG("figureJ1.svg", 4000px, 1600px), gridstack([p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
 end

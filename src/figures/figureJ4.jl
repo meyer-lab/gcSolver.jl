@@ -1,12 +1,12 @@
 """ This file builds the depletion manuscript, Figure 4. """
 
-function cellTypeContr(gp, realType, compType)
+function cellTypeContr(gp, realType, compType, recExp=false)
     x, y, df = getGPdata()
     predDF = DataFrame(realPred = Float64[], fakePred = Float64[])
     
     
     #RealX = only rows with x axis cell-type, want it to make predictions
-    realX = x[df.Cell .!== realType, :]    
+    realX = x[df.Cell .== realType, :]    
     #realX = filter(row -> row["Cell"] .!== realType, df)
     
     #println("RealX size = ", size(realX,2))
@@ -38,13 +38,13 @@ function cellTypeContr(gp, realType, compType)
     end
     
     #println("predDF = ", predDF[1:20,:])
-    
     predComp = gdf.plot(
         layer(predDF, x = :realPred, y = :fakePred, Geom.point),
         Guide.title(string(compType, " influence on ", realType, " prediction")),
         Guide.xlabel("Correct Pred"),
         Guide.ylabel("Incorrect Pred")
     )
+        
     
     return predComp
 end
@@ -54,7 +54,7 @@ function figureJ4()
     x, y, df = getGPdata()
     trainedGP = gaussianProcess(x', y)
     
-    p1 = cellTypeContr(trainedGP, "Treg", "Thelper")
+    p1 = cellTypeContr(trainedGP, "Treg", "Thelper", true)
     p2 = cellTypeContr(trainedGP, "Treg", "NK")
     p3 = cellTypeContr(trainedGP, "Treg", "CD8")
     

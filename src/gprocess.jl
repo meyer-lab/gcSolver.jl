@@ -147,20 +147,38 @@ function cellHotEnc(cellType)
     end
 end
 
-function runCkineVarPropGP(gp, xRow, sigma)::Vector
+function runCkineVarPropGP(gp, xRow, sigma, cov=false)::Vector
 
     # Sigma is the covariance matrix of the input parameters
-    function jacF(x)
+    if cov
+    #take only variance in pstat explained by IL2Ra variance
+        function jacFCov(x)
+            pp = vcat(xRow[1:5], x[1], xRow[7:end])
+            pp = reshape(pp, (13, 1))
+            μ, σ² = predict_f(gp, pp)
+            return μ
+        end
 
-        pp = vcat(xRow[1:5], x[1:2], xRow[8], x[3], xRow[10:end])
-        pp = reshape(pp, (13, 1))
-        μ, σ² = predict_f(gp, pp)
-        return μ
+        jac = zeros(1, 1)
+        ForwardDiff.jacobian!(jac, jacFCov, [xRow[6]])
+
+        # Just return the diagonal for the marginal variance
+        return diag(transpose(jac) * sigma[1, 1] * jac)
+
+    else
+    #variance explained by all receptor expression discrepencies
+        function jacF(x)
+
+            pp = vcat(xRow[1:5], x[1:2], xRow[8], x[3], xRow[10:end])
+            pp = reshape(pp, (13, 1))
+            μ, σ² = predict_f(gp, pp)
+            return μ
+        end
+
+        jac = zeros(3, 1)
+        ForwardDiff.jacobian!(jac, jacF, append!(xRow[6:7], xRow[9]))
+
+        # Just return the diagonal for the marginal variance
+        return diag(transpose(jac) * sigma * jac)
     end
-
-    jac = zeros(3, 1)
-    ForwardDiff.jacobian!(jac, jacF, append!(xRow[6:7], xRow[9]))
-
-    # Just return the diagonal for the marginal variance
-    return diag(transpose(jac) * sigma * jac)
 end
