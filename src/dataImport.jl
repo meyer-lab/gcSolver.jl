@@ -3,7 +3,7 @@
 function importData()
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
-    yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
+    yData = DataFrame!(CSV.File(joinpath(dataDir, "WTmuteinsMoments.csv")))
     affDF = DataFrame!(CSV.File(joinpath(dataDir, "WTmutAffData.csv")))
     exprDF = DataFrame!(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
 
