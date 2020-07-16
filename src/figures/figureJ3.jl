@@ -56,8 +56,8 @@ function gpPlot(ligandName, cellType, gp)
 
     end
 
-    ylabel!("pSTAT", yguidefontsize=7)
-    xlabel!("Dose (nM)", xguidefontsize=7)
+    ylabel!("pSTAT", yguidefontsize = 7)
+    xlabel!("Dose (nM)", xguidefontsize = 7)
 
     return pl1
 end

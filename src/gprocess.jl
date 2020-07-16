@@ -125,7 +125,7 @@ function runCkineVarPropGP(gp, xRow, sigma)::Vector
 
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
-        
+
         pp = vcat(xRow[1:5], x[1:2], xRow[8], x[3], xRow[10:end])
         pp = reshape(pp, (13, 1))
         μ, σ² = predict_f(gp, pp)
