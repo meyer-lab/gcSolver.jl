@@ -8,7 +8,7 @@ function gpPlot(ligandName, cellType, gp)
     responseDF = importData()
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
-    doseVec = doseVec[:, 1]
+    doseVec = doseVec[!, :Dose]
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
