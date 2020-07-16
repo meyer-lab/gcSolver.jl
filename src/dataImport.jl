@@ -37,7 +37,7 @@ function getSigma(cellType)
     momentDF = groupby(momentDF, ["Cell Type", "Receptor"])
     momentDF = combine(momentDF, :Variance => mean)
     filter!(row -> row["Cell Type"] .== cellType, momentDF)
-    for i in 1:3
+    for i = 1:3
         sigma[i, i] = momentDF[i, "Variance_mean"]
     end
 
@@ -45,8 +45,8 @@ function getSigma(cellType)
     covDF = groupby(covDF, ["Cell Type", "CD25:Receptor"])
     covDF = combine(covDF, :Covariance => mean)
     filter!(row -> row["Cell Type"] .== "Treg", covDF)
-    for i in 2:3
-        sigma[1, i] = sigma[i, 1] = covDF[i-1, "Covariance_mean"]
+    for i = 2:3
+        sigma[1, i] = sigma[i, 1] = covDF[i - 1, "Covariance_mean"]
     end
 
     return sigma
