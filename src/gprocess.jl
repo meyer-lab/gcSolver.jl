@@ -61,8 +61,8 @@ function LOOCV()
     print(first(CVDF, 50))
     CVplt = gdf.plot(
         layer(CVDF, x = :Yreal, y = :Y_pred, color = :Ligand, Geom.point),
-        Guide.xlabel("Actual pSTAT ($log_10$)"),
-        Guide.ylabel("Predicted pSTAT ($log_10$)"),
+        Guide.xlabel("Actual pSTAT (log 10)"),
+        Guide.ylabel("Predicted pSTAT (log 10)"),
         Scale.color_discrete(),
         Guide.colorkey(title = "Ligand"),
     )
