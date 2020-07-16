@@ -55,21 +55,6 @@ function LOOCV()
     muteinList = Array{String}(undef, length(y))
     gp = gaussianProcess(X', y)
 
-    """
-    for row in (1:size(X)[1])
-        print(row)
-        X_train = X[1:end .!= row, :]
-        y_train = y[1:end .!= row]
-        print("indexed")
-
-        gp = gaussianProcess(X_train', y_train)
-        print("trained")
-
-        yp, _ = predict_f(gp, X[1:end .== row, :]')
-        y_pred[1:end .== row] .= yp
-        print("Predicted")
-    end
-    """
     y_pred, _ = GaussianProcesses.predict_LOO(gp)
     muteinList = df.Ligand
     CVDF = DataFrame(Y_pred = y_pred, Yreal = y, Ligand = muteinList)
