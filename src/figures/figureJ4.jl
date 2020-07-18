@@ -2,10 +2,10 @@
 
 function cellTypeContr(gp, realType, compType, recExp=false)
     x, y, df = getGPdata()
-    predDF = DataFrame(realPred = Float64[], fakePred = Float64[], ligand = String[])    
+    predDF = DataFrame(realPred = Float64[], fakePred = Float64[], ligand = String[]) 
     
     #RealX = only rows with x axis cell-type, want it to make predictions
-    realX = x[df.Cell .== realType, :]    
+    realX = x[df.Cell .== realType, :]
     #realX = filter(row -> row["Cell"] .!== realType, df)
     
     #println("RealX size = ", size(realX,2))
@@ -20,7 +20,7 @@ function cellTypeContr(gp, realType, compType, recExp=false)
     #realX[10:13,:] = cellHotEnc(compType)
     compPreds = predict_f(gp, realX')
     
-    ligands = df[!, :Ligand]
+    ligands = df[df.Cell .== realType, :].Ligand
     #println("ligands = ", ligands)
 
   
@@ -32,7 +32,7 @@ function cellTypeContr(gp, realType, compType, recExp=false)
     realVals = realPreds[1]
     fakeVals = compPreds[1]
     #for i in enumerate(realVals)
-    for i = 1:length(realVals)
+    for i = 1:length(ligands)
         #push!(predDF, (realPreds[i], compPreds[i]), ::float64)
         real = realVals[i]
         fake = fakeVals[i]
@@ -40,10 +40,9 @@ function cellTypeContr(gp, realType, compType, recExp=false)
         push!(predDF, (real, fake, lig))
 
     end
-    
     #println("predDF = ", predDF[1:20,:])
     predComp = gdf.plot(
-        layer(predDF, x = :realPred, y = :fakePred, Geom.point),
+        layer(predDF, x = :realPred, y = :fakePred, color = :ligand, Geom.point),
         Guide.title(string(compType, " influence on ", realType, " prediction")),
         Guide.xlabel("Correct Pred"),
         Guide.ylabel("Incorrect Pred"),
