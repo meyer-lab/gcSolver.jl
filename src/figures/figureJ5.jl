@@ -4,7 +4,7 @@ using Plots;
 plt = Plots;
 
 # Plot of dose response curves
-function gpPlotVar(ligandName, cellType, gp, cov=false)
+function gpPlotVar(ligandName, cellType, gp, cov = false)
     responseDF = importData()
     sigma = getSigma(cellType)
     time = [0.5, 1, 2, 4]
@@ -50,24 +50,40 @@ function gpPlotVar(ligandName, cellType, gp, cov=false)
             plt.plot!(doseVec, vars, c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
             if length(log10.(abs.(realDataDF[realDataDF.Time .== ITtime, :].alphStatCov_mean) .+ 1)) > 0
                 absCovs = abs.(realDataDF[realDataDF.Time .== ITtime, :].alphStatCov_mean)
-                plt.scatter!(doseVec, log10.(absCovs) .+ 1, c = colors[i], xscale = :log10, label = "", title = string(cellType, " Response to ", ligandName, " GP Model"), titlefontsize = 9)
+                plt.scatter!(
+                    doseVec,
+                    log10.(absCovs) .+ 1,
+                    c = colors[i],
+                    xscale = :log10,
+                    label = "",
+                    title = string(cellType, " Response to ", ligandName, " GP Model"),
+                    titlefontsize = 9,
+                )
             end
 
         else
             plt.plot!(doseVec, vars, c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
             if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Variance_mean .+ 1)) > 0
-                plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Variance_mean) .+ 1, c = colors[i], xscale = :log10, label = "", title = string(cellType, " Response to ", ligandName, " GP Model"), titlefontsize = 9)
+                plt.scatter!(
+                    doseVec,
+                    log10.(realDataDF[realDataDF.Time .== ITtime, :].Variance_mean) .+ 1,
+                    c = colors[i],
+                    xscale = :log10,
+                    label = "",
+                    title = string(cellType, " Response to ", ligandName, " GP Model"),
+                    titlefontsize = 9,
+                )
             end
         end
 
     end
 
     if cov
-        ylabel!("log pSTAT/IL2Ra Covariance", yguidefontsize=7)
-        xlabel!("Dose (nM)", xguidefontsize=7)
+        ylabel!("log pSTAT/IL2Ra Covariance", yguidefontsize = 7)
+        xlabel!("Dose (nM)", xguidefontsize = 7)
     else
-        ylabel!("log pSTAT Variance", yguidefontsize=7)
-        xlabel!("Dose (nM)", xguidefontsize=7)
+        ylabel!("log pSTAT Variance", yguidefontsize = 7)
+        xlabel!("Dose (nM)", xguidefontsize = 7)
     end
 
     return pl1
