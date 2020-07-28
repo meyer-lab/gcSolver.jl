@@ -39,7 +39,7 @@ function gpPlotVar(ligandName, cellType, gp, cov = false)
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
         xMat[:, 1] .= log10.(doseVec)
         xMat[:, 2] .= ITtime
-        xMat[:, 3:13] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
+        xMat[:, 3:size(xMat,2)] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
         for ii in (1:length(doseVec))

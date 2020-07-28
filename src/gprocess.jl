@@ -19,6 +19,22 @@ function getGPdata()
     for (ii, iiName) in enumerate(hotEncName)
         fullDataX[!, iiName] = vec(hotEnc[ii, :])
     end
+    
+    """# if 13th column = 1, change 12th clumn to = 1 and cut out 13th column
+    fullDataX[fullDataX[:, 13] == 1][12] == 1
+    # preliminray, change 13th column to 0's
+    fullDataX[fullDataX[:, 13] == 1][13] == 0"""
+    
+    combCD4 = fullDataX[:, size(fullDataX,2)]
+        #println("13 = ", thirteen)
+        #for (iii) in enumerate(thirteen)
+    for iii = 1:length(combCD4)
+        if combCD4[iii] == 1
+            fullDataX[iii,12] = 1
+        end
+    end
+    
+    fullDataX = fullDataX[:, 1:12]
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
 end
@@ -135,13 +151,13 @@ end
 
 function cellHotEnc(cellType)
     if cellType == "CD8"
-        return [1, 0, 0, 0]
+        return [1, 0, 0]
     elseif cellType == "NK"
-        return [0, 1, 0, 0]
+        return [0, 1, 0]
     elseif cellType == "Thelper"
-        return [0, 0, 1, 0]
+        return [0, 0, 1]
     elseif cellType == "Treg"
-        return [0, 0, 0, 1]
+        return [0, 0, 1]
     else
         error("Unrecognized Cell Type")
     end
@@ -154,7 +170,7 @@ function runCkineVarPropGP(gp, xRow, sigma, cov = false)::Vector
         #take only variance in pstat explained by IL2Ra variance
         function jacFCov(x)
             pp = vcat(xRow[1:5], x[1], xRow[7:end])
-            pp = reshape(pp, (13, 1))
+            pp = reshape(pp, size(xRow, 1), 1)
             μ, σ² = predict_f(gp, pp)
             return μ
         end
@@ -170,7 +186,7 @@ function runCkineVarPropGP(gp, xRow, sigma, cov = false)::Vector
         function jacF(x)
 
             pp = vcat(xRow[1:5], x[1:2], xRow[8], x[3], xRow[10:end])
-            pp = reshape(pp, (13, 1))
+            pp = reshape(pp, size(xRow, 1), 1)
             μ, σ² = predict_f(gp, pp)
             return μ
         end

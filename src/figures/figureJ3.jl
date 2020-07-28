@@ -4,7 +4,7 @@ using Plots;
 plt = Plots;
 
 # Plot of dose response curves
-function gpPlot(ligandName, cellType, gp)
+function gpPlot(ligandName, cellType, gp, compType = "none")
     responseDF = importData()
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
@@ -19,6 +19,7 @@ function gpPlot(ligandName, cellType, gp)
     realDataDF = combine(realDataDF, :Mean => mean)
 
     fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
+    
     intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:9])
     append!(intrinsLevels, cellHotEnc(cellType))
     xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
@@ -33,7 +34,7 @@ function gpPlot(ligandName, cellType, gp)
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
         xMat[:, 1] .= log10.(doseVec)
         xMat[:, 2] .= ITtime
-        xMat[:, 3:13] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
+        xMat[:, 3:size(xMat,2)] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
         μs[i, :], σ²s[i, :] = predict_f(gp, xMat')
@@ -55,6 +56,50 @@ function gpPlot(ligandName, cellType, gp)
         end
 
     end
+    
+    if compType != "none"
+        intrinsLevelsComp = identity.(convert(Matrix, fullDataX)[1, 3:9])
+        append!(intrinsLevelsComp, cellHotEnc(compType))
+        xMatComp = zeros(length(doseVec), length(intrinsLevelsComp) + 2)
+
+        colorsComp = ["turquoise3", "coral3", "darkorchid4", "darkgoldenrod"]
+        μsComp = zeros(length(time), length(doseVec))
+        σ²sComp = similar(μs)
+
+        #pl1 = plt.plot()
+
+        for (i, ITtime) in enumerate(time)
+            xMatComp = zeros(length(doseVec), length(intrinsLevelsComp) + 2)
+            xMatComp[:, 1] .= log10.(doseVec)
+            xMatComp[:, 2] .= ITtime
+            xMatComp[:, 3:size(xMatComp,2)] .= repeat(intrinsLevelsComp, outer = [1, length(doseVec)])'
+            xMatComp[:, 3] .= log10.(xMatComp[:, 3])
+            xMatComp[:, 4] .= log10.(xMatComp[:, 4])
+            μsComp[i, :], σ²sComp[i, :] = predict_f(gp, xMatComp')
+            
+            #assuming this adds to current plot
+            #linestyle not working, maybe dots are too big and looks like solid line?
+            plt.plot!(
+                doseVec,
+                [μsComp[i, :] μsComp[i, :]],
+                #fillrange = [μsComp[i, :] .- σ²sComp[i, :] μsComp[i, :] .+ σ²sComp[i, :]],
+                #fillalpha = 0.3,
+                c = colorsComp[i],
+                #linestyle = :dot,
+                xscale = :log10,
+                label = "",
+                title = string(cellType, " Response to ", ligandName, " GP Model"),
+                titlefontsize = 9,
+            )
+            labelString = string(compType, " ", ITtime)
+            plt.plot!(doseVec, μsComp[i, :], c = colorsComp[i], xscale = :log10, label = labelString, legend = :bottomright, legendfontsize = 5, markersize = 5)
+
+            # checks that we have data before attempting to plot it
+            if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1)) > 0
+                plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1), c = colorsComp[i], xscale = :log10, label = "")
+            end
+        end
+    end
 
     ylabel!("pSTAT", yguidefontsize = 7)
     xlabel!("Dose (nM)", xguidefontsize = 7)
@@ -67,7 +112,8 @@ function figureJ3()
     l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x]
     X, y, df = getGPdata()
     trainedGP = gaussianProcess(X', y)
-    p1 = gpPlot("IL2", "Treg", trainedGP)
+    #p1 = gpPlot("IL2", "Treg", trainedGP)
+    p1 = gpPlot("IL2", "Treg", trainedGP, "NK")
     p2 = gpPlot("IL2", "Thelper", trainedGP)
     p3 = gpPlot("IL2", "NK", trainedGP)
     p4 = gpPlot("IL2", "CD8", trainedGP)
@@ -120,5 +166,6 @@ function figureJ3()
         layout = l,
         size = (1600, 2400),
     )
+    #ffig = plt.plot(p1, size = (1600, 2400))
     plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ3.svg"))
 end
