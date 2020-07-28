@@ -170,7 +170,7 @@ function runCkineVarPropGP(gp, xRow, sigma, cov = false)::Vector
         #take only variance in pstat explained by IL2Ra variance
         function jacFCov(x)
             pp = vcat(xRow[1:5], x[1], xRow[7:end])
-            pp = reshape(pp, (size(gp,2), 1))
+            pp = reshape(pp, size(xRow, 1), 1)
             μ, σ² = predict_f(gp, pp)
             return μ
         end
@@ -186,7 +186,7 @@ function runCkineVarPropGP(gp, xRow, sigma, cov = false)::Vector
         function jacF(x)
 
             pp = vcat(xRow[1:5], x[1:2], xRow[8], x[3], xRow[10:end])
-            pp = reshape(pp, (size(gp,2), 1))
+            pp = reshape(pp, size(xRow, 1), 1)
             μ, σ² = predict_f(gp, pp)
             return μ
         end
