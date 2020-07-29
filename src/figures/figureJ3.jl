@@ -19,7 +19,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     realDataDF = combine(realDataDF, :Mean => mean)
 
     fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
-    
+
     intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:9])
     append!(intrinsLevels, cellHotEnc(cellType))
     xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
@@ -34,7 +34,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
         xMat[:, 1] .= log10.(doseVec)
         xMat[:, 2] .= ITtime
-        xMat[:, 3:size(xMat,2)] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
+        xMat[:, 3:size(xMat, 2)] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
         μs[i, :], σ²s[i, :] = predict_f(gp, xMat')
@@ -56,7 +56,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
         end
 
     end
-    
+
     if compType != "none"
         intrinsLevelsComp = identity.(convert(Matrix, fullDataX)[1, 3:9])
         append!(intrinsLevelsComp, cellHotEnc(compType))
@@ -72,11 +72,11 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
             xMatComp = zeros(length(doseVec), length(intrinsLevelsComp) + 2)
             xMatComp[:, 1] .= log10.(doseVec)
             xMatComp[:, 2] .= ITtime
-            xMatComp[:, 3:size(xMatComp,2)] .= repeat(intrinsLevelsComp, outer = [1, length(doseVec)])'
+            xMatComp[:, 3:size(xMatComp, 2)] .= repeat(intrinsLevelsComp, outer = [1, length(doseVec)])'
             xMatComp[:, 3] .= log10.(xMatComp[:, 3])
             xMatComp[:, 4] .= log10.(xMatComp[:, 4])
             μsComp[i, :], σ²sComp[i, :] = predict_f(gp, xMatComp')
-            
+
             #assuming this adds to current plot
             #linestyle not working, maybe dots are too big and looks like solid line?
             plt.plot!(
@@ -92,11 +92,26 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
                 titlefontsize = 9,
             )
             labelString = string(compType, " ", ITtime)
-            plt.plot!(doseVec, μsComp[i, :], c = colorsComp[i], xscale = :log10, label = labelString, legend = :bottomright, legendfontsize = 5, markersize = 5)
+            plt.plot!(
+                doseVec,
+                μsComp[i, :],
+                c = colorsComp[i],
+                xscale = :log10,
+                label = labelString,
+                legend = :bottomright,
+                legendfontsize = 5,
+                markersize = 5,
+            )
 
             # checks that we have data before attempting to plot it
             if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1)) > 0
-                plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1), c = colorsComp[i], xscale = :log10, label = "")
+                plt.scatter!(
+                    doseVec,
+                    log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1),
+                    c = colorsComp[i],
+                    xscale = :log10,
+                    label = "",
+                )
             end
         end
     end
