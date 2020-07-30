@@ -27,7 +27,7 @@ end
 " Assemble Gaussian process model. "
 function gaussianProcess(X, y::Vector)
     mZero = MeanZero()
-    kern = SE(0.0, 0.0)
+    kern = kern = RQIso(0., 0., 0.)
 
     gp = GP(X, y, mZero, kern)
 
@@ -58,7 +58,6 @@ function LOOCV()
     y_pred, _ = GaussianProcesses.predict_LOO(gp)
     muteinList = df.Ligand
     CVDF = DataFrame(Y_pred = y_pred, Yreal = y, Ligand = muteinList)
-    print(first(CVDF, 50))
     CVplt = gdf.plot(
         layer(CVDF, x = :Yreal, y = :Y_pred, color = :Ligand, Geom.point),
         Guide.xlabel("Actual pSTAT (log 10)"),
