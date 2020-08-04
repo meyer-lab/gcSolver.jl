@@ -13,6 +13,8 @@ plt = Plots
 import CSV
 using DiffEqSensitivity
 using DataFrames
+import StatsBase: indicatormat
+using StatsFuns
 
 include("reaction.jl")
 include("dataImport.jl")

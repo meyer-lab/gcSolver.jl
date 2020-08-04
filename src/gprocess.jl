@@ -1,9 +1,6 @@
 using GaussianProcesses
-import GaussianProcesses: predict_LOO
 using Gadfly;
 gdf = Gadfly;
-import StatsBase: indicatormat
-
 
 function getGPdata()
     fullData = importData()
