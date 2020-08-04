@@ -1,3 +1,5 @@
+import LineSearches
+
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
 """ Creates full vector of unknown values to be fit """
@@ -140,7 +142,7 @@ function runFit(; itern = 1000000)
     unk0 = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true)
-    fit = optimize((x) -> resids(softplus.(x)), unk0, GradientDescent(), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(softplus.(x)), unk0, LBFGS(; linesearch = LineSearches.BackTracking()), opts, autodiff = :forward)
 
     @show fit
 
