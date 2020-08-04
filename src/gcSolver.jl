@@ -11,6 +11,7 @@ gdf = Gadfly
 using Plots
 plt = Plots
 import CSV
+using DiffEqSensitivity
 using DataFrames
 
 include("reaction.jl")
@@ -74,7 +75,8 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
         sidx = nothing
     end
 
-    sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
+    senseALG = QuadratureAdjoint(; reltol = 1e-6, compile = true, autojacvec = ReverseDiffVJP(true))
+    sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, sensealg = senseALG, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
