@@ -1,13 +1,11 @@
-using StaticArrays
-
 const Nspecies = 47 # number of complexes in surface + endosome + free ligand
 const halfL = 19 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
-const recIDX = SVector(1, 2, 3, 10, 17)
-const recIDXint = @SVector [ii + halfL for ii in recIDX]
-const ligIDX = SVector(39, 40, 41)
-const activeSpec = SVector(8, 9, 15, 16, 19)
-const pSTATidx = @SVector [43, 44, 45]
+const recIDX = [1, 2, 3, 10, 17]
+const recIDXint = [ii + halfL for ii in recIDX]
+const ligIDX = [39, 40, 41]
+const activeSpec = [8, 9, 15, 16, 19]
+const pSTATidx = [43, 44, 45]
 
 const Nparams = 36 # number of unknowns for the full model
 const Nlig = 3 # Number of ligands
