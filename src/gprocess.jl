@@ -40,7 +40,7 @@ end
 " Assemble Gaussian process model. "
 function gaussianProcess(X, y::Vector)
     mZero = MeanZero()
-    kern = kern = RQIso(0.0, 0.0, 0.0)
+    kern = RQIso(0.0, 0.0, 0.0)
 
     gp = GP(X, y, mZero, kern)
 
