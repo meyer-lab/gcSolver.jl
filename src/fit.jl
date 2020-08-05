@@ -126,8 +126,8 @@ function resids(x::Vector{T})::T where {T}
     end
 
     #@assert all(df.MeanPredict .>= 0.0)
-    dateFilt1 = filter(row -> string(row["Date"]) .== "2019-04-19", df)
-    dateFilt2 = filter(row -> string(row["Date"]) .== "2019-05-02", df)
+    dateFilt1 = filter(row -> string(row["Date"]) .== "4/19/2019", df)
+    dateFilt2 = filter(row -> string(row["Date"]) .== "5/2/2019", df)
     dateFilt1.MeanPredict = dateFilt1.MeanPredict * x[24] * 1e6
     dateFilt2.MeanPredict = dateFilt2.MeanPredict * x[25] * 1e6
     df = vcat(dateFilt1, dateFilt2)
