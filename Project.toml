@@ -6,7 +6,6 @@ version = "0.1.2"
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-DiffEqSensitivity = "41bf760c-e81c-5289-8e54-58b1f1f8abe2"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 GaussianProcesses = "891a1506-143c-57d2-908e-e1f8e92e6de9"

@@ -11,7 +11,6 @@ gdf = Gadfly
 using Plots
 plt = Plots
 import CSV
-using DiffEqSensitivity
 using DataFrames
 import StatsBase: indicatormat
 using StatsFuns
@@ -19,7 +18,7 @@ using StatsFuns
 include("reaction.jl")
 include("dataImport.jl")
 
-const solTol = 1.0e-5
+const solTol = 1.0e-9
 const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
 
 function domainDef(u, p, t)
@@ -77,8 +76,7 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
         sidx = nothing
     end
 
-    senseALG = QuadratureAdjoint(; reltol = 1e-6, compile = true, autojacvec = ReverseDiffVJP(true))
-    sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, sensealg = senseALG, isoutofdomain = domainDef).u
+    sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
