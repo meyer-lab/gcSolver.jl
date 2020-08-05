@@ -12,11 +12,13 @@ using Plots
 plt = Plots
 import CSV
 using DataFrames
+import StatsBase: indicatormat
+using StatsFuns
 
 include("reaction.jl")
 include("dataImport.jl")
 
-const solTol = 1.0e-5
+const solTol = 1.0e-9
 const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
 
 function domainDef(u, p, t)
