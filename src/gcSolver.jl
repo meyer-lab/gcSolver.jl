@@ -137,21 +137,6 @@ function runCkineHessian(tps::Vector, params::Vector)::Array
 end
 
 
-include("figures/figureJ1.jl")
-include("figures/figureJ2.jl")
-include("figures/figureJ3.jl")
-include("figures/figureJ4.jl")
-include("figures/figureJ5.jl")
-
-function figureAll()
-    figureJ1()
-    figureJ2()
-    figureJ3()
-    figureJ4()
-    figureJ5()
-end
-
-
 include("fit.jl")
 include("gprocess.jl")
 
