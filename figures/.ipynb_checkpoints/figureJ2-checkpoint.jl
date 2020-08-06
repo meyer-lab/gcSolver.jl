@@ -1,6 +1,7 @@
 """ This file builds the depletion manuscript, Figure 2. """
 
 using Gadfly;
+using Statistics;
 using gcSolver;
 using DataFrames;
 using ForwardDiff;
