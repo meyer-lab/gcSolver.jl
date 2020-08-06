@@ -1,11 +1,15 @@
-""" This file builds the depletion manuscript, Figure 1. """
+""" This file builds the depletion manuscript, Figure 3. """
 
 using Plots;
+using gcSolver;
+using DataFrames;
+using Statistics;
+using GaussianProcesses
 plt = Plots;
 
 # Plot of dose response curves
 function gpPlot(ligandName, cellType, gp, compType = "none")
-    responseDF = importData()
+    responseDF = gcSolver.importData()
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
@@ -21,7 +25,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
 
     intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:9])
-    append!(intrinsLevels, cellHotEnc(cellType))
+    append!(intrinsLevels, gcSolver.cellHotEnc(cellType))
     xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
 
     colors = ["aqua", "coral", "darkorchid", "goldenrod"]
@@ -59,7 +63,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
 
     if compType != "none"
         intrinsLevelsComp = identity.(convert(Matrix, fullDataX)[1, 3:9])
-        append!(intrinsLevelsComp, cellHotEnc(compType))
+        append!(intrinsLevelsComp, gcSolver.cellHotEnc(compType))
         xMatComp = zeros(length(doseVec), length(intrinsLevelsComp) + 2)
 
         colorsComp = ["turquoise3", "coral3", "darkorchid4", "darkgoldenrod"]
@@ -125,8 +129,8 @@ end
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ3()
     l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x]
-    X, y, df = getGPdata()
-    trainedGP = gaussianProcess(X', y)
+    X, y, df = gcSolver.getGPdata()
+    trainedGP = gcSolver.gaussianProcess(X', y)
     #p1 = gpPlot("IL2", "Treg", trainedGP)
     p1 = gpPlot("IL2", "Treg", trainedGP, "NK")
     p2 = gpPlot("IL2", "Thelper", trainedGP)

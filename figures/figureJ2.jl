@@ -1,9 +1,15 @@
 """ This file builds the depletion manuscript, Figure 2. """
 
+using Gadfly;
+using Statistics;
+using gcSolver;
+using DataFrames;
+using ForwardDiff;
+gdf = Gadfly;
 
 # Plot of dose response curves
 function doseResPlot2(ligandName, cellType, date, unkVec)
-    responseDF = importData()
+    responseDF = gcSolver.importData()
     tps = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
@@ -32,9 +38,9 @@ function doseResPlot2(ligandName, cellType, date, unkVec)
 
         #Gives back 36 parameter long
         idxx = findfirst(responseDF.Cell .== cellType)
-        iterParams = fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]), cellType)
+        iterParams = gcSolver.fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]), cellType)
         if ligandName != "IL2" && ligandName != "IL15"
-            iterParams = mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
+            iterParams = gcSolver.mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
         end
 
         jacResults = runRecJac(tps, iterParams)
@@ -59,7 +65,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec)
 end
 
 function runRecJac(tps::Vector, params::Vector)
-    checkInputs(tps, params)
+    gcSolver.checkInputs(tps, params)
 
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
@@ -76,7 +82,7 @@ end
 
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ2()
-    fitVec = importFit()
+    fitVec = gcSolver.importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
     """
     p1 = doseResPlot2("IL2", "Treg", "3/19/2019", fitVec)

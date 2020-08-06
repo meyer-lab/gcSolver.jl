@@ -1,8 +1,14 @@
 """ This file builds the depletion manuscript, Figure 4. """
 
+using Gadfly;
+using gcSolver;
+using DataFrames;
+using GaussianProcesses;
+gdf = Gadfly;
+
 function cellTypeContr(gp, realType, compType, recExp = false)
 
-    x, y, df = getGPdata()
+    x, y, df = gcSolver.getGPdata()
 
     predDF = DataFrame(realPred = Float64[], fakePred = Float64[], ligand = String[])
 
@@ -25,7 +31,7 @@ function cellTypeContr(gp, realType, compType, recExp = false)
             #realX[10:13,:] = cellHotEnc(compType)
         elseif CD4 == true"""
     else
-        hotEnc = cellHotEnc(compType)
+        hotEnc = gcSolver.cellHotEnc(compType)
         """if compType == "Treg"
             hotEnc = cellHotEnc("Thelper")
         end"""
@@ -84,8 +90,8 @@ end
 
 """Generate plots"""
 function figureJ4()
-    x, y, df = getGPdata()
-    trainedGP = gaussianProcess(x', y)
+    x, y, df = gcSolver.getGPdata()
+    trainedGP = gcSolver.gaussianProcess(x', y)
 
     #x4, y4, df4 = getGPdata(true)
     #trainedGP4 = gaussianProcess(x4', y4)

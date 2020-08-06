@@ -1,12 +1,16 @@
-""" This file builds the depletion manuscript, Figure 1. """
+""" This file builds the depletion manuscript, Figure 5. """
 
 using Plots;
+using gcSolver;
+using DataFrames;
+using Statistics;
 plt = Plots;
 
 # Plot of dose response curves
 function gpPlotVar(ligandName, cellType, gp, cov = false)
-    responseDF = importData()
-    sigma = getSigma(cellType)
+    nPoints = 100
+    responseDF = gcSolver.importData()
+    sigma = gcSolver.getSigma(cellType)
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
@@ -27,27 +31,28 @@ function gpPlotVar(ligandName, cellType, gp, cov = false)
 
     fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
     intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:9])
-    append!(intrinsLevels, cellHotEnc(cellType))
+    append!(intrinsLevels, gcSolver.cellHotEnc(cellType))
     xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
 
     colors = ["aqua", "coral", "darkorchid", "goldenrod"]
-    vars = zeros(length(doseVec))
+    vars = zeros(nPoints)
 
     pl1 = plt.plot()
+    doseVecPred = exp10.(range(log10.(doseVec[1]), log10.(doseVec[length(doseVec)]), length=nPoints))
 
     for (i, ITtime) in enumerate(time)
-        xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
-        xMat[:, 1] .= log10.(doseVec)
+        xMat = zeros(nPoints, length(intrinsLevels) + 2)
+        xMat[:, 1] .= log10.(doseVecPred)
         xMat[:, 2] .= ITtime
-        xMat[:, 3:size(xMat, 2)] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
+        xMat[:, 3:size(xMat, 2)] .= repeat(intrinsLevels, outer = [1, nPoints])'
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
-        for ii in (1:length(doseVec))
-            vars[ii] = log10.(runCkineVarPropGP(gp, xMat[ii, :], sigma, cov))[1]
+        for ii in (1:nPoints)
+            vars[ii] = log10.(gcSolver.runCkineVarPropGP(gp, xMat[ii, :], sigma, cov))[1]
         end
 
         if cov
-            plt.plot!(doseVec, vars, c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
+            plt.plot!(doseVecPred, vars, c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
             if length(log10.(abs.(realDataDF[realDataDF.Time .== ITtime, :].alphStatCov_mean) .+ 1)) > 0
                 absCovs = abs.(realDataDF[realDataDF.Time .== ITtime, :].alphStatCov_mean)
                 plt.scatter!(
@@ -62,7 +67,7 @@ function gpPlotVar(ligandName, cellType, gp, cov = false)
             end
 
         else
-            plt.plot!(doseVec, vars, c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
+            plt.plot!(doseVecPred, vars, c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
             if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Variance_mean .+ 1)) > 0
                 plt.scatter!(
                     doseVec,
@@ -92,8 +97,8 @@ end
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ5()
     l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x]
-    X, y, df = getGPdata()
-    trainedGP = gaussianProcess(X', y)
+    X, y, df = gcSolver.getGPdata()
+    trainedGP = gcSolver.gaussianProcess(X', y)
     p1 = gpPlotVar("IL2", "Treg", trainedGP, true)
     p2 = gpPlotVar("IL2", "Thelper", trainedGP, true)
     p3 = gpPlotVar("IL2", "NK", trainedGP)
