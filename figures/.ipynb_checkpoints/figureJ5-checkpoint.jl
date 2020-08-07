@@ -38,7 +38,7 @@ function gpPlotVar(ligandName, cellType, gp, cov = false)
     vars = zeros(nPoints)
 
     pl1 = plt.plot()
-    doseVecPred = exp10.(range(log10.(doseVec[1]), log10.(doseVec[length(doseVec)]), length=nPoints))
+    doseVecPred = exp10.(range(log10.(doseVec[1]), log10.(doseVec[length(doseVec)]), length = nPoints))
 
     for (i, ITtime) in enumerate(time)
         xMat = zeros(nPoints, length(intrinsLevels) + 2)
