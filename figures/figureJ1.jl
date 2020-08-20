@@ -74,11 +74,11 @@ function figureJ1()
     p6 = doseResPlot("IL15", "Thelper", "3/19/2019", fitVec)
     p7 = doseResPlot("IL15", "NK", "3/15/2019", fitVec)
     p8 = doseResPlot("IL15", "CD8", "3/15/2019", fitVec)
-    """
     p9 = doseResPlot("R38Q/H16N", "Treg", "4/19/2019", fitVec)
     p10 = doseResPlot("R38Q/H16N", "Thelper", "4/19/2019", fitVec)
     p11 = doseResPlot("R38Q/H16N", "NK", "5/02/2019", fitVec)
     p12 = doseResPlot("R38Q/H16N", "CD8", "3/19/2019", fitVec)
+    """
     
     p13 = doseResPlot("WT N-term", "Treg", "4/19/2019", fitVec)
     p14 = doseResPlot("WT N-term", "Thelper", "4/19/2019", fitVec)
