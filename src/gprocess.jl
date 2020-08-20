@@ -8,6 +8,16 @@ function getGPdata()
     hotEnc = indicatormat(fullData.Cell)
     hotEncName = sort(unique(fullData.Cell))
 
+    bivEnc = zeros(1:size(fullData, 1))
+
+    for ii in 1:size(fullData, 1)
+        if fullData.Ligand[ii] == "IL2" || fullData.Ligand[ii] == "IL15"
+            bivEnc[ii] = 0
+        else
+            bivEnc[ii] = 1
+        end
+    end
+
     fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
     fullDataY = log10.(fullData.Mean .+ 1.0)
 
@@ -17,14 +27,7 @@ function getGPdata()
         fullDataX[!, iiName] = vec(hotEnc[ii, :])
     end
 
-    """# if 13th column = 1, change 12th clumn to = 1 and cut out 13th column
-    fullDataX[fullDataX[:, 13] == 1][12] == 1
-    # preliminray, change 13th column to 0's
-    fullDataX[fullDataX[:, 13] == 1][13] == 0"""
-
     combCD4 = fullDataX[:, size(fullDataX, 2)]
-    #println("13 = ", thirteen)
-    #for (iii) in enumerate(thirteen)
     for iii = 1:length(combCD4)
         if combCD4[iii] == 1
             fullDataX[iii, 12] = 1
@@ -32,6 +35,7 @@ function getGPdata()
     end
 
     fullDataX = fullDataX[:, 1:12]
+    fullDataX.Bivalent = bivEnc
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
 end
