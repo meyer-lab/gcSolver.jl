@@ -1,4 +1,4 @@
-import LineSearches
+import LineSearches: BackTracking
 
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
@@ -7,7 +7,7 @@ function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
     p = 0.1ones(23)
 
-    p[1] = 0.00125 # means of prior distributions from gc-cytokines paper
+    p[1] = 0.001 # means of prior distributions from gc-cytokines paper
     p[8] = 1.0
     p[10] = 0.678
     p[11] = 0.2
@@ -59,15 +59,10 @@ end
 
 
 """ Adjusts the binding activity of ligand to match that of mutein """
-function mutAffAdjust(paramVec::Vector{T}, dfRow) where {T}
-    paramVec[5] = dfRow.IL2RaKD[1] * 0.6
-
-    bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[8]
-    for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5, k10, k11
-        paramVec[ii] *= bgAdjust
-    end
-
-    return paramVec
+function mutAffAdjust(p::Vector{T}, dfRow) where {T}
+    p[5] = dfRow.IL2RaKD[1] * 0.6
+    p[6:10] .*= p[5] / p[8]
+    return p
 end
 
 
@@ -81,10 +76,6 @@ end
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
     df = importData()
-
-    #get rid of IL15 and missing mutein
-    df = df[df.Ligand .!= "R38Q/H16N", :]
-    df = df[df.Ligand .!= "IL15", :]
 
     df.Time *= 60.0
     tps = unique(df.Time)
@@ -136,7 +127,7 @@ function runFit(; itern = 1000000)
     x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true)
-    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; linesearch = LineSearches.BackTracking()), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; linesearch = BackTracking()), opts, autodiff = :forward)
 
     @show fit
 

@@ -51,17 +51,13 @@ end
 
 
     @testset "Steady-state at t=0." begin
-        out = gcSolver.solveAutocrine(rxntfR)
-
         rr = copy(rxntfR)
         rr[1:3] .= 0.0
 
-        dy = ones(gcSolver.Nspecies)
-
-        gcSolver.fullDeriv(dy, out, rr, 0.0)
+        out = gcSolver.runCkine([0.0, 1.0], rr)
 
         @test all(out .>= 0.0)
-        @test norm(dy) < 1.0e-9
+        @test norm(out[1, :] - out[2, :]) < 1.0e-4
     end
 
 

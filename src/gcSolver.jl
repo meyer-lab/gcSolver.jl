@@ -1,6 +1,7 @@
 module gcSolver
 
 using OrdinaryDiffEq
+using SteadyStateDiffEq
 import LinearAlgebra: diag, norm
 import ForwardDiff
 using Optim
@@ -18,12 +19,8 @@ using StatsFuns
 include("reaction.jl")
 include("dataImport.jl")
 
-const solTol = 1.0e-12
+const solTol = 1.0e-9
 const solAlg = AutoTsit5(KenCarp4(), stiffalgfirst = true)
-
-function domainDef(u, p, t)
-    return any(x -> x < -solTol, u)
-end
 
 
 " Check that we haven't been provided anything ridiculous by the user. "
@@ -43,13 +40,18 @@ function __init__()
     prob = ODEProblem(fullDeriv, u0, (0.0, 1.0), params)
     deMT = modelingtoolkitize(prob)
 
-    global modelFunc = ODEFunction(deMT; jac = true, tgrad = true)
+    global modelFunc = ODEFunction(deMT; jac = true)
 end
 
 
 function runCkineSetup(tps::Vector{Float64}, p::Vector{T}) where {T}
     checkInputs(tps, p)
-    u0 = solveAutocrine(p)
+
+    # Solve for steady-state
+    pss = copy(p)
+    pss[1:3] .= 0.0
+    probss = SteadyStateProblem(modelFunc, zeros(T, Nspecies), pss)
+    u0 = solve(probss, DynamicSS(solAlg))
 
     return ODEProblem(modelFunc, u0, convert(T, maximum(tps)), p)
 end
@@ -63,13 +65,7 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
         prob = params
     end
 
-    if pSTAT5
-        sidx = pSTATidx
-    else
-        sidx = nothing
-    end
-
-    sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
+    sol = solve(prob, solAlg; saveat = tps, reltol = 1.0e-9).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)
@@ -85,7 +81,7 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
 
     if pSTAT5
         # Summation of active species
-        return vec(sol[:, 1] + 2 * (sol[:, 2] + sol[:, 3]))
+        return vec(sol[:, pSTATidx[1]] + 2 * (sol[:, pSTATidx[2]] + sol[:, pSTATidx[3]]))
     end
 
     return sol
@@ -107,26 +103,6 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
 
     # Just return the diagonal for the marginal variance
     return diag(transpose(jac) * sigma * jac)
-end
-
-
-" Calculate the Hessian of the model. "
-function runCkineHessian(tps::Vector, params::Vector)::Array
-    checkInputs(tps, params)
-
-    # Sigma is the covariance matrix of the input parameters
-    function hF(tt::Float64, x)::Real
-        pp = vcat(params[1:24], x, params[30:end])
-        return runCkine([tt], pp, pSTAT5 = true)[1]
-    end
-
-    H = zeros(5, 5, length(tps))
-
-    for ii = 1:length(tps)
-        ForwardDiff.hessian!(view(H, :, :, ii), (x) -> hF(tps[ii], x), params[25:29])
-    end
-
-    return H
 end
 
 
