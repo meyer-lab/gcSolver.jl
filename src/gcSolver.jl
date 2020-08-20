@@ -22,7 +22,7 @@ const solTol = 1.0e-9
 const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
 
 function domainDef(u, p, t)
-    return any(x -> x < 0.0, u)
+    return any(x -> x < -solTol, u)
 end
 
 

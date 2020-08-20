@@ -117,11 +117,10 @@ end
 function LOOcell()
     X, y, df = getGPdata()
 
-    cells = unique(df.Cell)
     y_pred = zeros(length(y))
     cellList = Array{String}(undef, length(y))
 
-    for cell in cells
+    for cell in unique(df.Cell)
         X_train = X[df.Cell .!== cell, :]
         y_train = y[df.Cell .!== cell]
 
