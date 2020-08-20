@@ -20,7 +20,7 @@ include("reaction.jl")
 include("dataImport.jl")
 
 const solTol = 1.0e-12
-const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
+const solAlg = AutoTsit5(KenCarp4(), stiffalgfirst = true)
 
 function domainDef(u, p, t)
     return any(x -> x < -solTol, u)
