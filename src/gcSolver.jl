@@ -1,7 +1,6 @@
 module gcSolver
 
 using OrdinaryDiffEq
-using DiffEqSensitivity
 import LinearAlgebra: diag, norm
 import ForwardDiff
 using Optim
@@ -70,8 +69,7 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
         sidx = nothing
     end
 
-    senseALG = QuadratureAdjoint(; reltol = 1e-9, compile = true, autojacvec = ReverseDiffVJP(true))
-    sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef, sensealg = senseALG).u
+    sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef).u
 
     if length(tps) > 1
         sol = vcat(transpose.(sol)...)

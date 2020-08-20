@@ -5,21 +5,21 @@ dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    unkVecF = 0.1ones(23)
+    p = 0.1ones(23)
 
-    unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
-    unkVecF[8] = 1.0
-    unkVecF[10] = 0.678
-    unkVecF[11] = 0.2
-    unkVecF[12] = 0.01
-    unkVecF[13] = 0.13
-    unkVecF[14] = 2.0 # initial Treg stat
-    unkVecF[15] = 0.5 # initial Thelp stat
-    unkVecF[16] = 0.2 # initial NK stat
-    unkVecF[17] = 0.2 # initial CD8 stat
-    unkVecF[18:23] .= 0.001 # pSTAT Rates
+    p[1] = 0.00125 # means of prior distributions from gc-cytokines paper
+    p[8] = 1.0
+    p[10] = 0.678
+    p[11] = 0.2
+    p[12] = 0.01
+    p[13] = 0.13
+    p[14] = 2.0 # initial Treg stat
+    p[15] = 0.5 # initial Thelp stat
+    p[16] = 0.2 # initial NK stat
+    p[17] = 0.2 # initial CD8 stat
+    p[18:23] .= 0.001 # pSTAT Rates
 
-    return unkVecF
+    return p
 end
 
 

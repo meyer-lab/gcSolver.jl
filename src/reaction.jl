@@ -8,7 +8,6 @@ const activeSpec = [8, 9, 15, 16, 19]
 const pSTATidx = [43, 44, 45]
 
 const Nparams = 36 # number of unknowns for the full model
-const Nlig = 3 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
 
