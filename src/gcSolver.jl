@@ -5,7 +5,7 @@ import LinearAlgebra: diag, norm
 import ForwardDiff
 using Optim
 using Statistics
-import ModelingToolkit
+import ModelingToolkit: modelingtoolkitize
 using Gadfly
 gdf = Gadfly
 using Plots
@@ -36,22 +36,15 @@ end
 
 
 " This recompiles the ODE function into a symbolic Jacobian. "
-function modelCompile()
+function __init__()
     u0 = ones(Nspecies)
-    params = ones(Nparams) * 0.1
+    params = 0.1ones(Nparams)
 
     prob = ODEProblem(fullDeriv, u0, (0.0, 1.0), params)
-    deMT = ModelingToolkit.modelingtoolkitize(prob)
+    deMT = modelingtoolkitize(prob)
 
-    f_iip = eval(ModelingToolkit.generate_function(deMT)[2])
-    tgrad_iip = eval(ModelingToolkit.generate_tgrad(deMT)[2])
-    jac = eval(ModelingToolkit.generate_jacobian(deMT)[2])
-
-    return ODEFunction(f_iip; tgrad = tgrad_iip, jac = jac)
+    global modelFunc = ODEFunction(deMT; jac = true, tgrad = true)
 end
-
-
-const modelFunc = modelCompile()
 
 
 function runCkineSetup(tps::Vector{Float64}, p::Vector{T}) where {T}
