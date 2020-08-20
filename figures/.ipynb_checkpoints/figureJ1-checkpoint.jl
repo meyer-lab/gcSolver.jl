@@ -79,7 +79,6 @@ function figureJ1()
     p11 = doseResPlot("R38Q/H16N", "NK", "5/02/2019", fitVec)
     p12 = doseResPlot("R38Q/H16N", "CD8", "3/19/2019", fitVec)
     """
-    
     p13 = doseResPlot("WT N-term", "Treg", "4/19/2019", fitVec)
     p14 = doseResPlot("WT N-term", "Thelper", "4/19/2019", fitVec)
     p15 = doseResPlot("WT N-term", "NK", "5/2/2019", fitVec)
@@ -93,5 +92,5 @@ function figureJ1()
     p23 = doseResPlot("R38Q N-term", "NK", "5/2/2019", fitVec)
     p24 = doseResPlot("R38Q N-term", "CD8", "5/2/2019", fitVec)
     #draw(SVG("figureJ2.svg", 1000px, 800px), p1)
-    draw(SVG("figureJ1.svg", 4000px, 1600px), gridstack([p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
+    draw(SVG("figureJ1.svg", 4000px, 1600px), gridstack([p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
 end
