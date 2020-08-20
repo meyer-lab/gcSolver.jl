@@ -19,7 +19,7 @@ using StatsFuns
 include("reaction.jl")
 include("dataImport.jl")
 
-const solTol = 1.0e-10
+const solTol = 1.0e-12
 const solAlg = AutoTsit5(KenCarp5(), stiffalgfirst = true)
 
 function domainDef(u, p, t)
@@ -70,7 +70,7 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
         sidx = nothing
     end
 
-    senseALG = QuadratureAdjoint(; reltol = 1e-8, compile = true, autojacvec = ReverseDiffVJP(true))
+    senseALG = QuadratureAdjoint(; reltol = 1e-9, compile = true, autojacvec = ReverseDiffVJP(true))
     sol = solve(prob, solAlg; saveat = tps, reltol = solTol, save_idxs = sidx, isoutofdomain = domainDef, sensealg = senseALG).u
 
     if length(tps) > 1

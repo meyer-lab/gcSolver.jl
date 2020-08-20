@@ -5,12 +5,10 @@ dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    unkVecF = zeros(25)
+    unkVecF = 0.1ones(23)
 
     unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
-    unkVecF[2:7] .= 0.1
     unkVecF[8] = 1.0
-    unkVecF[9] = 0.1
     unkVecF[10] = 0.678
     unkVecF[11] = 0.2
     unkVecF[12] = 0.01
@@ -20,8 +18,6 @@ function getUnkVec()
     unkVecF[16] = 0.2 # initial NK stat
     unkVecF[17] = 0.2 # initial CD8 stat
     unkVecF[18:23] .= 0.001 # pSTAT Rates
-    unkVecF[24] = 0.2
-    unkVecF[25] = 0.2
 
     return unkVecF
 end
@@ -125,24 +121,22 @@ function resids(x::Vector{T})::T where {T}
         end
     end
 
-    #@assert all(df.MeanPredict .>= 0.0)
+    # @assert all(df.MeanPredict .>= 0.0)
     dateFilt1 = filter(row -> string(row["Date"]) .== "4/19/2019", df)
     dateFilt2 = filter(row -> string(row["Date"]) .== "5/2/2019", df)
-    dateFilt1.MeanPredict = dateFilt1.MeanPredict * x[24] * 1e6
-    dateFilt2.MeanPredict = dateFilt2.MeanPredict * x[25] * 1e6
-    df = vcat(dateFilt1, dateFilt2)
-    #CSV.write("/home/brianoj/gcSolver.jl/data/fitTry.csv", x)
     # Convert relative scale.
-    return norm((df.MeanPredict) - df.Mean)
+    dateFilt1.MeanPredict .*= dateFilt1.MeanPredict \ dateFilt1.Mean
+    dateFilt2.MeanPredict .*= dateFilt2.MeanPredict \ dateFilt2.Mean
+    return norm(dateFilt1.MeanPredict - dateFilt1.Mean) + norm(dateFilt2.MeanPredict - dateFilt2.Mean)
 end
 
 
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
 function runFit(; itern = 1000000)
-    unk0 = invsoftplus.(getUnkVec())
+    x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true)
-    fit = optimize((x) -> resids(softplus.(x)), unk0, LBFGS(; linesearch = LineSearches.BackTracking()), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; linesearch = LineSearches.BackTracking()), opts, autodiff = :forward)
 
     @show fit
 
