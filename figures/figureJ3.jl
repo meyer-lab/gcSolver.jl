@@ -14,6 +14,16 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
 
+    bivEnc = zeros(1:size(responseDF, 1))
+    for ii in 1:size(responseDF, 1)
+        if responseDF.Ligand[ii] == "IL2" || fullData.Ligand[ii] == "IL15"
+            bivEnc[ii] = 0
+        else
+            bivEnc[ii] = 1
+        end
+    end
+    responseDF.Bivalent = bivEnc
+
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
     #filter!(row -> string(row["Date"]) .== date, filtFrame)
@@ -22,9 +32,9 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     realDataDF = groupby(realDataDF, [:Time, :Dose])
     realDataDF = combine(realDataDF, :Mean => mean)
 
-    fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
+    fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc, :Bivalent]]
 
-    intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:9])
+    intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:10])
     append!(intrinsLevels, gcSolver.cellHotEnc(cellType))
     xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
 
