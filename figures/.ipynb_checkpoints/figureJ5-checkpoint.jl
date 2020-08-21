@@ -17,7 +17,7 @@ function gpPlotVar(ligandName, cellType, gp, cov = false)
 
     bivEnc = zeros(1:size(responseDF, 1))
     for ii in 1:size(responseDF, 1)
-        if responseDF.Ligand[ii] == "IL2" || fullData.Ligand[ii] == "IL15"
+        if responseDF.Ligand[ii] == "IL2" || responseDF.Ligand[ii] == "IL15"
             bivEnc[ii] = 0
         else
             bivEnc[ii] = 1
