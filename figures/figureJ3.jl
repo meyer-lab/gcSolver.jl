@@ -72,7 +72,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     end
 
     if compType != "none"
-        intrinsLevelsComp = identity.(convert(Matrix, fullDataX)[1, 3:9])
+        intrinsLevelsComp = identity.(convert(Matrix, fullDataX)[1, 3:10])
         append!(intrinsLevelsComp, gcSolver.cellHotEnc(compType))
         xMatComp = zeros(length(doseVec), length(intrinsLevelsComp) + 2)
 
@@ -142,7 +142,7 @@ function figureJ3()
     X, y, df = gcSolver.getGPdata()
     trainedGP = gcSolver.gaussianProcess(X', y)
     #p1 = gpPlot("IL2", "Treg", trainedGP)
-    p1 = gpPlot("IL2", "Treg", trainedGP, "NK")
+    p1 = gpPlot("IL2", "Treg", trainedGP)
     p2 = gpPlot("IL2", "Thelper", trainedGP)
     p3 = gpPlot("IL2", "NK", trainedGP)
     p4 = gpPlot("IL2", "CD8", trainedGP)
