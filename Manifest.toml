@@ -12,12 +12,6 @@ git-tree-sha1 = "051c95d6836228d120f5f4b984dd5aba1624f716"
 uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "0.5.0"
 
-[[AbstractTrees]]
-deps = ["Markdown"]
-git-tree-sha1 = "33e450545eaf7699da1a6e755f9ea65f14077a45"
-uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
-version = "0.3.3"
-
 [[Adapt]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "0fac443759fa829ed8066db6cf1077d888bb6573"
@@ -81,6 +75,12 @@ git-tree-sha1 = "971b03f25bdf2acab79f1c51afc717f9dccf43c2"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 version = "0.9.5"
 
+[[CodeTracking]]
+deps = ["InteractiveUtils", "UUIDs"]
+git-tree-sha1 = "ccc043a0df446cac279dca29d13e2827b40aceb5"
+uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
+version = "0.5.12"
+
 [[ColorSchemes]]
 deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random", "StaticArrays"]
 git-tree-sha1 = "7a15e3690529fd1042f0ab954dff7445b1efc8a5"
@@ -95,9 +95,9 @@ version = "0.10.8"
 
 [[Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "InteractiveUtils", "Reexport"]
-git-tree-sha1 = "5639e44833cfcf78c6a73fbceb4da75611d312cd"
+git-tree-sha1 = "008d6bc68dea6beb6303fdc37188cb557391ebf2"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.12.3"
+version = "0.12.4"
 
 [[Combinatorics]]
 git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
@@ -127,12 +127,6 @@ deps = ["Base64", "Colors", "DataStructures", "Dates", "IterTools", "JSON", "Lin
 git-tree-sha1 = "034174e607d254b8ca0853a1a9029b265114bf6c"
 uuid = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 version = "0.8.2"
-
-[[ConsoleProgressMonitor]]
-deps = ["Logging", "ProgressMeter"]
-git-tree-sha1 = "3ab7b2136722890b9af903859afcf457fa3059e8"
-uuid = "88cd18e8-d9cc-4ea6-8889-5259c0d15c8b"
-version = "0.1.2"
 
 [[ConstructionBase]]
 git-tree-sha1 = "a2a6a5fea4d6f730ec4c18a76d27ec10e8ec1c50"
@@ -306,9 +300,9 @@ version = "0.8.14"
 
 [[FiniteDiff]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "ed5d92cc9a84b9f5f9d65d3559b22d4b3b824b7e"
+git-tree-sha1 = "c98c1b5c2b5eeb6d867ec77b936132b8e7c978c0"
 uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
-version = "2.5.2"
+version = "2.6.0"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -469,6 +463,12 @@ git-tree-sha1 = "b34d7cef7b337321e97d22242c3c2b91f476748e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.0"
 
+[[JuliaInterpreter]]
+deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
+git-tree-sha1 = "e4057be815219e5a5878c5c95a25de9d488d376a"
+uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
+version = "0.7.25"
+
 [[JuliaVariables]]
 deps = ["MLStyle", "NameResolution"]
 git-tree-sha1 = "e0fcfa0a2f6122fbe13603764c5310dde00c5593"
@@ -510,12 +510,6 @@ git-tree-sha1 = "864527aa4d14c893fb8c51d48ef314410c88c7b9"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 version = "0.13.5"
 
-[[LeftChildRightSiblingTrees]]
-deps = ["AbstractTrees"]
-git-tree-sha1 = "71be1eb5ad19cb4f61fa8c73395c0338fd092ae0"
-uuid = "1d6d02ad-be62-4b6b-8a6d-2f90e265016e"
-version = "0.1.2"
-
 [[LibGit2]]
 deps = ["Printf"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -554,17 +548,17 @@ version = "0.5.1"
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
-[[LoggingExtras]]
-deps = ["Dates"]
-git-tree-sha1 = "03289aba73c0abc25ff0229bed60f2a4129cd15c"
-uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
-version = "0.4.2"
-
 [[LoopVectorization]]
 deps = ["DocStringExtensions", "LinearAlgebra", "OffsetArrays", "SIMDPirates", "SLEEFPirates", "UnPack", "VectorizationBase"]
 git-tree-sha1 = "c91ec40b996132c96d1392e36e36383e579eb60f"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
 version = "0.8.24"
+
+[[LoweredCodeUtils]]
+deps = ["JuliaInterpreter"]
+git-tree-sha1 = "41b448dcb53258645cd5e4f9447409e1928ad4eb"
+uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
+version = "0.4.8"
 
 [[MKL_jll]]
 deps = ["IntelOpenMP_jll", "Libdl", "Pkg"]
@@ -654,10 +648,10 @@ uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
 version = "0.3.4"
 
 [[NameResolution]]
-deps = ["DataStructures", "PrettyPrint"]
-git-tree-sha1 = "05a19b392a843157263582142fd4ac312e578451"
+deps = ["PrettyPrint"]
+git-tree-sha1 = "1a0fa0e9613f46c9b8c11eee38ebb4f590013c5e"
 uuid = "71a1bf82-56d0-4bbc-8a3c-48b961074391"
-version = "0.1.4"
+version = "0.1.5"
 
 [[OffsetArrays]]
 git-tree-sha1 = "2066e16af994955287f2e03ba1d9e890eb43b0dd"
@@ -775,12 +769,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 [[Profile]]
 deps = ["Printf"]
 uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
-
-[[ProgressLogging]]
-deps = ["Logging", "SHA", "UUIDs"]
-git-tree-sha1 = "59398022b661b6fd569f25de6b18fde39843196a"
-uuid = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
-version = "0.1.3"
 
 [[ProgressMeter]]
 deps = ["Distributed", "Printf"]
@@ -998,12 +986,6 @@ deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "Linear
 git-tree-sha1 = "b7f762e9820b7fab47544c36f26f54ac59cf8abf"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 version = "1.0.5"
-
-[[TerminalLoggers]]
-deps = ["LeftChildRightSiblingTrees", "Logging", "Markdown", "Printf", "ProgressLogging", "UUIDs"]
-git-tree-sha1 = "cbea752b5eef52a3e1188fb31580c3e4fa0cbc35"
-uuid = "5d786b92-1e48-4d6f-9151-6b4477ca9bed"
-version = "0.1.2"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
