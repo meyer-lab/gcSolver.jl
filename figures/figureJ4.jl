@@ -35,7 +35,7 @@ function cellTypeContr(gp, realType, compType, recExp = false)
         """if compType == "Treg"
             hotEnc = cellHotEnc("Thelper")
         end"""
-        realX[:, 10:size(realX, 2)] = repeat(hotEnc, outer = [1, size(realX)[1]])'
+        realX[:, 11:size(realX, 2)] = repeat(hotEnc, outer = [1, size(realX)[1]])'
         #println("size (cols) = ", size(realX,2))
     end
 

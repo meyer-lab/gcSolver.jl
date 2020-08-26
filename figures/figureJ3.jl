@@ -14,6 +14,16 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
 
+    bivEnc = zeros(1:size(responseDF, 1))
+    for ii in 1:size(responseDF, 1)
+        if responseDF.Ligand[ii] == "IL2" || responseDF.Ligand[ii] == "IL15"
+            bivEnc[ii] = 0
+        else
+            bivEnc[ii] = 1
+        end
+    end
+    responseDF.Bivalent = bivEnc
+
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
     #filter!(row -> string(row["Date"]) .== date, filtFrame)
@@ -22,9 +32,9 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     realDataDF = groupby(realDataDF, [:Time, :Dose])
     realDataDF = combine(realDataDF, :Mean => mean)
 
-    fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]
+    fullDataX = filtFrame[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc, :Bivalent]]
 
-    intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:9])
+    intrinsLevels = identity.(convert(Matrix, fullDataX)[1, 3:10])
     append!(intrinsLevels, gcSolver.cellHotEnc(cellType))
     xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
 
@@ -62,7 +72,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     end
 
     if compType != "none"
-        intrinsLevelsComp = identity.(convert(Matrix, fullDataX)[1, 3:9])
+        intrinsLevelsComp = identity.(convert(Matrix, fullDataX)[1, 3:10])
         append!(intrinsLevelsComp, gcSolver.cellHotEnc(compType))
         xMatComp = zeros(length(doseVec), length(intrinsLevelsComp) + 2)
 
@@ -132,7 +142,7 @@ function figureJ3()
     X, y, df = gcSolver.getGPdata()
     trainedGP = gcSolver.gaussianProcess(X', y)
     #p1 = gpPlot("IL2", "Treg", trainedGP)
-    p1 = gpPlot("IL2", "Treg", trainedGP, "NK")
+    p1 = gpPlot("IL2", "Treg", trainedGP)
     p2 = gpPlot("IL2", "Thelper", trainedGP)
     p3 = gpPlot("IL2", "NK", trainedGP)
     p4 = gpPlot("IL2", "CD8", trainedGP)
