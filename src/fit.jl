@@ -1,29 +1,25 @@
-import LineSearches
+import LineSearches: BackTracking
 
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    unkVecF = zeros(25)
+    p = 0.1ones(23)
 
-    unkVecF[1] = 0.00125 # means of prior distributions from gc-cytokines paper
-    unkVecF[2:7] .= 0.1
-    unkVecF[8] = 1.0
-    unkVecF[9] = 0.1
-    unkVecF[10] = 0.678
-    unkVecF[11] = 0.2
-    unkVecF[12] = 0.01
-    unkVecF[13] = 0.13
-    unkVecF[14] = 2.0 # initial Treg stat
-    unkVecF[15] = 0.5 # initial Thelp stat
-    unkVecF[16] = 0.2 # initial NK stat
-    unkVecF[17] = 0.2 # initial CD8 stat
-    unkVecF[18:23] .= 0.001 # pSTAT Rates
-    unkVecF[24] = 0.2
-    unkVecF[25] = 0.2
+    p[1] = 0.001 # means of prior distributions from gc-cytokines paper
+    p[8] = 1.0
+    p[10] = 0.678
+    p[11] = 0.2
+    p[12] = 0.01
+    p[13] = 0.13
+    p[14] = 2.0 # initial Treg stat
+    p[15] = 0.5 # initial Thelp stat
+    p[16] = 0.2 # initial NK stat
+    p[17] = 0.2 # initial CD8 stat
+    p[18:23] .= 0.001 # pSTAT Rates
 
-    return unkVecF
+    return p
 end
 
 
@@ -63,15 +59,10 @@ end
 
 
 """ Adjusts the binding activity of ligand to match that of mutein """
-function mutAffAdjust(paramVec::Vector{T}, dfRow) where {T}
-    paramVec[5] = dfRow.IL2RaKD[1] * 0.6
-
-    bgAdjust = (dfRow.IL2RBGKD[1] * 0.6) / paramVec[8]
-    for ii in [6, 7, 8, 9, 10] # Adjust k2, k4, k5, k10, k11
-        paramVec[ii] *= bgAdjust
-    end
-
-    return paramVec
+function mutAffAdjust(p::Vector{T}, dfRow) where {T}
+    p[5] = dfRow.IL2RaKD[1] * 0.6
+    p[6:10] .*= p[5] / p[8]
+    return p
 end
 
 
@@ -85,10 +76,6 @@ end
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
     df = importData()
-
-    #get rid of IL15 and missing mutein
-    df = df[df.Ligand .!= "R38Q/H16N", :]
-    df = df[df.Ligand .!= "IL15", :]
 
     df.Time *= 60.0
     tps = unique(df.Time)
@@ -125,24 +112,22 @@ function resids(x::Vector{T})::T where {T}
         end
     end
 
-    #@assert all(df.MeanPredict .>= 0.0)
+    # @assert all(df.MeanPredict .>= 0.0)
     dateFilt1 = filter(row -> string(row["Date"]) .== "4/19/2019", df)
     dateFilt2 = filter(row -> string(row["Date"]) .== "5/2/2019", df)
-    dateFilt1.MeanPredict = dateFilt1.MeanPredict * x[24] * 1e6
-    dateFilt2.MeanPredict = dateFilt2.MeanPredict * x[25] * 1e6
-    df = vcat(dateFilt1, dateFilt2)
-    #CSV.write("/home/brianoj/gcSolver.jl/data/fitTry.csv", x)
     # Convert relative scale.
-    return norm((df.MeanPredict) - df.Mean)
+    dateFilt1.MeanPredict .*= dateFilt1.MeanPredict \ dateFilt1.Mean
+    dateFilt2.MeanPredict .*= dateFilt2.MeanPredict \ dateFilt2.Mean
+    return norm(dateFilt1.MeanPredict - dateFilt1.Mean) + norm(dateFilt2.MeanPredict - dateFilt2.Mean)
 end
 
 
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
 function runFit(; itern = 1000000)
-    unk0 = invsoftplus.(getUnkVec())
+    x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true)
-    fit = optimize((x) -> resids(softplus.(x)), unk0, LBFGS(; linesearch = LineSearches.BackTracking()), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; linesearch = BackTracking()), opts, autodiff = :forward)
 
     @show fit
 

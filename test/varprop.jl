@@ -20,8 +20,4 @@ end
 
     @test isfinite(outt)
     @test all(isfinite.(outtG))
-
-    # minOut = gcSolver.runFit(itern = 10)
-    # @test all(isfinite.(minOut))
-    # @test length(p) == length(minOut)
 end

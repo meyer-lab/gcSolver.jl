@@ -8,7 +8,6 @@ const activeSpec = [8, 9, 15, 16, 19]
 const pSTATidx = [43, 44, 45]
 
 const Nparams = 36 # number of unknowns for the full model
-const Nlig = 3 # Number of ligands
 const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
 
@@ -110,30 +109,4 @@ function fullDeriv(du, u, p, t)
     du[ligIDX] .-= view(u, ligIDX) .* trafP[5]
 
     return nothing
-end
-
-
-# Initial autocrine condition
-function solveAutocrine(rIn::Vector)
-    """Takes in parameters and solves for steady state expression and initial species states"""
-    @assert all(rIn .>= 0.0)
-    r = view(rIn, 20:30)
-    @assert r[3] < 1.0
-
-    # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
-    y0 = zeros(eltype(r), Nspecies)
-
-    # Add base amount of STAT5
-    y0[42] = r[11]
-
-    # Expand out trafficking terms
-    kRec = r[4] * (1.0 - r[3])
-    kDeg = r[5] * r[3]
-
-    # Assuming no autocrine ligand, so can solve steady state
-    # Add the species
-    y0[recIDXint] = r[6:10] / kDeg / internalFrac
-    y0[recIDX] = (r[6:10] + kRec * y0[recIDXint] * internalFrac) / r[1]
-
-    return y0
 end
