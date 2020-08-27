@@ -16,7 +16,7 @@ function gpPlotVar(ligandName, cellType, gp, cov = false)
     doseVec = doseVec[!, :Dose]
 
     bivEnc = zeros(1:size(responseDF, 1))
-    for ii in 1:size(responseDF, 1)
+    for ii = 1:size(responseDF, 1)
         if responseDF.Ligand[ii] == "IL2" || responseDF.Ligand[ii] == "IL15"
             bivEnc[ii] = 0
         else
