@@ -8,6 +8,7 @@ gdf = Gadfly;
 
 function cellTypeContr(gp, realType, compType, recExp = false)
 
+
     x, y, df = gcSolver.getGPdata()
 
     predDF = DataFrame(realPred = Float64[], fakePred = Float64[], ligand = String[])
