@@ -20,3 +20,7 @@ figureJ4()
 println("Making Figure 5")
 include("figures/figureJ5.jl")
 figureJ5()
+
+println("Making Figure 6")
+include("figures/figureJ6.jl")
+figureJ6()
