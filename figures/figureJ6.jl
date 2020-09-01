@@ -63,8 +63,5 @@ function figureJ6()
     p5 = BivContr(trainedGP, "R38Q N-term")
     p6 = BivContr(trainedGP, "R38Q/H16N")
 
-    draw(
-        SVG("figureJ6.svg", 3000px, 2000px),
-        gridstack([p1 p2 p3; p4 p5 p6]),
-    )
+    draw(SVG("figureJ6.svg", 3000px, 2000px), gridstack([p1 p2 p3; p4 p5 p6]))
 end
