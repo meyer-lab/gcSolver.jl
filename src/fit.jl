@@ -77,11 +77,11 @@ function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
     df = importData()
 
+    sort!(df, :Time)
     df.Time *= 60.0
-    tps = unique(df.Time)
-    sort!(tps)
 
-    df.MeanPredict = similar(df.Mean, T)
+    # FIXME: Add back scaling factor
+    cost = 0.0
 
     Threads.@threads for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
@@ -94,8 +94,13 @@ function resids(x::Vector{T})::T where {T}
                     vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
                 end
                 local yhat
+                idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
+
+                tpss = df[idxs, :Time]
+                # Add a small amount to each timepoint, so that we don't have an issue with the integrator stepping backward
+                tpss += range(0.0, 0.01; length=length(tpss))
                 try
-                    yhat = runCkine(tps, vector, pSTAT5 = true)
+                    cost += runCkineCost(tpss, vector, df[idxs, :Mean])
                 catch e
                     if typeof(e) <: AssertionError
                         return Inf
@@ -103,22 +108,12 @@ function resids(x::Vector{T})::T where {T}
                         rethrow(e)
                     end
                 end
-
-                for (ii, tt) in Iterators.enumerate(tps)
-                    idxs = (df.Dose .== dose) .& (df.Time .== tt) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
-                    df[idxs, :MeanPredict] .= yhat[ii]
-                end
             end
         end
     end
-
-    # @assert all(df.MeanPredict .>= 0.0)
-    dateFilt1 = filter(row -> string(row["Date"]) .== "4/19/2019", df)
-    dateFilt2 = filter(row -> string(row["Date"]) .== "5/2/2019", df)
-    # Convert relative scale.
-    dateFilt1.MeanPredict .*= dateFilt1.MeanPredict \ dateFilt1.Mean
-    dateFilt2.MeanPredict .*= dateFilt2.MeanPredict \ dateFilt2.Mean
-    return norm(dateFilt1.MeanPredict - dateFilt1.Mean) + norm(dateFilt2.MeanPredict - dateFilt2.Mean)
+    # dateFilt1 = filter(row -> string(row["Date"]) .== "4/19/2019", df)
+    # dateFilt2 = filter(row -> string(row["Date"]) .== "5/2/2019", df)
+    return cost
 end
 
 

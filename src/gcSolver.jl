@@ -73,7 +73,7 @@ function runCkineCost(tps::Vector{Float64}, params::Vector{Dual{T, V, N}}, dataa
     end
 
     soll = vec(sol[:, pSTATidx[1]] + 2 * (sol[:, pSTATidx[2]] + sol[:, pSTATidx[3]]))
-    cost = norm(soll - dataa)
+    cost = norm(dataa - soll) / 2.0
 
     part = partials(params[1]) * dOverall[1]
     for ii in 2:length(dOverall)
@@ -81,6 +81,11 @@ function runCkineCost(tps::Vector{Float64}, params::Vector{Dual{T, V, N}}, dataa
     end
 
     return Dual{T, V, N}(cost, part)
+end
+
+
+function runCkineCost(tps::Vector{Float64}, params::Vector{Float64}, dataa)
+    return norm(dataa - runCkine(tps, params; pSTAT5 = true)) / 2.0
 end
 
 
