@@ -1,4 +1,5 @@
 import LineSearches
+using Distributed
 
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
@@ -81,6 +82,7 @@ function resids(x::Vector{T})::T where {T}
     df.Time *= 60.0
 
     df.MeanPredict = similar(df.Mean, T)
+    FutureDict = Dict()
 
     for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
@@ -97,16 +99,22 @@ function resids(x::Vector{T})::T where {T}
                 # Make sure duplicate times are not considered duplicates
                 tpss += range(0.0, 0.01; length=length(tpss))
 
-                try
-                    df[idxs, :MeanPredict] = runCkine(tpss, vector; pSTAT5 = true)
-                catch e
-                    if typeof(e) <: AssertionError
-                        println(e)
-                        return Inf
-                    else
-                        rethrow(e)
-                    end
-                end
+                FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
+            end
+        end
+    end
+
+    for (key, val) in FutureDict
+        idxs = (df.Dose .== key[1]) .& (df.Ligand .== key[2]) .& (df.Cell .== key[3])
+
+        try
+            df[idxs, :MeanPredict] = fetch(val)
+        catch e
+            if typeof(e) <: AssertionError
+                println(e)
+                return Inf
+            else
+                rethrow(e)
             end
         end
     end
@@ -126,7 +134,7 @@ function runFit(; itern = 1000000)
     x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true)
-    lsi = LineSearches.InitialStatic(alpha = 0.1)
+    lsi = LineSearches.InitialStatic(alpha = 0.01)
     fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; alphaguess = lsi), opts, autodiff = :forward)
 
     @show fit
@@ -134,4 +142,4 @@ function runFit(; itern = 1000000)
     return fit.minimizer
 end
 
-export getExpression, getUnkVec, fitParams
+export getExpression, getUnkVec, fitParams, runCkine
