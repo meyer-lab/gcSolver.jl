@@ -135,7 +135,7 @@ function runFit(; itern = 1000000)
 
     opts = Optim.Options(iterations = itern, show_trace = true, extended_trace = true)
     lsi = InitialStatic(; alpha = 0.01)
-    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; m = 200, alphaguess = lsi), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; alphaguess = lsi), opts, autodiff = :forward)
 
     @show fit
 
