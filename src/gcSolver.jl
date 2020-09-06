@@ -2,6 +2,7 @@ module gcSolver
 
 using OrdinaryDiffEq
 import LinearAlgebra: diag, norm, dot
+import ForwardDiff
 import ForwardDiff: value, Dual, partials, jacobian!, jacobian
 using Optim
 using Statistics
