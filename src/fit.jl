@@ -18,7 +18,7 @@ function getUnkVec()
     p[16] = 0.2 # initial NK stat
     p[17] = 0.2 # initial CD8 stat
     p[18:23] .= 0.001 # pSTAT Rates
-    p[24:25] = 1.0 # scaling factors
+    p[24:25] .= 1.0 # scaling factors
 
     return p
 end
