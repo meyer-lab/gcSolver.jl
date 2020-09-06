@@ -110,3 +110,28 @@ function fullDeriv(du, u, p, t)
 
     return nothing
 end
+
+
+" Takes in parameters and solves for steady state expression and initial species states "
+function solveAutocrine(rIn::Vector)
+    @assert all(rIn .>= 0.0)
+    r = view(rIn, 20:30)
+    @assert r[3] < 1.0
+
+    # r is endo, activeEndo, sortF, kRec, kDeg, Rexpr*8
+    y0 = zeros(eltype(r), Nspecies)
+
+    # Add base amount of STAT5
+    y0[42] = r[11]
+
+    # Expand out trafficking terms
+    kRec = r[4] * (1.0 - r[3])
+    kDeg = r[5] * r[3]
+
+    # Assuming no autocrine ligand, so can solve steady state
+    # Add the species
+    y0[recIDXint] = r[6:10] / kDeg / internalFrac
+    y0[recIDX] = (r[6:10] + kRec * y0[recIDXint] * internalFrac) / r[1]
+
+    return y0
+end
