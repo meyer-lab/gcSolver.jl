@@ -1,9 +1,6 @@
-using Distributed
 using Test
 using Profile
-@everywhere using Pkg
-@everywhere Pkg.activate(".")
-@everywhere using gcSolver
+using gcSolver
 using ForwardDiff
 using LinearAlgebra
 
