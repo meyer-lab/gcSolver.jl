@@ -1,4 +1,5 @@
 using Distributed
+import LineSearches: InitialStatic
 
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
@@ -133,7 +134,8 @@ function runFit(; itern = 1000000)
     x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true, extended_trace = true)
-    fit = optimize((x) -> resids(softplus.(x)), x₀, NewtonTrustRegion(; initial_delta = 0.01), opts, autodiff = :forward)
+    lsi = InitialStatic(; alpha = 0.01)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; m = 200, alphaguess = lsi), opts, autodiff = :forward)
 
     @show fit
 
