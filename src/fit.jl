@@ -5,7 +5,7 @@ dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    p = 0.1ones(25)
+    p = 0.1ones(23)
 
     p[1] = 0.001 # means of prior distributions from gc-cytokines paper
     p[8] = 1.0
@@ -18,7 +18,6 @@ function getUnkVec()
     p[16] = 0.2 # initial NK stat
     p[17] = 0.2 # initial CD8 stat
     p[18:23] .= 0.001 # pSTAT Rates
-    p[24:25] .= 1.0 # scaling factors
 
     return p
 end
@@ -83,11 +82,8 @@ function resids(x::Vector{T})::T where {T}
 
     cost = 0.0
 
-    # Normalize
-    df[df.Date .== "4/19/2019", :Mean] ./= p[24]
-    df[df.Date .== "5/2/2019", :Mean] ./= p[25]
-    # Factor to scale the SSE back
-    scaleF = (p[24] + p[25]) / 2.0
+    # Note that, because the STAT portion of the model seems to be proportional, this
+    # doesn't include a scaling factor
 
     for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
@@ -112,7 +108,7 @@ function resids(x::Vector{T})::T where {T}
             end
         end
     end
-    return cost * (scaleF ^ 2.0)
+    return cost
 end
 
 
@@ -121,7 +117,7 @@ function runFit(; itern = 1000000)
     x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true)
-    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; linesearch = BackTracking()), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(), opts, autodiff = :forward)
 
     @show fit
 
