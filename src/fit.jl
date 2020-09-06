@@ -5,7 +5,7 @@ dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    p = 0.1ones(23)
+    p = 0.1ones(25)
 
     p[1] = 0.001 # means of prior distributions from gc-cytokines paper
     p[8] = 1.0
@@ -18,6 +18,7 @@ function getUnkVec()
     p[16] = 0.2 # initial NK stat
     p[17] = 0.2 # initial CD8 stat
     p[18:23] .= 0.001 # pSTAT Rates
+    p[24:25] = 1.0 # scaling factors
 
     return p
 end
@@ -75,32 +76,32 @@ end
 """ Calculates squared error for a given unkVec. """
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
-    df = importData()
+    df = copy(importData())
 
     sort!(df, :Time)
     df.Time *= 60.0
 
-    # FIXME: Add back scaling factor
     cost = 0.0
 
-    Threads.@threads for ligand in unique(df.Ligand)
+    # Normalize
+    df[df.Date .== "4/19/2019", :Mean] ./= p[24]
+    df[df.Date .== "5/2/2019", :Mean] ./= p[25]
+    # Factor to scale the SSE back
+    scaleF = (p[24] + p[25]) / 2.0
+
+    for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
         for dose in reverse(sort(unique(df.Dose)))
             ligVec = [dose, 0.0, 0.0]
             for cell in unique(df.Cell)
                 idxx = findfirst(df.Cell .== cell)
-                vector = vec(fitParams(ligVec, x, 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]), cell))
-                if ligand != "IL2"
-                    vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
-                end
-                local yhat
+                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
+                vector = vec(fitParams(ligVec, x, recpE, cell))
+                vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
                 idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
 
-                tpss = df[idxs, :Time]
-                # Add a small amount to each timepoint, so that we don't have an issue with the integrator stepping backward
-                tpss += range(0.0, 0.01; length=length(tpss))
                 try
-                    cost += runCkineCost(tpss, vector, df[idxs, :Mean])
+                    cost += runCkineCost(df[idxs, :Time], vector, df[idxs, :Mean])
                 catch e
                     if typeof(e) <: AssertionError
                         return Inf
@@ -111,9 +112,7 @@ function resids(x::Vector{T})::T where {T}
             end
         end
     end
-    # dateFilt1 = filter(row -> string(row["Date"]) .== "4/19/2019", df)
-    # dateFilt2 = filter(row -> string(row["Date"]) .== "5/2/2019", df)
-    return cost
+    return cost * (scaleF ^ 2.0)
 end
 
 

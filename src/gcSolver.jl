@@ -8,10 +8,6 @@ using Optim
 using Statistics
 import ModelingToolkit: modelingtoolkitize
 using DiffEqSensitivity
-using Gadfly
-gdf = Gadfly
-using Plots
-plt = Plots
 import CSV
 using DataFrames
 import StatsBase: indicatormat
