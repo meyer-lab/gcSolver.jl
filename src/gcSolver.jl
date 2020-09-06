@@ -1,12 +1,12 @@
 module gcSolver
 
 using OrdinaryDiffEq
-using SteadyStateDiffEq
-import LinearAlgebra: diag, norm
-import ForwardDiff
+import LinearAlgebra: diag, norm, dot
+import ForwardDiff: value, Dual, partials, jacobian!, jacobian
 using Optim
 using Statistics
 import ModelingToolkit: modelingtoolkitize
+using DiffEqSensitivity
 using Gadfly
 gdf = Gadfly
 using Plots
@@ -46,14 +46,40 @@ end
 
 function runCkineSetup(tps::Vector{Float64}, p::Vector{T}) where {T}
     checkInputs(tps, p)
-
-    # Solve for steady-state
-    pss = copy(p)
-    pss[1:3] .= 0.0
-    probss = SteadyStateProblem(modelFunc, zeros(T, Nspecies), pss)
-    u0 = solve(probss, DynamicSS(solAlg))
+    u0 = solveAutocrine(p)
 
     return ODEProblem(modelFunc, u0, convert(T, maximum(tps)), p)
+end
+
+
+function runCkineCost(tps::Vector{Float64}, params::Vector{Dual{T, V, N}}, dataa) where {T, V, N}
+    prob = runCkineSetup(tps, value.(params))
+    sAlg = InterpolatingAdjoint()
+
+    sol = solve(prob, solAlg; reltol = 1.0e-9)
+    dg = (out, u, p, t, i) -> out .= dataa[i] - (u[pSTATidx[1]] + 2 * (u[pSTATidx[2]] + u[pSTATidx[3]]))
+    du0, dp = adjoint_sensitivities(sol, KenCarp4(autodiff=false), dg, tps; sensealg=sAlg)
+
+    # Convert du0 into parameter effects
+    J = jacobian(solveAutocrine, value.(params))
+    dOverall = vec(du0' * J + dp)
+
+    sol = sol(tps).u
+    if length(tps) > 1
+        sol = vcat(transpose.(sol)...)
+    else
+        sol = reshape(sol[1], (1, Nspecies))
+    end
+
+    soll = vec(sol[:, pSTATidx[1]] + 2 * (sol[:, pSTATidx[2]] + sol[:, pSTATidx[3]]))
+    cost = norm(soll - dataa)
+
+    part = partials(params[1]) * dOverall[1]
+    for ii in 2:length(dOverall)
+        part += partials(params[ii]) * dOverall[ii]
+    end
+
+    return Dual{T, V, N}(cost, part)
 end
 
 
@@ -99,7 +125,7 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
     end
 
     jac = zeros(5, length(tps))
-    ForwardDiff.jacobian!(jac, jacF, params[25:29])
+    jacobian!(jac, jacF, params[25:29])
 
     # Just return the diagonal for the marginal variance
     return diag(transpose(jac) * sigma * jac)
@@ -109,6 +135,6 @@ end
 include("fit.jl")
 include("gprocess.jl")
 
-export runCkine, runCkineVarProp
+export runCkine, runCkineVarProp, runCkineCost
 
 end # module
