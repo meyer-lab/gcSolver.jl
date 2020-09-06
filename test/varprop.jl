@@ -9,22 +9,6 @@
 end
 
 
-@testset "Test cost gradient function." begin
-    g = ForwardDiff.gradient(x -> runCkineCost(tps, x, tps), rxntfR)
-
-    @time ForwardDiff.gradient(x -> runCkineCost(tps, x, tps), rxntfR)
-
-    func = (x) -> norm(tps - runCkine(tps, x; pSTAT5 = true)) / 2.0
-    gComp = ForwardDiff.gradient(func, rxntfR)
-
-    println(g)
-    println(gComp)
-
-    @test length(g) == length(rxntfR)
-    @test all(isfinite.(g))
-end
-
-
 @testset "Run fitting." begin
     p = gcSolver.getUnkVec()
     outtG = similar(p)

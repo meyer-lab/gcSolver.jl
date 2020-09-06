@@ -1,4 +1,4 @@
-import LineSearches: BackTracking
+import LineSearches
 
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
@@ -75,15 +75,12 @@ end
 """ Calculates squared error for a given unkVec. """
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
-    df = copy(importData())
+    df = importData()
 
     sort!(df, :Time)
     df.Time *= 60.0
 
-    cost = 0.0
-
-    # Note that, because the STAT portion of the model seems to be proportional, this
-    # doesn't include a scaling factor
+    df.MeanPredict = similar(df.Mean, T)
 
     for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
@@ -96,10 +93,15 @@ function resids(x::Vector{T})::T where {T}
                 vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
                 idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
 
+                tpss = df[idxs, :Time]
+                # Make sure duplicate times are not considered duplicates
+                tpss += range(0.0, 0.01; length=length(tpss))
+
                 try
-                    cost += runCkineCost(df[idxs, :Time], vector, df[idxs, :Mean])
+                    df[idxs, :MeanPredict] = runCkine(tpss, vector; pSTAT5 = true)
                 catch e
                     if typeof(e) <: AssertionError
+                        println(e)
                         return Inf
                     else
                         rethrow(e)
@@ -108,7 +110,14 @@ function resids(x::Vector{T})::T where {T}
             end
         end
     end
-    return cost
+
+    @assert all(df.MeanPredict .>= -0.01)
+    dateFilt1 = filter(row -> string(row["Date"]) .== "4/19/2019", df)
+    dateFilt2 = filter(row -> string(row["Date"]) .== "5/2/2019", df)
+    # Convert relative scale.
+    dateFilt1.MeanPredict .*= dateFilt1.MeanPredict \ dateFilt1.Mean
+    dateFilt2.MeanPredict .*= dateFilt2.MeanPredict \ dateFilt2.Mean
+    return norm(dateFilt1.MeanPredict - dateFilt1.Mean) + norm(dateFilt2.MeanPredict - dateFilt2.Mean)
 end
 
 
@@ -117,7 +126,8 @@ function runFit(; itern = 1000000)
     x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true)
-    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(), opts, autodiff = :forward)
+    lsi = LineSearches.InitialStatic(alpha = 0.1)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; alphaguess = lsi), opts, autodiff = :forward)
 
     @show fit
 

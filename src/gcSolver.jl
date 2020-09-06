@@ -7,7 +7,6 @@ import ForwardDiff: value, Dual, partials, jacobian!, jacobian
 using Optim
 using Statistics
 import ModelingToolkit: modelingtoolkitize
-using DiffEqSensitivity
 import CSV
 using DataFrames
 import StatsBase: indicatormat
@@ -15,9 +14,6 @@ using StatsFuns
 
 include("reaction.jl")
 include("dataImport.jl")
-
-const solTol = 1.0e-9
-const solAlg = AutoTsit5(KenCarp4(), stiffalgfirst = true)
 
 
 " Check that we haven't been provided anything ridiculous by the user. "
@@ -49,42 +45,6 @@ function runCkineSetup(tps::Vector{Float64}, p::Vector{T}) where {T}
 end
 
 
-function runCkineCost(tps::Vector{Float64}, params::Vector{Dual{T, V, N}}, dataa) where {T, V, N}
-    prob = runCkineSetup(tps, value.(params))
-    sAlg = InterpolatingAdjoint()
-
-    sol = solve(prob, solAlg; reltol = 1.0e-9)
-    dg = (out, u, p, t, i) -> out .= dataa[i] - (u[pSTATidx[1]] + 2 * (u[pSTATidx[2]] + u[pSTATidx[3]]))
-    du0, dp = adjoint_sensitivities(sol, KenCarp4(autodiff=false), dg, tps; sensealg=sAlg)
-
-    # Convert du0 into parameter effects
-    J = jacobian(solveAutocrine, value.(params))
-    dOverall = vec(du0' * J + dp)
-
-    sol = sol(tps).u
-    if length(tps) > 1
-        sol = vcat(transpose.(sol)...)
-    else
-        sol = reshape(sol[1], (1, Nspecies))
-    end
-
-    soll = vec(sol[:, pSTATidx[1]] + 2 * (sol[:, pSTATidx[2]] + sol[:, pSTATidx[3]]))
-    cost = norm(dataa - soll) / 2.0
-
-    part = partials(params[1]) * dOverall[1]
-    for ii in 2:length(dOverall)
-        part += partials(params[ii]) * dOverall[ii]
-    end
-
-    return Dual{T, V, N}(cost, part)
-end
-
-
-function runCkineCost(tps::Vector{Float64}, params::Vector{Float64}, dataa)
-    return norm(dataa - runCkine(tps, params; pSTAT5 = true)) / 2.0
-end
-
-
 " Actually run the gc ODE model. "
 function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
     if params isa Vector
@@ -93,23 +53,30 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
         prob = params
     end
 
-    sol = solve(prob, solAlg; saveat = tps, reltol = 1.0e-9).u
-
-    if length(tps) > 1
-        sol = vcat(transpose.(sol)...)
+    if pSTAT5
+        sidx = pSTATidx
     else
-        sol = reshape(sol[1], (1, Nspecies))
+        sidx = nothing
     end
 
-    if length(tps) > size(sol, 1)
+    solAlg = KenCarp5()
+    sol = solve(prob, solAlg; saveat = tps, save_idxs = sidx, reltol = 1.0e-9, maxiters = 1e7)
+
+    if sol.retcode != :Success
         println("Solving failed with the following parameters.")
+        println(sol.retcode)
         println(ForwardDiff.value.(params))
-        @assert length(tps) == size(sol, 1)
+        @assert sol.retcode == :Success
     end
+
+    sol = hcat(sol.u...)'
+    @assert ndims(sol) == 2
+    @assert size(sol, 1) == length(tps)
 
     if pSTAT5
+        @assert size(sol) == (length(tps), 3)
         # Summation of active species
-        return vec(sol[:, pSTATidx[1]] + 2 * (sol[:, pSTATidx[2]] + sol[:, pSTATidx[3]]))
+        return vec(sol[:, 1] + 2 * (sol[:, 2] + sol[:, 3]))
     end
 
     return sol
