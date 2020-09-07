@@ -59,7 +59,7 @@ function runCkineCost(tps::Vector{Float64}, params::Vector{Dual{T, V, N}}, dataa
 
     sol = solve(prob, solAlg; reltol = 1.0e-9)
     dg = (out, u, p, t, i) -> out .= dataa[i] - (u[pSTATidx[1]] + 2 * (u[pSTATidx[2]] + u[pSTATidx[3]]))
-    du0, dp = adjoint_sensitivities(sol, KenCarp4(autodiff=false), dg, tps; sensealg=sAlg)
+    du0, dp = adjoint_sensitivities(sol, KenCarp4(autodiff = false), dg, tps; sensealg = sAlg)
 
     # Convert du0 into parameter effects
     J = jacobian(solveAutocrine, value.(params))
@@ -76,7 +76,7 @@ function runCkineCost(tps::Vector{Float64}, params::Vector{Dual{T, V, N}}, dataa
     cost = norm(soll - dataa)
 
     part = partials(params[1]) * dOverall[1]
-    for ii in 2:length(dOverall)
+    for ii = 2:length(dOverall)
         part += partials(params[ii]) * dOverall[ii]
     end
 
