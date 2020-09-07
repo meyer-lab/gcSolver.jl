@@ -42,8 +42,12 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) wher
     paramvec[17] = kfbnd * 59.0 #k23
     paramvec[18] = unkVec[8] #k25
     paramvec[19] = 5.0 #endoadjust
-    paramvec[20:24] = unkVec[9:13]
-    paramvec[25:29] = receptor_expression(recAbundances, unkVec[9], unkVec[11], unkVec[12], unkVec[13])
+    paramvec[20] = ke
+    paramvec[21] = unkVec[10]
+    paramvec[22] = sortF
+    paramvec[23] = krec
+    paramvec[24] = kdeg
+    paramvec[25:29] = recAbundances * ke / (1.0 + (krec * (1.0 - sortF) / kdeg / sortF))
     if CellType == "Treg"
         paramvec[30] = unkVec[14] #initial stat
     elseif CellType == "Thelper"
@@ -52,6 +56,8 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) wher
         paramvec[30] = unkVec[16] #initial stat
     elseif CellType == "CD8"
         paramvec[30] = unkVec[17] #initial stat
+    else
+        @assert false
     end
     paramvec[31:36] = unkVec[18:23]
 
