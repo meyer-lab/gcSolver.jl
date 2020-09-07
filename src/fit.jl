@@ -42,6 +42,10 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) wher
     paramvec[17] = kfbnd * 59.0 #k23
     paramvec[18] = unkVec[8] #k25
     paramvec[19] = 5.0 #endoadjust
+    ke = unkVec[9]
+    sortF = tanh(unkVec[11]) * 0.95 + 0.01
+    krec = unkVec[12]
+    kdeg = unkVec[13]
     paramvec[20] = ke
     paramvec[21] = unkVec[10]
     paramvec[22] = sortF
@@ -83,6 +87,7 @@ function resids(x::Vector{T})::T where {T}
 
     df.MeanPredict = similar(df.Mean, T)
     FutureDict = Dict()
+    cost = 0.0
 
     for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
@@ -105,7 +110,10 @@ function resids(x::Vector{T})::T where {T}
 
                 tpss = df[idxs, :Time]
                 # Make sure duplicate times are not considered duplicates
-                tpss += range(0.0, 0.001; length=length(tpss))
+                tpss += range(0.0, 0.01; length=length(tpss))
+
+                # Regularize for exploding values
+                cost += sum(softplus.(vector .- 1.0e6))
 
                 FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
             end
@@ -124,7 +132,8 @@ function resids(x::Vector{T})::T where {T}
     # Convert relative scale.
     dateFilt1.MeanPredict .*= dateFilt1.MeanPredict \ dateFilt1.Mean
     dateFilt2.MeanPredict .*= dateFilt2.MeanPredict \ dateFilt2.Mean
-    return norm(dateFilt1.MeanPredict - dateFilt1.Mean) + norm(dateFilt2.MeanPredict - dateFilt2.Mean)
+    cost += norm(dateFilt1.MeanPredict - dateFilt1.Mean) + norm(dateFilt2.MeanPredict - dateFilt2.Mean)
+    return cost
 end
 
 
@@ -133,7 +142,8 @@ function runFit(; itern = 1000000)
     x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true, extended_trace = true, allow_f_increases = true)
-    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; m = 100), opts, autodiff = :forward)
+    lsi = InitialStatic(; alpha = 0.0001)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; m = 100, alphaguess = lsi), opts, autodiff = :forward)
 
     @show fit
 
