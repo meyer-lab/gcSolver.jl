@@ -67,12 +67,6 @@ function mutAffAdjust(p::Vector{T}, dfRow) where {T}
 end
 
 
-""" Uses receptor abundance (from flow) and trafficking rates to calculate receptor expression rate at steady state. """
-function receptor_expression(abundance, ke, kᵣ, sortF, kD)
-    return abundance * ke / (1.0 + (kᵣ * (1.0 - sortF) / kD / sortF))
-end
-
-
 """ Calculates squared error for a given unkVec. """
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
@@ -87,17 +81,25 @@ function resids(x::Vector{T})::T where {T}
     for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
         for dose in reverse(sort(unique(df.Dose)))
-            ligVec = [dose, 0.0, 0.0]
+            if ligand == "IL15"
+                ligVec = [0.0, dose, 0.0]
+            else
+                ligVec = [dose, 0.0, 0.0]
+            end
+
             for cell in unique(df.Cell)
                 idxx = findfirst(df.Cell .== cell)
                 recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
                 vector = vec(fitParams(ligVec, x, recpE, cell))
-                vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
+
+                if ligand != "IL15"
+                    vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
+                end
                 idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
 
                 tpss = df[idxs, :Time]
                 # Make sure duplicate times are not considered duplicates
-                tpss += range(0.0, 0.01; length=length(tpss))
+                tpss += range(0.0, 0.001; length=length(tpss))
 
                 FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
             end
@@ -107,16 +109,7 @@ function resids(x::Vector{T})::T where {T}
     for (key, val) in FutureDict
         idxs = (df.Dose .== key[1]) .& (df.Ligand .== key[2]) .& (df.Cell .== key[3])
 
-        try
-            df[idxs, :MeanPredict] = fetch(val)
-        catch e
-            if typeof(e) <: AssertionError
-                println(e)
-                return Inf
-            else
-                rethrow(e)
-            end
-        end
+        df[idxs, :MeanPredict] = fetch(val)
     end
 
     @assert all(df.MeanPredict .>= -0.01)
@@ -133,9 +126,8 @@ end
 function runFit(; itern = 1000000)
     x₀ = invsoftplus.(getUnkVec())
 
-    opts = Optim.Options(iterations = itern, show_trace = true, extended_trace = true)
-    lsi = InitialStatic(; alpha = 0.01)
-    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; alphaguess = lsi), opts, autodiff = :forward)
+    opts = Optim.Options(iterations = itern, show_trace = true, extended_trace = true, allow_f_increases = true)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; m = 100), opts, autodiff = :forward)
 
     @show fit
 
