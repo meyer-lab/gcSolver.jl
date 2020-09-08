@@ -66,7 +66,7 @@ end
 
         dy = ones(gcSolver.Nspecies)
 
-        gcSolver.fullDeriv(dy, out[1, :], rxntfR, 0.0)
+        gcSolver.fullDeriv(dy, vec(out), rxntfR, 0.0)
 
         @test all(out .>= 0.0)
 

@@ -1,6 +1,4 @@
 using GaussianProcesses
-using Gadfly;
-gdf = Gadfly;
 
 function getGPdata()
     fullData = importData()
@@ -75,14 +73,7 @@ function LOOCV()
     y_pred, _ = GaussianProcesses.predict_LOO(gp)
     muteinList = df.Ligand
     CVDF = DataFrame(Y_pred = y_pred, Yreal = y, Ligand = muteinList)
-    CVplt = gdf.plot(
-        layer(CVDF, x = :Yreal, y = :Y_pred, color = :Ligand, Geom.point),
-        Guide.xlabel("Actual pSTAT (log 10)"),
-        Guide.ylabel("Predicted pSTAT (log 10)"),
-        Scale.color_discrete(),
-        Guide.colorkey(title = "Ligand"),
-    )
-    draw(SVG("LOOOcv.svg", 600px, 600px), CVplt)
+
     println(cor(y, y_pred))
 end
 
@@ -105,15 +96,7 @@ function LOOmutein()
         muteinList[df.Ligand .== mutein] .= mutein
     end
     CVDF = DataFrame(Y_pred = y_pred, Yreal = y, Ligand = muteinList)
-    CVplt = gdf.plot(
-        layer(CVDF, x = :Yreal, y = :Y_pred, color = :Ligand, Geom.point),
-        Guide.title(string("Leave-One-Mutein-Out CV")),
-        Guide.xlabel("Actual pSTAT"),
-        Guide.ylabel("Predicted pSTAT"),
-        Scale.color_discrete(),
-        Guide.colorkey(title = "Ligand"),
-    )
-    draw(SVG("LOMOcv.svg", 600px, 600px), CVplt)
+
     println(cor(y, y_pred))
 end
 
@@ -136,15 +119,6 @@ function LOOcell()
     end
     CVDF = DataFrame(Y_pred = y_pred, Yreal = y, Cell = cellList)
 
-    CVplt = gdf.plot(
-        layer(CVDF, x = :Yreal, y = :Y_pred, color = :Cell, Geom.point),
-        Guide.title(string("Leave-One-Cell-Out CV")),
-        Guide.xlabel("Actual pSTAT"),
-        Guide.ylabel("Predicted pSTAT"),
-        Scale.color_discrete(),
-        Guide.colorkey(title = "Cell Type"),
-    )
-    draw(SVG("LOCOcv.svg", 600px, 600px), CVplt)
     println(cor(y, y_pred))
 end
 
