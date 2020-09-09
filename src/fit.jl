@@ -110,7 +110,7 @@ function resids(x::Vector{T})::T where {T}
 
                 tpss = df[idxs, :Time]
                 # Make sure duplicate times are not considered duplicates
-                tpss += range(0.0, 0.01; length=length(tpss))
+                tpss += range(0.0, 0.01; length = length(tpss))
 
                 # Regularize for exploding values
                 cost += sum(softplus.(vector .- 1.0e6))
