@@ -1,5 +1,5 @@
 using Distributed
-addprocs(24; exeflags="--project")
+addprocs(24; exeflags = "--project")
 
 println("Loading packages")
 @everywhere using Pkg
