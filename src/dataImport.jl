@@ -1,9 +1,14 @@
 
 """ Import all of the data into one dataframe. """
-function importData()
+function importData(monomeric=false)
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
     yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
+    if monomeric
+        yData = filter(row -> row.Ligand ∈ ["IL2", "IL15"], yData)
+        monDF = DataFrame!(CSV.File(joinpath(dataDir, "MonomericMutpSTAT.csv")))
+        append!(yData, monDF)
+    end
     affDF = DataFrame!(CSV.File(joinpath(dataDir, "WTmutAffData.csv")))
     exprDF = DataFrame!(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
 
