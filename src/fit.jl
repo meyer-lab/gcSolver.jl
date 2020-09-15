@@ -80,7 +80,7 @@ end
 """ Calculates squared error for a given unkVec. """
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
-    df = importData()
+    df = importData(true)
 
     sort!(df, :Time)
     df.Time *= 60.0
@@ -127,12 +127,13 @@ function resids(x::Vector{T})::T where {T}
     end
 
     @assert all(df.MeanPredict .>= -0.01)
-    dateFilt1 = filter(row -> string(row["Date"]) .== "4/19/2019", df)
-    dateFilt2 = filter(row -> string(row["Date"]) .== "5/2/2019", df)
-    # Convert relative scale.
-    dateFilt1.MeanPredict .*= dateFilt1.MeanPredict \ dateFilt1.Mean
-    dateFilt2.MeanPredict .*= dateFilt2.MeanPredict \ dateFilt2.Mean
-    cost += norm(dateFilt1.MeanPredict - dateFilt1.Mean) + norm(dateFilt2.MeanPredict - dateFilt2.Mean)
+
+    for date in unique(df.Date)
+        dateFilt = filter(row -> string(row["Date"]) .== date, df)
+        dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
+        cost += norm(dateFilt.MeanPredict - dateFilt.Mean)
+    end
+
     return cost
 end
 
