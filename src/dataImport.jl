@@ -25,9 +25,15 @@ end
 """ Import the saved fit. """
 function importFit()
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "BBoxResults.csv")))
+    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "MonomericFit.csv")))
     return fitVec
+end
 
+""" Import Date pSTAT conversion factors. """
+function importConvFrame()
+    dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
+    convFrame = DataFrame!(CSV.File(joinpath(dataDir, "DateConvFrame.csv")))
+    return convFrame
 end
 
 """Creates Sigma for Var Propagation"""

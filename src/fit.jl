@@ -1,5 +1,6 @@
 using Distributed
 import LineSearches: InitialStatic
+using CSV
 
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
@@ -152,3 +153,68 @@ function runFit(; itern = 1000000)
 end
 
 export getExpression, getUnkVec, fitParams, runCkine
+
+
+function getDateConvDict()
+    fitVec = importFit()
+    fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
+    x = softplus.(fitVec)
+
+    df = importData(true)
+
+    sort!(df, :Time)
+    df.Time *= 60.0
+
+    df.MeanPredict = similar(df.Mean, T)
+    FutureDict = Dict()
+
+    for ligand in unique(df.Ligand)
+        # Put the highest dose first so we catch a solving error early
+        for dose in reverse(sort(unique(df.Dose)))
+            if ligand == "IL15"
+                ligVec = [0.0, dose, 0.0]
+            else
+                ligVec = [dose, 0.0, 0.0]
+            end
+
+            for cell in unique(df.Cell)
+                idxx = findfirst(df.Cell .== cell)
+                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
+                vector = vec(fitParams(ligVec, x, recpE, cell))
+
+                if ligand != "IL15"
+                    vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
+                end
+                idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
+
+                tpss = df[idxs, :Time]
+                # Make sure duplicate times are not considered duplicates
+                tpss += range(0.0, 0.01; length = length(tpss))
+
+                # Regularize for exploding values
+
+                FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
+            end
+        end
+    end
+
+    for (key, val) in FutureDict
+        idxs = (df.Dose .== key[1]) .& (df.Ligand .== key[2]) .& (df.Cell .== key[3])
+
+        df[idxs, :MeanPredict] = fetch(val)
+    end
+
+    @assert all(df.MeanPredict .>= -0.01)
+
+    dateConvDF = DataFrame(Date = [], Conv = [])
+    for date in unique(df.Date)
+        dateFilt = filter(row -> string(row["Date"]) .== date, df)
+        convFact = dateFilt.MeanPredict \ dateFilt.Mean
+        miniDF = DataFrame(Date = date, Conv = convFact)
+        dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
+        append!(dateConvDF, miniDF)
+    end
+
+    
+    CSV.write(joinpath(dataDir, "DateConvFrame.csv"), dateConvDF)
+end
