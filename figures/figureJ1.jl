@@ -3,12 +3,13 @@
 using DataFrames;
 using gcSolver;
 using Gadfly;
-using Statistics
+using Statistics;
+using StatsFuns;
 gdf = Gadfly;
 
 # Plot of dose response curves
 function doseResPlot(ligandName, cellType, date, unkVec)
-    responseDF = gcSolver.importData()
+    responseDF = gcSolver.importData(true)
     time = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
@@ -40,12 +41,15 @@ function doseResPlot(ligandName, cellType, date, unkVec)
             iterParams = gcSolver.mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
         end
         #gives you pstat results
-        pstatResults = gcSolver.runCkine(time, iterParams, pSTAT5 = true) .* unkVec[24] .* 1e6
+        pstatResults = gcSolver.runCkine(time, iterParams, pSTAT5 = true)
         for indx = 1:length(time)
             #use dataframe and push row into it - enter data into data frame
             push!(predictDF, (dose, time[indx] / 60, pstatResults[indx]))
         end
     end
+
+    DateFrame = gcSolver.importConvFrame()
+    predictDF.pSTAT .*= filter(row -> row.Date ∈ [date], DateFrame).Conv
 
     pl1 = gdf.plot(
         layer(realDataDF, x = :Dose, y = :Mean_mean, color = :Time, Geom.point),
@@ -65,7 +69,8 @@ end
 function figureJ1()
     fitVec = gcSolver.importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
-    """
+    fitVec = softplus.(fitVec)
+
     p1 = doseResPlot("IL2", "Treg", "3/19/2019", fitVec)
     p2 = doseResPlot("IL2", "Thelper", "3/19/2019", fitVec)
     p3 = doseResPlot("IL2", "NK", "3/15/2019", fitVec)
@@ -74,23 +79,30 @@ function figureJ1()
     p6 = doseResPlot("IL15", "Thelper", "3/19/2019", fitVec)
     p7 = doseResPlot("IL15", "NK", "3/15/2019", fitVec)
     p8 = doseResPlot("IL15", "CD8", "3/15/2019", fitVec)
-    p9 = doseResPlot("R38Q/H16N", "Treg", "4/19/2019", fitVec)
-    p10 = doseResPlot("R38Q/H16N", "Thelper", "4/19/2019", fitVec)
-    p11 = doseResPlot("R38Q/H16N", "NK", "5/02/2019", fitVec)
-    p12 = doseResPlot("R38Q/H16N", "CD8", "3/19/2019", fitVec)
-    """
-    p13 = doseResPlot("WT N-term", "Treg", "4/19/2019", fitVec)
-    p14 = doseResPlot("WT N-term", "Thelper", "4/19/2019", fitVec)
-    p15 = doseResPlot("WT N-term", "NK", "5/2/2019", fitVec)
-    p16 = doseResPlot("WT N-term", "CD8", "5/2/2019", fitVec)
-    p17 = doseResPlot("H16N N-term", "Treg", "4/19/2019", fitVec)
-    p18 = doseResPlot("H16N N-term", "Thelper", "4/19/2019", fitVec)
-    p19 = doseResPlot("H16N N-term", "NK", "5/2/2019", fitVec)
-    p20 = doseResPlot("H16N N-term", "CD8", "5/2/2019", fitVec)
-    p21 = doseResPlot("R38Q N-term", "Treg", "4/19/2019", fitVec)
-    p22 = doseResPlot("R38Q N-term", "Thelper", "4/19/2019", fitVec)
-    p23 = doseResPlot("R38Q N-term", "NK", "5/2/2019", fitVec)
-    p24 = doseResPlot("R38Q N-term", "CD8", "5/2/2019", fitVec)
+    p9 = doseResPlot("WT C-term", "Treg", "3/1/2019", fitVec)
+    p10 = doseResPlot("WT C-term", "Thelper", "3/1/2019", fitVec)
+    p11 = doseResPlot("WT C-term", "NK", "3/1/2019", fitVec)
+    p12 = doseResPlot("WT C-term", "CD8", "3/1/2019", fitVec)
+    p13 = doseResPlot("WT N-term", "Treg", "3/1/2019", fitVec)
+    p14 = doseResPlot("WT N-term", "Thelper", "3/1/2019", fitVec)
+    p15 = doseResPlot("WT N-term", "NK", "3/1/2019", fitVec)
+    p16 = doseResPlot("WT N-term", "CD8", "3/1/2019", fitVec)
+    p17 = doseResPlot("V91K C-term", "Treg", "3/1/2019", fitVec)
+    p18 = doseResPlot("V91K C-term", "Thelper", "3/1/2019", fitVec)
+    p19 = doseResPlot("V91K C-term", "NK", "3/1/2019", fitVec)
+    p20 = doseResPlot("V91K C-term", "CD8", "3/1/2019", fitVec)
+    p21 = doseResPlot("R38Q N-term", "Treg", "3/1/2019", fitVec)
+    p22 = doseResPlot("R38Q N-term", "Thelper", "3/1/2019", fitVec)
+    p23 = doseResPlot("R38Q N-term", "NK", "3/1/2019", fitVec)
+    p24 = doseResPlot("R38Q N-term", "CD8", "3/1/2019", fitVec)
+    p25 = doseResPlot("F42Q N-Term", "Treg", "3/1/2019", fitVec)
+    p26 = doseResPlot("F42Q N-Term", "Thelper", "3/1/2019", fitVec)
+    p27 = doseResPlot("F42Q N-Term", "NK", "3/1/2019", fitVec)
+    p28 = doseResPlot("F42Q N-Term", "CD8", "3/1/2019", fitVec)
+    p29 = doseResPlot("N88D C-term", "Treg", "3/1/2019", fitVec)
+    p30 = doseResPlot("N88D C-term", "Thelper", "3/1/2019", fitVec)
+    p31 = doseResPlot("N88D C-term", "NK", "3/1/2019", fitVec)
+    p32 = doseResPlot("N88D C-term", "CD8", "3/1/2019", fitVec)
     #draw(SVG("figureJ2.svg", 1000px, 800px), p1)
-    draw(SVG("figureJ1.svg", 4000px, 1600px), gridstack([p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
+    draw(SVG("figureJ1.svg", 4000px, 2400px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24; p25 p26 p27 p28; p29 p30 p31 p32]))
 end

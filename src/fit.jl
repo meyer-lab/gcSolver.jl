@@ -1,5 +1,6 @@
 using Distributed
 import LineSearches: InitialStatic
+using CSV
 
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
@@ -78,7 +79,7 @@ end
 
 
 """ Calculates squared error for a given unkVec. """
-function resids(x::Vector{T})::T where {T}
+function resids(x::Vector{T}, dateConvFrame)::T where {T}
     @assert all(x .>= 0.0)
     df = importData(true)
 
@@ -128,12 +129,19 @@ function resids(x::Vector{T})::T where {T}
 
     @assert all(df.MeanPredict .>= -0.01)
 
+    dateConvDF = DataFrame(Date = [], Conv = [])
     for date in unique(df.Date)
         dateFilt = filter(row -> string(row["Date"]) .== date, df)
+        convFact = dateFilt.MeanPredict \ dateFilt.Mean
+        miniDF = DataFrame(Date = date, Conv = convFact)
         dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
         cost += norm(dateFilt.MeanPredict - dateFilt.Mean)
+        append!(dateConvDF, miniDF)
     end
 
+    if dateConvFrame
+        CSV.write(joinpath(dataDir, "DateConvFrame.csv"), dateConvDF)
+    end
     return cost
 end
 
@@ -144,7 +152,7 @@ function runFit(; itern = 1000000)
 
     opts = Optim.Options(iterations = itern, show_trace = true, extended_trace = true, allow_f_increases = true)
     lsi = InitialStatic(; alpha = 0.0001)
-    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; m = 100, alphaguess = lsi), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(softplus.(x), false), x₀, LBFGS(; m = 100, alphaguess = lsi), opts, autodiff = :forward)
 
     @show fit
 
@@ -152,3 +160,12 @@ function runFit(; itern = 1000000)
 end
 
 export getExpression, getUnkVec, fitParams, runCkine
+
+
+function getDateConvDict()
+    fitVec = importFit()
+    fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
+    fitVec = softplus.(fitVec)
+
+    dateConvDF = resids(fitVec, true)
+end
