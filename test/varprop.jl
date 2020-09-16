@@ -13,10 +13,10 @@ end
     p = gcSolver.getUnkVec()
     outtG = similar(p)
 
-    outt = gcSolver.resids(p, false)
-    ForwardDiff.gradient!(outtG, gcSolver.resids, p, false)
+    outt = gcSolver.resids(p)
+    ForwardDiff.gradient!(outtG, gcSolver.resids, p)
 
-    @time ForwardDiff.gradient!(outtG, gcSolver.resids, p, false)
+    @time ForwardDiff.gradient!(outtG, gcSolver.resids, p)
 
     @test isfinite(outt)
     @test all(isfinite.(outtG))

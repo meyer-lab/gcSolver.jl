@@ -79,7 +79,7 @@ end
 
 
 """ Calculates squared error for a given unkVec. """
-function resids(x::Vector{T}, dateConvFrame)::T where {T}
+function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
     df = importData(true)
 
@@ -129,18 +129,10 @@ function resids(x::Vector{T}, dateConvFrame)::T where {T}
 
     @assert all(df.MeanPredict .>= -0.01)
 
-    dateConvDF = DataFrame(Date = [], Conv = [])
     for date in unique(df.Date)
         dateFilt = filter(row -> string(row["Date"]) .== date, df)
-        convFact = dateFilt.MeanPredict \ dateFilt.Mean
-        miniDF = DataFrame(Date = date, Conv = convFact)
         dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
         cost += norm(dateFilt.MeanPredict - dateFilt.Mean)
-        append!(dateConvDF, miniDF)
-    end
-
-    if dateConvFrame
-        CSV.write(joinpath(dataDir, "DateConvFrame.csv"), dateConvDF)
     end
 
     return cost
@@ -153,7 +145,7 @@ function runFit(; itern = 1000000)
 
     opts = Optim.Options(iterations = itern, show_trace = true, extended_trace = true, allow_f_increases = true)
     lsi = InitialStatic(; alpha = 0.0001)
-    fit = optimize((x) -> resids(softplus.(x), false), x₀, LBFGS(; m = 100, alphaguess = lsi), opts, autodiff = :forward)
+    fit = optimize((x) -> resids(softplus.(x)), x₀, LBFGS(; m = 100, alphaguess = lsi), opts, autodiff = :forward)
 
     @show fit
 
@@ -166,7 +158,63 @@ export getExpression, getUnkVec, fitParams, runCkine
 function getDateConvDict()
     fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
-    fitVec = softplus.(fitVec)
+    x = softplus.(fitVec)
 
-    dateConvDF = resids(fitVec, true)
+    df = importData(true)
+
+    sort!(df, :Time)
+    df.Time *= 60.0
+
+    df.MeanPredict = similar(df.Mean, T)
+    FutureDict = Dict()
+
+    for ligand in unique(df.Ligand)
+        # Put the highest dose first so we catch a solving error early
+        for dose in reverse(sort(unique(df.Dose)))
+            if ligand == "IL15"
+                ligVec = [0.0, dose, 0.0]
+            else
+                ligVec = [dose, 0.0, 0.0]
+            end
+
+            for cell in unique(df.Cell)
+                idxx = findfirst(df.Cell .== cell)
+                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
+                vector = vec(fitParams(ligVec, x, recpE, cell))
+
+                if ligand != "IL15"
+                    vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
+                end
+                idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
+
+                tpss = df[idxs, :Time]
+                # Make sure duplicate times are not considered duplicates
+                tpss += range(0.0, 0.01; length = length(tpss))
+
+                # Regularize for exploding values
+
+                FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
+            end
+        end
+    end
+
+    for (key, val) in FutureDict
+        idxs = (df.Dose .== key[1]) .& (df.Ligand .== key[2]) .& (df.Cell .== key[3])
+
+        df[idxs, :MeanPredict] = fetch(val)
+    end
+
+    @assert all(df.MeanPredict .>= -0.01)
+
+    dateConvDF = DataFrame(Date = [], Conv = [])
+    for date in unique(df.Date)
+        dateFilt = filter(row -> string(row["Date"]) .== date, df)
+        convFact = dateFilt.MeanPredict \ dateFilt.Mean
+        miniDF = DataFrame(Date = date, Conv = convFact)
+        dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
+        append!(dateConvDF, miniDF)
+    end
+
+    
+    CSV.write(joinpath(dataDir, "DateConvFrame.csv"), dateConvDF)
 end
