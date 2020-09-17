@@ -215,6 +215,6 @@ function getDateConvDict()
         append!(dateConvDF, miniDF)
     end
 
-    
+
     CSV.write(joinpath(dataDir, "DateConvFrame.csv"), dateConvDF)
 end

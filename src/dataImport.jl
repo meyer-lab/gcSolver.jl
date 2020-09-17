@@ -1,6 +1,6 @@
 
 """ Import all of the data into one dataframe. """
-function importData(monomeric=false)
+function importData(monomeric = false)
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
     yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
