@@ -8,21 +8,17 @@ using GaussianProcesses
 plt = Plots;
 
 # Plot of dose response curves
-function gpPlot(ligandName, cellType, gp, compType = "none")
-    responseDF = gcSolver.importData()
+function gpPlot(ligandName, cellType, gp, compType = "none", biv = true)
+    
+    if biv == true
+        responseDF = gcSolver.importData()
+    else
+        responseDF = gcSolver.importData(true)
+    end
+    
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
-
-    bivEnc = zeros(1:size(responseDF, 1))
-    for ii = 1:size(responseDF, 1)
-        if responseDF.Ligand[ii] == "IL2" || responseDF.Ligand[ii] == "IL15"
-            bivEnc[ii] = 0
-        else
-            bivEnc[ii] = 1
-        end
-    end
-    responseDF.Bivalent = bivEnc
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
@@ -43,7 +39,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     σ²s = similar(μs)
 
     pl1 = plt.plot()
-
+ 
     for (i, ITtime) in enumerate(time)
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
         xMat[:, 1] .= log10.(doseVec)

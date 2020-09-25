@@ -6,8 +6,7 @@ using DataFrames;
 using GaussianProcesses;
 gdf = Gadfly;
 
-function cellTypeContr(gp, realType, compType, recExp = false)
-
+function cellTypeContr(gp, realType, compType, recExp = false, biv = true)
 
     x, y, df = gcSolver.getGPdata()
 
@@ -43,8 +42,11 @@ function cellTypeContr(gp, realType, compType, recExp = false)
     compPreds = predict_f(gp, realX')
 
     ligands = df[df.Cell .== realType, :].Ligand
-    #println("ligands = ", ligands)
-
+    println("ligands = ", ligands)
+    """if biv == false
+        #cut out bivalent muteins from ligands
+    end
+    println("ligands = ", ligands) """
 
     """#assuming first tuple returned by predict f is the inputs and the second tuple returned is the predictions
     realVals = realPreds[2]

@@ -7,23 +7,17 @@ using Statistics;
 plt = Plots;
 
 # Plot of dose response curves
-function gpPlotVar(ligandName, cellType, gp, cov = false)
+function gpPlotVar(ligandName, cellType, gp, cov = false, biv = true)
     nPoints = 100
-    responseDF = gcSolver.importData()
+    if biv == true
+        responseDF = gcSolver.importData()
+    else
+        responseDF = gcSolver.importData(true)
+    end
     sigma = gcSolver.getSigma(cellType)
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
-
-    bivEnc = zeros(1:size(responseDF, 1))
-    for ii = 1:size(responseDF, 1)
-        if responseDF.Ligand[ii] == "IL2" || responseDF.Ligand[ii] == "IL15"
-            bivEnc[ii] = 0
-        else
-            bivEnc[ii] = 1
-        end
-    end
-    responseDF.Bivalent = bivEnc
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
