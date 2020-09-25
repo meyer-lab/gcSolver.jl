@@ -96,7 +96,7 @@ end
 
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ5()
-    l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x]
+    l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x; z aa]
     X, y, df = gcSolver.getGPdata()
     trainedGP = gcSolver.gaussianProcess(X', y)
     p1 = gpPlotVar("IL2", "Treg", trainedGP, true, false)
@@ -123,6 +123,8 @@ function figureJ5()
     p22 = gpPlotVar("R38Q N-term", "Thelper", trainedGP, true)
     p23 = gpPlotVar("R38Q N-term", "NK", trainedGP)
     p24 = gpPlotVar("R38Q N-term", "CD8", trainedGP)
+    p26 = gpPlotVar("V91K C-term", "CD8", trainedGP, true, false)
+    p28 = gpPlotVar("V91K C-term", "CD8", trainedGP, false, false)
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
     ffig = plt.plot(
         p1,
@@ -149,6 +151,8 @@ function figureJ5()
         p22,
         p23,
         p24,
+        p26,
+        p28,
         layout = l,
         size = (1600, 2400),
     )

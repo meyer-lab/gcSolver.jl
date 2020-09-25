@@ -47,9 +47,6 @@ function figureJ6()
     x, y, df = gcSolver.getGPdata()
     trainedGP = gcSolver.gaussianProcess(x', y)
 
-    #x4, y4, df4 = getGPdata(true)
-    #trainedGP4 = gaussianProcess(x4', y4)
-
     p1 = BivContr(trainedGP, "IL2")
     p2 = BivContr(trainedGP, "IL15")
     p3 = BivContr(trainedGP, "WT N-term")
