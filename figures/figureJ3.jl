@@ -8,20 +8,17 @@ using GaussianProcesses
 plt = Plots;
 
 # Plot of dose response curves
-function gpPlot(ligandName, cellType, gp, compType = "none", biv = true)
-    
-    if biv == true
-        responseDF = gcSolver.importData()
-    else
-        responseDF = gcSolver.importData(true)
-    end
-    
+function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
+
+    responseDF = gcSolver.importData()
+
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
+    filter!(row -> row["Bivalent"] .== biv, filtFrame)
     #filter!(row -> string(row["Date"]) .== date, filtFrame)
 
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
@@ -138,14 +135,14 @@ function figureJ3()
     X, y, df = gcSolver.getGPdata()
     trainedGP = gcSolver.gaussianProcess(X', y)
     #p1 = gpPlot("IL2", "Treg", trainedGP)
-    p1 = gpPlot("IL2", "Treg", trainedGP)
-    p2 = gpPlot("IL2", "Thelper", trainedGP)
-    p3 = gpPlot("IL2", "NK", trainedGP)
-    p4 = gpPlot("IL2", "CD8", trainedGP)
-    p5 = gpPlot("IL15", "Treg", trainedGP)
-    p6 = gpPlot("IL15", "Thelper", trainedGP)
-    p7 = gpPlot("IL15", "NK", trainedGP)
-    p8 = gpPlot("IL15", "CD8", trainedGP)
+    p1 = gpPlot("IL2", "Treg", trainedGP, false)
+    p2 = gpPlot("IL2", "Thelper", trainedGP, false)
+    p3 = gpPlot("IL2", "NK", trainedGP, false)
+    p4 = gpPlot("IL2", "CD8", trainedGP, false)
+    p5 = gpPlot("IL15", "Treg", trainedGP, false)
+    p6 = gpPlot("IL15", "Thelper", trainedGP, false)
+    p7 = gpPlot("IL15", "NK", trainedGP, false)
+    p8 = gpPlot("IL15", "CD8", trainedGP, false)
     p9 = gpPlot("R38Q/H16N", "Treg", trainedGP)
     p10 = gpPlot("R38Q/H16N", "Thelper", trainedGP)
     p11 = gpPlot("R38Q/H16N", "NK", trainedGP)

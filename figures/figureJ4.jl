@@ -42,7 +42,6 @@ function cellTypeContr(gp, realType, compType, recExp = false, biv = true)
     compPreds = predict_f(gp, realX')
 
     ligands = df[df.Cell .== realType, :].Ligand
-    println("ligands = ", ligands)
     """if biv == false
         #cut out bivalent muteins from ligands
     end

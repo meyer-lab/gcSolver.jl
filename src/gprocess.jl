@@ -18,11 +18,11 @@ function getGPdata()
     combCD4 = fullDataX[:, size(fullDataX, 2)]
     for iii = 1:length(combCD4)
         if combCD4[iii] == 1
-            fullDataX[iii, 12] = 1
+            fullDataX[iii, 13] = 1
         end
     end
 
-    fullDataX = fullDataX[:, 1:12]
+    fullDataX = fullDataX[:, 1:13]
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
 end

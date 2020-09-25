@@ -14,12 +14,6 @@ function BivContr(gp, ligand)
     realX = x[df.Ligand .== ligand, :]
 
     realPreds = predict_f(gp, realX')
-    biv = realX[1, size(realX, 2)]
-    if biv == 1
-        realX[:, size(realX, 2)] .= 0
-    else
-        realX[:, size(realX, 2)] .= 1
-    end
 
     compPreds = predict_f(gp, realX')
 

@@ -9,11 +9,7 @@ plt = Plots;
 # Plot of dose response curves
 function gpPlotVar(ligandName, cellType, gp, cov = false, biv = true)
     nPoints = 100
-    if biv == true
-        responseDF = gcSolver.importData()
-    else
-        responseDF = gcSolver.importData(true)
-    end
+    responseDF = gcSolver.importData()
     sigma = gcSolver.getSigma(cellType)
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
@@ -21,7 +17,7 @@ function gpPlotVar(ligandName, cellType, gp, cov = false, biv = true)
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
-    #filter!(row -> string(row["Date"]) .== date, filtFrame)
+    filter!(row -> row["Bivalent"] .== biv, filtFrame)
 
     if cov
         realDataDF = filtFrame[!, [:Dose, :Time, :alphStatCov]]
@@ -103,14 +99,14 @@ function figureJ5()
     l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x]
     X, y, df = gcSolver.getGPdata()
     trainedGP = gcSolver.gaussianProcess(X', y)
-    p1 = gpPlotVar("IL2", "Treg", trainedGP, true)
-    p2 = gpPlotVar("IL2", "Thelper", trainedGP, true)
-    p3 = gpPlotVar("IL2", "NK", trainedGP)
-    p4 = gpPlotVar("IL2", "CD8", trainedGP)
-    p5 = gpPlotVar("IL15", "Treg", trainedGP, true)
-    p6 = gpPlotVar("IL15", "Thelper", trainedGP, true)
-    p7 = gpPlotVar("IL15", "NK", trainedGP)
-    p8 = gpPlotVar("IL15", "CD8", trainedGP)
+    p1 = gpPlotVar("IL2", "Treg", trainedGP, true, false)
+    p2 = gpPlotVar("IL2", "Thelper", trainedGP, true, false)
+    p3 = gpPlotVar("IL2", "NK", trainedGP, false, false)
+    p4 = gpPlotVar("IL2", "CD8", trainedGP, false, false)
+    p5 = gpPlotVar("IL15", "Treg", trainedGP, true, false)
+    p6 = gpPlotVar("IL15", "Thelper", trainedGP, true, false)
+    p7 = gpPlotVar("IL15", "NK", trainedGP, false, false)
+    p8 = gpPlotVar("IL15", "CD8", trainedGP, false, false)
     p9 = gpPlotVar("R38Q/H16N", "Treg", trainedGP, true)
     p10 = gpPlotVar("R38Q/H16N", "Thelper", trainedGP, true)
     p11 = gpPlotVar("R38Q/H16N", "NK", trainedGP)
