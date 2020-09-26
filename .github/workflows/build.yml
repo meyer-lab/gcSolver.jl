@@ -1,0 +1,16 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: make all
+    - name: Upload files
+      uses: actions/upload-artifact@v2
+      with:
+        name: files
+        path: f*.svg
