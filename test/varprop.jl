@@ -26,5 +26,5 @@ end
 @testset "Test that residuals can be calculated using Farhat Fit." begin
     farhatVec = gcSolver.getFarhatVec()
     resids = gcSolver.resids(farhatVec)
-    @test isfininte(resids)
+    @test isfinite(resids)
 end
