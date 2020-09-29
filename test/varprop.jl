@@ -21,3 +21,10 @@ end
     @test isfinite(outt)
     @test all(isfinite.(outtG))
 end
+
+
+@testset "Test that residuals can be calculated using Farhat Fit." begin
+    farhatVec = gcSolver.getFarhatVec()
+    resids = gcSolver.resids(farhatVec)
+    @test isfininte(resids)
+end

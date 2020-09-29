@@ -155,6 +155,7 @@ end
 export getExpression, getUnkVec, fitParams, runCkine
 
 
+""" Writes a CSV for conversion factors between predictions and pSTAT values """
 function getDateConvDict()
     fitVec = importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
@@ -217,4 +218,35 @@ function getDateConvDict()
 
 
     CSV.write(joinpath(dataDir, "DateConvFrame.csv"), dateConvDF)
+end
+
+
+""" Writes results of Farhat et al. model fitting to unknown vector """
+function getUnkVec()
+    #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
+    p = 0.1ones(23)
+    p[1] = 0.001 # means of prior distributions from gc-cytokines paper
+    p[1] = 0.003 #0.001 # means of prior distributions from gc-cytokines paper
+    p[2] = 11
+    p[3] = 0.08
+    p[4] = 25
+    p[5] = 0.04
+    p[6] = 5
+    p[7] = 24
+    p[8] = 1.0
+    p[10] = 0.678
+    p[11] = 0.2
+    p[12] = 0.01
+    p[13] = 0.13
+    p[9] = 0.09
+    p[10] = 2.5 #0.678
+    p[11] = 0.13 #0.2
+    p[12] = 0.1 # 0.01
+    p[13] = 0.007 #0.13
+    p[14] = 2.0 # initial Treg stat
+    p[15] = 0.5 # initial Thelp stat
+    p[16] = 0.2 # initial NK stat
+    p[17] = 0.2 # initial CD8 stat
+    p[18:23] .= 0.001 # pSTAT Rates
+    return p
 end

@@ -94,4 +94,3 @@ end
         temp = runCkine(tps, rxntfR)
         @test any(temp[1, :] .> 0.0)
     end
-end
