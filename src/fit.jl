@@ -222,7 +222,7 @@ end
 
 
 """ Writes results of Farhat et al. model fitting to unknown vector """
-function getUnkVec()
+function getFarhatVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
     p = 0.1ones(23)
     p[1] = 0.001 # means of prior distributions from gc-cytokines paper
