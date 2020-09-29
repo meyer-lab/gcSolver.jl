@@ -15,6 +15,14 @@ function BivContr(gp, ligand)
 
     realPreds = predict_f(gp, realX')
 
+    biv = realX[1, size(realX, 2)]
+    println("biv = ", biv)
+    if biv == 1
+        realX[:, size(realX, 2)] .= 0
+    else
+        realX[:, size(realX, 2)] .= 1
+    end
+
     compPreds = predict_f(gp, realX')
 
     cells = df[df.Ligand .== ligand, :].Cell
@@ -53,6 +61,10 @@ function figureJ6()
     p4 = BivContr(trainedGP, "H16N N-term")
     p5 = BivContr(trainedGP, "R38Q N-term")
     p6 = BivContr(trainedGP, "R38Q/H16N")
+    p7 = BivContr(trainedGP, "V91K C-term")
+    p8 = BivContr(trainedGP, "WT C-term")
+    p9 = BivContr(trainedGP, "F42Q N-Term")
 
-    draw(SVG("figureJ6.svg", 3000px, 2000px), gridstack([p1 p2 p3; p4 p5 p6]))
+
+    draw(SVG("figureJ6.svg", 3000px, 2000px), gridstack([p1 p2 p3; p4 p5 p6; p7 p8 p9]))
 end

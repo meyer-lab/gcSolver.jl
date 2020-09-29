@@ -20,24 +20,20 @@ function cellTypeContr(gp, realType, compType, recExp = false, biv = true)
 
     if recExp == true
         compExpression = x[df.Cell .== compType, :][1, 5:9]
-        realX[:, 5:9] = repeat(compExpression, outer = [1, size(realX)[1]])'
-        """elseif CD4 == false
-           #modify RealX
-            hotEnc = cellHotEnc(compType)
-            realX[:, 10:13] = repeat(hotEnc, outer = [1, size(realX)[1]])'
-            #realX[10:13,:] = cellHotEnc(compType)
-        elseif CD4 == true"""
+        realX[:, 5:9] = repeat(compExpression , outer = [1, size(realX)[1]])'
     else
         hotEnc = gcSolver.cellHotEnc(compType)
-        """if compType == "Treg"
-            hotEnc = cellHotEnc("Thelper")
-        end"""
         realX[:, 11:size(realX, 2)] = repeat(hotEnc, outer = [1, size(realX)[1]])'
     end
 
     compPreds = predict_f(gp, realX')
 
     ligands = df[df.Cell .== realType, :].Ligand
+    println("ligands = ", ligands)
+    if biv == true
+        ligands = filter(row -> row["Bivalent"] .== biv, ligands)
+    end
+    println("ligands = ", ligands)
 
     # first tuple returned by predict_f is the predictions and the second tuple returned is the standard deviations
     realVals = realPreds[1]
