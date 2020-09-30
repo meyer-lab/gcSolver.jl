@@ -12,15 +12,27 @@ function BivContr(gp, ligand)
     predDF = DataFrame(realPred = Float64[], fakePred = Float64[], cell = String[])
 
     realX = x[df.Ligand .== ligand, :]
+    #test = df.Ligand .== ligand
+    #println("test = ", test)
+
+    #println(first(df,5))
+    
+    #show(stdout, x)
+
+    #first(realX, 5)
+    realXtest = realX[1,:]
+    println("realX = ", realXtest)
+    
+    #show(stdout, realXtest)
 
     realPreds = predict_f(gp, realX')
 
-    biv = realX[1, size(realX, 2)]
+    biv = realX[1, 10]
     println("biv = ", biv)
     if biv == 1
-        realX[:, size(realX, 2)] .= 0
+        realX[:, 10] .= 0
     else
-        realX[:, size(realX, 2)] .= 1
+        realX[:, 10] .= 1
     end
 
     compPreds = predict_f(gp, realX')
@@ -38,15 +50,25 @@ function BivContr(gp, ligand)
         push!(predDF, (real, fake, cel))
     end
 
-
-    predComp = gdf.plot(
-        layer(predDF, x = :realPred, y = :fakePred, color = :cell, Geom.point),
-        Guide.title(string("Ligand valency influence on ", ligand, " prediction")),
-        Guide.xlabel("Correct Pred (log pSTAT)"),
-        Guide.ylabel("Incorrect Pred"),
-        Scale.color_discrete(),
-        Guide.colorkey(title = "Cells"),
-    )
+    if biv == 1
+        predComp = gdf.plot(
+            layer(predDF, x = :realPred, y = :fakePred, color = :cell, Geom.point),
+            Guide.title(string("Ligand valency influence on (bivalent) ", ligand, " prediction")),
+            Guide.xlabel("Correct Pred (log pSTAT, bivalent)"),
+            Guide.ylabel("Incorrect Pred (log pSTAT, monovalent)"),
+            Scale.color_discrete(),
+            Guide.colorkey(title = "Cells"),
+        )
+    else
+        predComp = gdf.plot(
+            layer(predDF, x = :realPred, y = :fakePred, color = :cell, Geom.point),
+            Guide.title(string("Ligand valency influence on (monovalent) ", ligand, " prediction")),
+            Guide.xlabel("Correct Pred (log pSTAT, monovalent)"),
+            Guide.ylabel("Incorrect Pred (log pSTAT, bivalent)"),
+            Scale.color_discrete(),
+            Guide.colorkey(title = "Cells"),
+        )
+    end
     return predComp
 end
 
@@ -65,6 +87,6 @@ function figureJ6()
     p8 = BivContr(trainedGP, "WT C-term")
     p9 = BivContr(trainedGP, "F42Q N-Term")
 
-
+    #draw(SVG("figureJ6.svg", 3000px, 2000px), p1)
     draw(SVG("figureJ6.svg", 3000px, 2000px), gridstack([p1 p2 p3; p4 p5 p6; p7 p8 p9]))
 end
