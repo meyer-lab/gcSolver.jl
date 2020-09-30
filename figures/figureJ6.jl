@@ -42,7 +42,7 @@ function BivContr(gp, ligand)
     predComp = gdf.plot(
         layer(predDF, x = :realPred, y = :fakePred, color = :cell, Geom.point),
         Guide.title(string("Ligand valency influence on ", ligand, " prediction")),
-        Guide.xlabel("Correct Pred"),
+        Guide.xlabel("Correct Pred (log pSTAT)"),
         Guide.ylabel("Incorrect Pred"),
         Scale.color_discrete(),
         Guide.colorkey(title = "Cells"),
