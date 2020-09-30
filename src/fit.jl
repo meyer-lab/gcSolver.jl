@@ -89,7 +89,6 @@ function resids(x::Vector{T})::T where {T}
     df.MeanPredict = similar(df.Mean, T)
     FutureDict = Dict()
     cost = 0.0
-    print(unique(df.Ligand))
 
     for ligand in unique(df.Ligand)
         # Put the highest dose first so we catch a solving error early
