@@ -6,12 +6,13 @@ using DataFrames;
 using GaussianProcesses;
 gdf = Gadfly;
 
-function BivContr(gp, ligand)
+function BivContr(gp, ligand, biv)
     x, y, df = gcSolver.getGPdata()
 
     predDF = DataFrame(realPred = Float64[], fakePred = Float64[], cell = String[])
 
-    realX = x[df.Ligand .== ligand, :]
+    realX1 = x[df.Ligand .== ligand, :]
+    realX = x[df.Bivalent .== biv, :]
     #test = df.Ligand .== ligand
     #println("test = ", test)
 
@@ -20,15 +21,17 @@ function BivContr(gp, ligand)
     #show(stdout, x)
 
     #first(realX, 5)
-    realXtest = realX[1,:]
-    println("realX = ", realXtest)
+    #realXtest = realX[1,:]
+    #println("realX = ", realXtest)
     
     #show(stdout, realXtest)
 
     realPreds = predict_f(gp, realX')
 
-    biv = realX[1, 10]
+    #don't need next line if we use argument 
+    #biv = realX[1, 10]
     println("biv = ", biv)
+    #println("biv2 = ", realX[:, 10])
     if biv == 1
         realX[:, 10] .= 0
     else
@@ -77,15 +80,15 @@ function figureJ6()
     x, y, df = gcSolver.getGPdata()
     trainedGP = gcSolver.gaussianProcess(x', y)
 
-    p1 = BivContr(trainedGP, "IL2")
-    p2 = BivContr(trainedGP, "IL15")
-    p3 = BivContr(trainedGP, "WT N-term")
-    p4 = BivContr(trainedGP, "H16N N-term")
-    p5 = BivContr(trainedGP, "R38Q N-term")
-    p6 = BivContr(trainedGP, "R38Q/H16N")
-    p7 = BivContr(trainedGP, "V91K C-term")
-    p8 = BivContr(trainedGP, "WT C-term")
-    p9 = BivContr(trainedGP, "F42Q N-Term")
+    p1 = BivContr(trainedGP, "IL2", 0)
+    p2 = BivContr(trainedGP, "IL15", 0)
+    p3 = BivContr(trainedGP, "WT N-term", 1)
+    p4 = BivContr(trainedGP, "H16N N-term", 1)
+    p5 = BivContr(trainedGP, "R38Q N-term", 1)
+    p6 = BivContr(trainedGP, "WT N-term", 0)
+    p7 = BivContr(trainedGP, "V91K C-term", 0)
+    p8 = BivContr(trainedGP, "WT C-term", 0)
+    p9 = BivContr(trainedGP, "F42Q N-Term", 0)
 
     #draw(SVG("figureJ6.svg", 3000px, 2000px), p1)
     draw(SVG("figureJ6.svg", 3000px, 2000px), gridstack([p1 p2 p3; p4 p5 p6; p7 p8 p9]))
