@@ -11,27 +11,11 @@ function BivContr(gp, ligand, biv)
 
     predDF = DataFrame(realPred = Float64[], fakePred = Float64[], cell = String[])
 
-    realX1 = x[df.Ligand .== ligand, :]
-    realX = x[df.Bivalent .== biv, :]
-    #test = df.Ligand .== ligand
-    #println("test = ", test)
-
-    #println(first(df,5))
-    
-    #show(stdout, x)
-
-    #first(realX, 5)
-    #realXtest = realX[1,:]
-    #println("realX = ", realXtest)
-    
-    #show(stdout, realXtest)
+    realX = x[df.Ligand .== ligand, :]
+    realX = realX[realX[:, 10] .== biv, :]
 
     realPreds = predict_f(gp, realX')
 
-    #don't need next line if we use argument 
-    #biv = realX[1, 10]
-    println("biv = ", biv)
-    #println("biv2 = ", realX[:, 10])
     if biv == 1
         realX[:, 10] .= 0
     else
@@ -40,7 +24,8 @@ function BivContr(gp, ligand, biv)
 
     compPreds = predict_f(gp, realX')
 
-    cells = df[df.Ligand .== ligand, :].Cell
+    filtFrame = filter(row -> row["Ligand"] .== ligand, df)
+    cells = filtFrame[filtFrame.Bivalent .== biv, :].Cell
 
     # first tuple returned by predict_f is the predictions and the second tuple returned is the standard deviations
     realVals = realPreds[1]
