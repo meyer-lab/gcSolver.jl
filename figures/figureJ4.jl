@@ -28,13 +28,11 @@ function cellTypeContr(gp, realType, compType, recExp = false, biv = true)
 
     compPreds = predict_f(gp, realX')
 
-    ligands = df[df.Cell .== realType, :].Ligand
-    println("ligands = ", ligands)
+    ligands = df[df.Cell .== realType, :]
     if biv == true
         ligands = filter(row -> row["Bivalent"] .== biv, ligands)
     end
-    println("ligands = ", ligands)
-
+    ligands = ligands.Ligand
     # first tuple returned by predict_f is the predictions and the second tuple returned is the standard deviations
     realVals = realPreds[1]
     fakeVals = compPreds[1]
@@ -125,10 +123,10 @@ function figureJ4()
     p11rec = cellTypeContr(trainedGP, "CD8", "Thelper", true)
     p12rec = cellTypeContr(trainedGP, "CD8", "NK", true)"""
 
-    p1 = cellTypeContr(trainedGP, "Treg", "Thelper", false, false)
-    p2 = cellTypeContr(trainedGP, "Treg", "Thelper", false, true)
-    p3 = cellTypeContr(trainedGP, "Treg", "Thelper", true, false)
-    p4 = cellTypeContr(trainedGP, "Treg", "Thelper", true, true)
+    p1 = cellTypeContr(trainedGP, "Treg", "Thelper", false, 0)
+    p2 = cellTypeContr(trainedGP, "Treg", "Thelper", false, 1)
+    p3 = cellTypeContr(trainedGP, "Treg", "Thelper", true, 0)
+    p4 = cellTypeContr(trainedGP, "Treg", "Thelper", true, 1)
 
     draw(SVG("figureJ4.svg", 4000px, 1600px), gridstack([p1 p2; p3 p4]))
     
