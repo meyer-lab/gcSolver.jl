@@ -8,24 +8,17 @@ using GaussianProcesses
 plt = Plots;
 
 # Plot of dose response curves
-function gpPlot(ligandName, cellType, gp, compType = "none")
+function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
+
     responseDF = gcSolver.importData()
+
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
 
-    bivEnc = zeros(1:size(responseDF, 1))
-    for ii = 1:size(responseDF, 1)
-        if responseDF.Ligand[ii] == "IL2" || responseDF.Ligand[ii] == "IL15"
-            bivEnc[ii] = 0
-        else
-            bivEnc[ii] = 1
-        end
-    end
-    responseDF.Bivalent = bivEnc
-
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
+    filter!(row -> row["Bivalent"] .== biv, filtFrame)
     #filter!(row -> string(row["Date"]) .== date, filtFrame)
 
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
@@ -43,7 +36,7 @@ function gpPlot(ligandName, cellType, gp, compType = "none")
     σ²s = similar(μs)
 
     pl1 = plt.plot()
-
+ 
     for (i, ITtime) in enumerate(time)
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
         xMat[:, 1] .= log10.(doseVec)
@@ -138,18 +131,18 @@ end
 
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ3()
-    l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x]
+    l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x; z aa bb cc]
     X, y, df = gcSolver.getGPdata()
     trainedGP = gcSolver.gaussianProcess(X', y)
     #p1 = gpPlot("IL2", "Treg", trainedGP)
-    p1 = gpPlot("IL2", "Treg", trainedGP)
-    p2 = gpPlot("IL2", "Thelper", trainedGP)
-    p3 = gpPlot("IL2", "NK", trainedGP)
-    p4 = gpPlot("IL2", "CD8", trainedGP)
-    p5 = gpPlot("IL15", "Treg", trainedGP)
-    p6 = gpPlot("IL15", "Thelper", trainedGP)
-    p7 = gpPlot("IL15", "NK", trainedGP)
-    p8 = gpPlot("IL15", "CD8", trainedGP)
+    p1 = gpPlot("IL2", "Treg", trainedGP, false)
+    p2 = gpPlot("IL2", "Thelper", trainedGP, false)
+    p3 = gpPlot("IL2", "NK", trainedGP, false)
+    p4 = gpPlot("IL2", "CD8", trainedGP, false)
+    p5 = gpPlot("IL15", "Treg", trainedGP, false)
+    p6 = gpPlot("IL15", "Thelper", trainedGP, false)
+    p7 = gpPlot("IL15", "NK", trainedGP, false)
+    p8 = gpPlot("IL15", "CD8", trainedGP, false)
     p9 = gpPlot("R38Q/H16N", "Treg", trainedGP)
     p10 = gpPlot("R38Q/H16N", "Thelper", trainedGP)
     p11 = gpPlot("R38Q/H16N", "NK", trainedGP)
@@ -166,6 +159,11 @@ function figureJ3()
     p22 = gpPlot("R38Q N-term", "Thelper", trainedGP)
     p23 = gpPlot("R38Q N-term", "NK", trainedGP)
     p24 = gpPlot("R38Q N-term", "CD8", trainedGP)
+    p25 = gpPlot("V91K C-term", "Treg", trainedGP, false)
+    p26 = gpPlot("V91K C-term", "Thelper", trainedGP, false)
+    p27 = gpPlot("V91K C-term", "NK", trainedGP, false)
+    p28 = gpPlot("V91K C-term", "CD8", trainedGP, false)
+
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
     ffig = plt.plot(
         p1,
@@ -192,6 +190,10 @@ function figureJ3()
         p22,
         p23,
         p24,
+        p25,
+        p26,
+        p27,
+        p28,
         layout = l,
         size = (1600, 2400),
     )

@@ -3,12 +3,13 @@
 function importData(monomeric = false)
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
-    yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMoments.csv")))
+    yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMomentsBiv.csv")))
     if monomeric
         yData = filter(row -> row.Ligand ∈ ["IL2", "IL15"], yData)
-        monDF = DataFrame!(CSV.File(joinpath(dataDir, "MonomericMutpSTAT.csv")))
-        append!(yData, monDF)
     end
+    monDF = DataFrame!(CSV.File(joinpath(dataDir, "MonomericMutpSTATbiv.csv")))
+    append!(yData, monDF)
+
     affDF = DataFrame!(CSV.File(joinpath(dataDir, "WTmutAffData.csv")))
     exprDF = DataFrame!(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
 
