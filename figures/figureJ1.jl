@@ -8,7 +8,7 @@ using StatsFuns;
 gdf = Gadfly;
 
 # Plot of dose response curves
-function doseResPlot(ligandName, cellType, date, unkVec, biv=false)
+function doseResPlot(ligandName, cellType, date, unkVec, biv = false)
     responseDF = gcSolver.importData(false)
     time = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
