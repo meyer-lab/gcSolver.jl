@@ -19,9 +19,7 @@ function getUnkVec()
     p[15] = 0.2 # initial Thelp stat
     p[16] = 0.3 # initial NK stat
     p[17] = 0.1 # initial CD8 stat
-    p[18] = 0.01
-    p[19:21] .= 0.0001
-    p[22:23] .= 0.01 # pSTAT Rates
+    p[18:23] .= 0.001
 
     return p
 end
@@ -107,11 +105,8 @@ function resids(x::Vector{T})::T where {T}
             for cell in unique(df.Cell)
                 idxx = findfirst(df.Cell .== cell)
                 recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
-                #farhatVec = getFarhatVec()
-                #x[1:13] = farhatVec[1:13]
                 vector = vec(fitParams(ligVec, x, recpE, cell))
-
-                if ligand != "IL15"
+                if ligand !== "IL15" && ligand !== "IL2"
                     vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
                 end
                 idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
