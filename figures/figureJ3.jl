@@ -36,7 +36,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
     σ²s = similar(μs)
 
     pl1 = plt.plot()
- 
+
     for (i, ITtime) in enumerate(time)
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
         xMat[:, 1] .= log10.(doseVec)
