@@ -8,7 +8,7 @@ using ForwardDiff;
 gdf = Gadfly;
 
 # Plot of dose response curves
-function doseResPlot2(ligandName, cellType, date, unkVec, biv=false)
+function doseResPlot2(ligandName, cellType, date, unkVec, biv = false)
     responseDF = gcSolver.importData(false)
     tps = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
