@@ -60,7 +60,7 @@ function runCkine(tps::Vector{Float64}, params; pSTAT5 = false)
     end
 
     solAlg = KenCarp4()
-    sol = solve(prob, solAlg; saveat = tps, save_idxs = sidx, reltol = 1.0e-9, maxiters = 1e7) 
+    sol = solve(prob, solAlg; saveat = tps, save_idxs = sidx, reltol = 1.0e-9, maxiters = 1e7)
 
     if sol.retcode != :Success
         println("Solving failed with the following parameters.")
