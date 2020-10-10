@@ -85,6 +85,7 @@ end
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
     df = importData(true)
+    df = df[df.Ligand .!= "IL15", :]
 
     sort!(df, :Time)
     df.Time *= 60.0
