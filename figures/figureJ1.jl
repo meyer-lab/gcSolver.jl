@@ -38,7 +38,7 @@ function doseResPlot(ligandName, cellType, date, unkVec, biv = false)
         #Gives back 36 parameter long
         idxx = findfirst(responseDF.Cell .== cellType)
         iterParams =
-            gcSolver.fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]]), cellType)
+            gcSolver.fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL2Ra, :IL2Rb, :gc, :IL15Ra, :IL7Ra]]), cellType)
         if ligandName != "IL2" && ligandName != "IL15"
             iterParams = gcSolver.mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
         end
