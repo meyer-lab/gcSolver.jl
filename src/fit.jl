@@ -105,7 +105,8 @@ function resids(x::Vector{T})::T where {T}
 
             for cell in unique(df.Cell)
                 idxx = findfirst(df.Cell .== cell)
-                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
+                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL2Ra, :IL2Rb, :gc, :IL15Ra, :IL7Ra]])
+                recpE[4] = recpE[5]
                 vector = vec(fitParams(ligVec, x, recpE, cell))
                 if ligand !== "IL15" && ligand !== "IL2"
                     vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
@@ -117,7 +118,7 @@ function resids(x::Vector{T})::T where {T}
                 tpss += range(0.0, 0.01; length = length(tpss))
 
                 # Regularize for exploding values
-                cost += sum(softplus.(vector .- 1.0e6))
+                #cost += sum(softplus.(vector .- 1.0e6))
 
                 FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
             end
@@ -126,18 +127,16 @@ function resids(x::Vector{T})::T where {T}
 
     for (key, val) in FutureDict
         idxs = (df.Dose .== key[1]) .& (df.Ligand .== key[2]) .& (df.Cell .== key[3])
-
         df[idxs, :MeanPredict] = fetch(val)
     end
 
     @assert all(df.MeanPredict .>= -0.01)
-
     for date in unique(df.Date)
         dateFilt = filter(row -> string(row["Date"]) .== date, df)
         dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
-        cost += norm(dateFilt.MeanPredict - dateFilt.Mean)
+        df[df[:Date] .== date, :].MeanPredict = dateFilt.MeanPredict
     end
-
+    cost += norm(df.MeanPredict - df.Mean)
     return cost
 end
 
@@ -165,11 +164,12 @@ function getDateConvDict()
     x = softplus.(fitVec)
 
     df = importData(true)
+    df = df[df.Ligand .!= "IL15", :]
 
     sort!(df, :Time)
     df.Time *= 60.0
 
-    df.MeanPredict = similar(df.Mean, T)
+    df.MeanPredict = similar(df.Mean, Float64)
     FutureDict = Dict()
 
     for ligand in unique(df.Ligand)
@@ -183,7 +183,8 @@ function getDateConvDict()
 
             for cell in unique(df.Cell)
                 idxx = findfirst(df.Cell .== cell)
-                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
+                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL2Ra, :IL2Rb, :gc, :IL15Ra, :IL7Ra]])
+                recpE[4] = recpE[5]
                 vector = vec(fitParams(ligVec, x, recpE, cell))
 
                 if ligand != "IL15"
@@ -209,7 +210,6 @@ function getDateConvDict()
     end
 
     @assert all(df.MeanPredict .>= -0.01)
-
     dateConvDF = DataFrame(Date = [], Conv = [])
     for date in unique(df.Date)
         dateFilt = filter(row -> string(row["Date"]) .== date, df)
