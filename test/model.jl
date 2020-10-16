@@ -76,17 +76,16 @@ end
 
     @testset "Detailed balance using no-trafficking model." begin
         prob = gcSolver.runCkineSetup([1000000.0], deepcopy(rxntfR))
-        prob.p[20:end] .= 0.0 # Set everything outside of binding reactions to 0
-        prob.u0[(gcSolver.halfL + 1):end] .= 0.0 # Set endosomal species to 0
+        prob.p[20:30] .= 0.0 # Set everything outside of binding reactions to 0
 
         out = vec(runCkine([1000000.0], prob))
 
         J = ForwardDiff.jacobian((y, x) -> gcSolver.fullDeriv(y, x, prob.p, 0.0), ones(gcSolver.Nspecies), out)
 
         # Slice out just the surface species
-        GK = J[1:(gcSolver.halfL), 1:(gcSolver.halfL)] * diagm(vec(out[1:(gcSolver.halfL)]))
+        GK = J[1:(2gcSolver.halfL), 1:(2gcSolver.halfL)] * diagm(vec(out[1:(2gcSolver.halfL)]))
 
-        @test norm(GK - transpose(GK)) < 1.0e-7
+        @test norm(GK - transpose(GK)) < 1.0e-9
     end
 
 
