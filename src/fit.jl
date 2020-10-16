@@ -105,7 +105,7 @@ function resids(x::Vector{T})::T where {T}
 
             for cell in unique(df.Cell)
                 idxx = findfirst(df.Cell .== cell)
-                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
+                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL2Ra, :IL2Rb, :gc, :IL15Ra, :IL7Ra]])
                 vector = vec(fitParams(ligVec, x, recpE, cell))
                 if ligand !== "IL15" && ligand !== "IL2"
                     vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
@@ -135,8 +135,9 @@ function resids(x::Vector{T})::T where {T}
     for date in unique(df.Date)
         dateFilt = filter(row -> string(row["Date"]) .== date, df)
         dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
-        cost += norm(dateFilt.MeanPredict - dateFilt.Mean)
+        df[df[:Date] .== date, :].MeanPredict = dateFilt.MeanPredict
     end
+    cost += norm(df.MeanPredict - df.Mean)
 
     return cost
 end
@@ -169,7 +170,7 @@ function getDateConvDict()
     sort!(df, :Time)
     df.Time *= 60.0
 
-    df.MeanPredict = similar(df.Mean, T)
+    df.MeanPredict = similar(df.Mean, Float64)
     FutureDict = Dict()
 
     for ligand in unique(df.Ligand)
@@ -183,10 +184,10 @@ function getDateConvDict()
 
             for cell in unique(df.Cell)
                 idxx = findfirst(df.Cell .== cell)
-                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc]])
+                recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL2Ra, :IL2Rb, :gc, :IL15Ra, :IL7Ra]])
                 vector = vec(fitParams(ligVec, x, recpE, cell))
 
-                if ligand != "IL15"
+                if ligand != "IL15" && ligand !== "IL2"
                     vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
                 end
                 idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
