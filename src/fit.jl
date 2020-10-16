@@ -187,7 +187,7 @@ function getDateConvDict()
                 recpE = 10.0 .^ Vector{Float64}(df[idxx, [:IL2Ra, :IL2Rb, :gc, :IL15Ra, :IL7Ra]])
                 vector = vec(fitParams(ligVec, x, recpE, cell))
 
-                if ligand != "IL15"
+                if ligand != "IL15" && ligand !== "IL2"
                     vector = mutAffAdjust(vector, df[findfirst(df.Ligand .== ligand), [:IL2RaKD, :IL2RBGKD]])
                 end
                 idxs = (df.Dose .== dose) .& (df.Ligand .== ligand) .& (df.Cell .== cell)
