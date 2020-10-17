@@ -101,7 +101,7 @@ function figureJ1()
     p26 = doseResPlot("F42Q N-Term", "Thelper", "3/1/19", fitVec, 0)
     p27 = doseResPlot("F42Q N-Term", "NK", "3/1/19", fitVec, 0)
     p28 = doseResPlot("F42Q N-Term", "CD8", "3/1/19", fitVec, 0)
-    
+
     #draw(SVG("figureJ2.svg", 1000px, 800px), p1)
     draw(
         SVG("figureJ1.svg", 4000px, 2400px),
