@@ -36,7 +36,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
     σ²s = similar(μs)
 
     pl1 = plt.plot()
- 
+
     for (i, ITtime) in enumerate(time)
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
         xMat[:, 1] .= log10.(doseVec)
@@ -224,7 +224,6 @@ function figureJ3()
     p46 = gpPlot("N88D C-term", "Thelper", trainedGP, false)
     p47 = gpPlot("N88D C-term", "NK", trainedGP, false)
     p48 = gpPlot("N88D C-term", "CD8", trainedGP, false)
-    
 
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
     ffig = plt.plot(

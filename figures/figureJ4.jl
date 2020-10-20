@@ -20,7 +20,7 @@ function cellTypeContr(gp, realType, compType, recExp = false, biv = true)
 
     if recExp == true
         compExpression = x[df.Cell .== compType, :][1, 5:9]
-        realX[:, 5:9] = repeat(compExpression , outer = [1, size(realX)[1]])'
+        realX[:, 5:9] = repeat(compExpression, outer = [1, size(realX)[1]])'
     else
         hotEnc = gcSolver.cellHotEnc(compType)
         realX[:, 11:size(realX, 2)] = repeat(hotEnc, outer = [1, size(realX)[1]])'
@@ -108,7 +108,7 @@ function figureJ4()
     p4rec = cellTypeContr(trainedGP, "Thelper", "Treg", true)
     p5rec = cellTypeContr(trainedGP, "Thelper", "NK", true)
     p6rec = cellTypeContr(trainedGP, "Thelper", "CD8", true)
-    
+
     p7 = cellTypeContr(trainedGP, "NK", "Treg")
     p8 = cellTypeContr(trainedGP, "NK", "Thelper")
     p9 = cellTypeContr(trainedGP, "NK", "CD8")
@@ -129,7 +129,7 @@ function figureJ4()
     p4 = cellTypeContr(trainedGP, "Treg", "Thelper", true, 1)
 
     draw(SVG("figureJ4.svg", 4000px, 1600px), gridstack([p1 p2; p3 p4]))
-    
+
     """draw(
         SVG("figureJ4.svg", 2500px, 3200px),
         gridstack([p1 p2 p3; p1rec p2rec p3rec; p4 p5 p6; p4rec p5rec p6rec; p7 p8 p9; p7rec p8rec p9rec; p10 p11 p12; p10rec p11rec p12rec]),
