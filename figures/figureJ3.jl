@@ -45,18 +45,36 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
         μs[i, :], σ²s[i, :] = predict_f(gp, xMat')
-        plt.plot!(
+        if biv == true
+            plt.plot!(
+                doseVec,
+                [μs[i, :] μs[i, :]],
+                fillrange = [μs[i, :] .- σ²s[i, :] μs[i, :] .+ σ²s[i, :]],
+                fillalpha = 0.3,
+                c = colors[i],
+                xscale = :log10,
+                ylims = (0,5),
+                yticks = 0:0.5:5,
+                label = "",
+                title = string(cellType, " Response to Bivalent ", ligandName, " GP Model"),
+                titlefontsize = 9,
+            )
+        else
+            plt.plot!(
             doseVec,
             [μs[i, :] μs[i, :]],
             fillrange = [μs[i, :] .- σ²s[i, :] μs[i, :] .+ σ²s[i, :]],
             fillalpha = 0.3,
             c = colors[i],
             xscale = :log10,
+            ylims = (0,5),
+            yticks = 0:0.5:5,
             label = "",
-            title = string(cellType, " Response to ", ligandName, " GP Model"),
+            title = string(cellType, " Response to Monovalent ", ligandName, " GP Model"),
             titlefontsize = 9,
         )
-        plt.plot!(doseVec, μs[i, :], c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
+        end
+        plt.plot!(doseVec, μs[i, :], c = colors[i], xscale = :log10, ylims = (0,5), yticks = 0:0.5:5, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
 
         if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1)) > 0
             plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1), c = colors[i], xscale = :log10, label = "")
@@ -86,24 +104,45 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
 
             #assuming this adds to current plot
             #linestyle not working, maybe dots are too big and looks like solid line?
-            plt.plot!(
-                doseVec,
-                [μsComp[i, :] μsComp[i, :]],
-                #fillrange = [μsComp[i, :] .- σ²sComp[i, :] μsComp[i, :] .+ σ²sComp[i, :]],
-                #fillalpha = 0.3,
-                c = colorsComp[i],
-                #linestyle = :dot,
-                xscale = :log10,
-                label = "",
-                title = string(cellType, " Response to ", ligandName, " GP Model"),
-                titlefontsize = 9,
-            )
+            if biv == true
+                plt.plot!(
+                    doseVec,
+                    [μsComp[i, :] μsComp[i, :]],
+                    #fillrange = [μsComp[i, :] .- σ²sComp[i, :] μsComp[i, :] .+ σ²sComp[i, :]],
+                    #fillalpha = 0.3,
+                    c = colorsComp[i],
+                    #linestyle = :dot,
+                    xscale = :log10,
+                    ylims = (0,5),
+                    yticks = 0:0.5:5,
+                    label = "",
+                    title = string(cellType, " Response to Bivalent ", ligandName, " GP Model"),
+                    titlefontsize = 9,
+                )
+            else
+                plt.plot!(
+                    doseVec,
+                    [μsComp[i, :] μsComp[i, :]],
+                    #fillrange = [μsComp[i, :] .- σ²sComp[i, :] μsComp[i, :] .+ σ²sComp[i, :]],
+                    #fillalpha = 0.3,
+                    c = colorsComp[i],
+                    #linestyle = :dot,
+                    xscale = :log10,
+                    ylims = (0,5),
+                    yticks = 0:0.5:5,
+                    label = "",
+                    title = string(cellType, " Response to Monovalent ", ligandName, " GP Model"),
+                    titlefontsize = 9,
+                )
+            end
             labelString = string(compType, " ", ITtime)
             plt.plot!(
                 doseVec,
                 μsComp[i, :],
                 c = colorsComp[i],
                 xscale = :log10,
+                ylims = (0,5),
+                yticks = 0:0.5:5,
                 label = labelString,
                 legend = :bottomright,
                 legendfontsize = 5,
@@ -117,6 +156,8 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                     log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1),
                     c = colorsComp[i],
                     xscale = :log10,
+                    ylims = (0,5),
+                    yticks = 0:0.5:5,
                     label = "",
                 )
             end
@@ -143,26 +184,46 @@ function figureJ3()
     p6 = gpPlot("IL15", "Thelper", trainedGP, false)
     p7 = gpPlot("IL15", "NK", trainedGP, false)
     p8 = gpPlot("IL15", "CD8", trainedGP, false)
-    p9 = gpPlot("R38Q/H16N", "Treg", trainedGP)
-    p10 = gpPlot("R38Q/H16N", "Thelper", trainedGP)
-    p11 = gpPlot("R38Q/H16N", "NK", trainedGP)
-    p12 = gpPlot("R38Q/H16N", "CD8", trainedGP)
-    p13 = gpPlot("WT N-term", "Treg", trainedGP)
-    p14 = gpPlot("WT N-term", "Thelper", trainedGP)
-    p15 = gpPlot("WT N-term", "NK", trainedGP)
-    p16 = gpPlot("WT N-term", "CD8", trainedGP)
-    p17 = gpPlot("R38Q N-term", "Treg", trainedGP, false)
-    p18 = gpPlot("R38Q N-term", "Thelper", trainedGP, false)
-    p19 = gpPlot("R38Q N-term", "NK", trainedGP, false)
-    p20 = gpPlot("R38Q N-term", "CD8", trainedGP, false)
-    p21 = gpPlot("R38Q N-term", "Treg", trainedGP)
-    p22 = gpPlot("R38Q N-term", "Thelper", trainedGP)
-    p23 = gpPlot("R38Q N-term", "NK", trainedGP)
-    p24 = gpPlot("R38Q N-term", "CD8", trainedGP)
-    p25 = gpPlot("V91K C-term", "Treg", trainedGP, false)
-    p26 = gpPlot("V91K C-term", "Thelper", trainedGP, false)
-    p27 = gpPlot("V91K C-term", "NK", trainedGP, false)
-    p28 = gpPlot("V91K C-term", "CD8", trainedGP, false)
+    p9 = gpPlot("WT N-term", "Treg", trainedGP)
+    p10 = gpPlot("WT N-term", "Thelper", trainedGP)
+    p11 = gpPlot("WT N-term", "NK", trainedGP)
+    p12 = gpPlot("WT N-term", "CD8", trainedGP)
+    p13 = gpPlot("WT N-term", "Treg", trainedGP, false)
+    p14 = gpPlot("WT N-term", "Thelper", trainedGP, false)
+    p15 = gpPlot("WT N-term", "NK", trainedGP, false)
+    p16 = gpPlot("WT N-term", "CD8", trainedGP, false)
+    p17 = gpPlot("R38Q N-term", "Treg", trainedGP)
+    p18 = gpPlot("R38Q N-term", "Thelper", trainedGP)
+    p19 = gpPlot("R38Q N-term", "NK", trainedGP)
+    p20 = gpPlot("R38Q N-term", "CD8", trainedGP)
+    p21 = gpPlot("R38Q N-term", "Treg", trainedGP, false)
+    p22 = gpPlot("R38Q N-term", "Thelper", trainedGP, false)
+    p23 = gpPlot("R38Q N-term", "NK", trainedGP, false)
+    p24 = gpPlot("R38Q N-term", "CD8", trainedGP, false)
+    p25 = gpPlot("H16N N-term", "Treg", trainedGP)
+    p26 = gpPlot("H16N N-term", "Thelper", trainedGP)
+    p27 = gpPlot("H16N N-term", "NK", trainedGP)
+    p28 = gpPlot("H16N N-term", "CD8", trainedGP)
+    p29 = gpPlot("R38Q/H16N", "Treg", trainedGP)
+    p30 = gpPlot("R38Q/H16N", "Thelper", trainedGP)
+    p31 = gpPlot("R38Q/H16N", "NK", trainedGP)
+    p32 = gpPlot("R38Q/H16N", "CD8", trainedGP)
+    p33 = gpPlot("WT C-term", "Treg", trainedGP, false)
+    p34 = gpPlot("WT C-term", "Thelper", trainedGP, false)
+    p35 = gpPlot("WT C-term", "NK", trainedGP, false)
+    p36 = gpPlot("WT C-term", "CD8", trainedGP, false)
+    p37 = gpPlot("V91K C-term", "Treg", trainedGP, false)
+    p38 = gpPlot("V91K C-term", "Thelper", trainedGP, false)
+    p39 = gpPlot("V91K C-term", "NK", trainedGP, false)
+    p40 = gpPlot("V91K C-term", "CD8", trainedGP, false)
+    p41 = gpPlot("F42Q N-Term", "Treg", trainedGP, false)
+    p42 = gpPlot("F42Q N-Term", "Thelper", trainedGP, false)
+    p43 = gpPlot("F42Q N-Term", "NK", trainedGP, false)
+    p44 = gpPlot("F42Q N-Term", "CD8", trainedGP, false)
+    p45 = gpPlot("N88D C-term", "Treg", trainedGP, false)
+    p46 = gpPlot("N88D C-term", "Thelper", trainedGP, false)
+    p47 = gpPlot("N88D C-term", "NK", trainedGP, false)
+    p48 = gpPlot("N88D C-term", "CD8", trainedGP, false)
 
     #draw(SVG("figureJ1.svg", 1000px, 800px), p1)
     ffig = plt.plot(
@@ -194,9 +255,29 @@ function figureJ3()
         p26,
         p27,
         p28,
-        layout = l,
-        size = (1600, 2400),
+        p29,
+        p30,
+        p31,
+        p32,
+        p33,
+        p34,
+        p35,
+        p36,
+        p37,
+        p38,
+        p39,
+        p40,
+        p41,
+        p42,
+        p43,
+        p44,
+        p45,
+        p46,
+        p47,
+        p48,        
+        layout = (12,4),
+        size = (2000, 5000),
     )
-    #ffig = plt.plot(p1, size = (1600, 2400))
+    #ffig = plt.plot(p1, size = (1600s, 2400))
     plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ3.svg"))
 end

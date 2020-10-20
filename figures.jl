@@ -27,3 +27,7 @@ figureJ5()
 println("Making Figure 6")
 include("figures/figureJ6.jl")
 figureJ6()
+
+println("Making Figure 7")
+include("figures/figureJ7.jl")
+figureJ7()
