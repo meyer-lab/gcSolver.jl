@@ -15,10 +15,10 @@ function getUnkVec()
     p[11] = 0.2
     p[12] = 0.01
     p[13] = 0.13
-    p[14] = 5.0 # initial Treg stat
-    p[15] = 0.2 # initial Thelp stat
+    p[14] = 1.0 # initial Treg stat
+    p[15] = 0.5 # initial Thelp stat
     p[16] = 0.3 # initial NK stat
-    p[17] = 0.1 # initial CD8 stat
+    p[17] = 0.3 # initial CD8 stat
     p[18:23] .= 0.001
 
     return p
@@ -31,24 +31,24 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) wher
     farhatVec = getFarhatVec()
     paramvec = zeros(T, Nparams)
     paramvec[1:3] = ILs
-    paramvec[4] = farhatVec[1] #unkVec[1] #kfwd
+    paramvec[4] = unkVec[1] #kfwd
     paramvec[5] = kfbnd * 10.0 #k1rev
     paramvec[6] = kfbnd * 144.0 #k2rev
-    paramvec[7] = farhatVec[2] # unkVec[2] #k4rev
-    paramvec[8] = farhatVec[3]#unkVec[3] #k5rev
+    paramvec[7] = unkVec[2] #k4rev
+    paramvec[8] = unkVec[3] #k5rev
     paramvec[9] = 12.0 * paramvec[8] / 1.5 #k10
     paramvec[10] = 63.0 * paramvec[8] / 1.5 #k11
     paramvec[11] = kfbnd * 0.065 #k13
     paramvec[12] = kfbnd * 438.0 #k14
-    paramvec[13:16] = farhatVec[4:7]# unkVec[4:7] #k16, k17, k22, k23
+    paramvec[13:16] = unkVec[4:7] #k16, k17, k22, k23
     paramvec[17] = kfbnd * 59.0 #k25
-    paramvec[18] = farhatVec[8]#unkVec[8]  #k27
+    paramvec[18] = unkVec[8]  #k27
     paramvec[19] = 5.0 #endoadjust #make sure this is right
-    ke = farhatVec[9]#unkVec[9] 
-    aendo = farhatVec[10]#unkVec[10]
-    sortF = farhatVec[11]# tanh(unkVec[11]) * 0.95 + 0.01
-    krec = farhatVec[12]#unkVec[12]
-    kdeg = farhatVec[13] #unkVec[13]
+    ke = unkVec[9] 
+    aendo = unkVec[10]
+    sortF = tanh(unkVec[11]) * 0.95 + 0.01
+    krec = unkVec[12]
+    kdeg = unkVec[13]
     paramvec[20] = ke
     paramvec[21] = aendo
     paramvec[22] = sortF
@@ -56,17 +56,17 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) wher
     paramvec[24] = kdeg
     paramvec[25:29] = recAbundances * ke / (1.0 + (krec * (1.0 - sortF) / kdeg / sortF))
     if CellType == "Treg"
-        paramvec[30] = unkVec[1] #initial stat
+        paramvec[30] = unkVec[14] #initial stat
     elseif CellType == "Thelper"
-        paramvec[30] = unkVec[2] #initial stat
+        paramvec[30] = unkVec[15] #initial stat
     elseif CellType == "NK"
-        paramvec[30] = unkVec[3] #initial stat
+        paramvec[30] = unkVec[16] #initial stat
     elseif CellType == "CD8"
-        paramvec[30] = unkVec[4] #initial stat
+        paramvec[30] = unkVec[17] #initial stat
     else
         @assert false
     end
-    paramvec[31:36] = unkVec[5:10]
+    paramvec[31:36] = unkVec[18:23]
 
     return paramvec
 end
@@ -132,12 +132,14 @@ function resids(x::Vector{T})::T where {T}
 
     @assert all(df.MeanPredict .>= -0.01)
 
+    predictsFrame = copy(df)
+    delete!(predictsFrame, 1:size(predictsFrame, 1))
     for date in unique(df.Date)
         dateFilt = filter(row -> string(row["Date"]) .== date, df)
         dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
-        df[df[:Date] .== date, :].MeanPredict = dateFilt.MeanPredict
+        append!(predictsFrame, dateFilt)
     end
-    cost += norm(df.MeanPredict - df.Mean)
+    cost += norm(predictsFrame.MeanPredict - predictsFrame.Mean)
 
     return cost
 end
@@ -145,7 +147,7 @@ end
 
 """ Gets inital unkowns, optimizes them, and returns parameters of best fit"""
 function runFit(; itern = 1000000)
-    x₀ = invsoftplus.(getUnkVec()[14:23])
+    x₀ = invsoftplus.(getUnkVec())
 
     opts = Optim.Options(iterations = itern, show_trace = true, extended_trace = true, allow_f_increases = true)
     lsi = InitialStatic(; alpha = 0.0001)
