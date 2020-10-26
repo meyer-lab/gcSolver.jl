@@ -53,7 +53,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                 fillalpha = 0.3,
                 c = colors[i],
                 xscale = :log10,
-                ylims = (0,5),
+                ylims = (0, 5),
                 yticks = 0:0.5:5,
                 label = "",
                 title = string(cellType, " Response to Bivalent ", ligandName, " GP Model"),
@@ -61,20 +61,31 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
             )
         else
             plt.plot!(
+                doseVec,
+                [μs[i, :] μs[i, :]],
+                fillrange = [μs[i, :] .- σ²s[i, :] μs[i, :] .+ σ²s[i, :]],
+                fillalpha = 0.3,
+                c = colors[i],
+                xscale = :log10,
+                ylims = (0, 5),
+                yticks = 0:0.5:5,
+                label = "",
+                title = string(cellType, " Response to Monovalent ", ligandName, " GP Model"),
+                titlefontsize = 9,
+            )
+        end
+        plt.plot!(
             doseVec,
-            [μs[i, :] μs[i, :]],
-            fillrange = [μs[i, :] .- σ²s[i, :] μs[i, :] .+ σ²s[i, :]],
-            fillalpha = 0.3,
+            μs[i, :],
             c = colors[i],
             xscale = :log10,
-            ylims = (0,5),
+            ylims = (0, 5),
             yticks = 0:0.5:5,
-            label = "",
-            title = string(cellType, " Response to Monovalent ", ligandName, " GP Model"),
-            titlefontsize = 9,
+            label = ITtime,
+            legend = :bottomright,
+            legendfontsize = 5,
+            markersize = 5,
         )
-        end
-        plt.plot!(doseVec, μs[i, :], c = colors[i], xscale = :log10, ylims = (0,5), yticks = 0:0.5:5, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
 
         if length(log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1)) > 0
             plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1), c = colors[i], xscale = :log10, label = "")
@@ -113,7 +124,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                     c = colorsComp[i],
                     #linestyle = :dot,
                     xscale = :log10,
-                    ylims = (0,5),
+                    ylims = (0, 5),
                     yticks = 0:0.5:5,
                     label = "",
                     title = string(cellType, " Response to Bivalent ", ligandName, " GP Model"),
@@ -128,7 +139,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                     c = colorsComp[i],
                     #linestyle = :dot,
                     xscale = :log10,
-                    ylims = (0,5),
+                    ylims = (0, 5),
                     yticks = 0:0.5:5,
                     label = "",
                     title = string(cellType, " Response to Monovalent ", ligandName, " GP Model"),
@@ -141,7 +152,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                 μsComp[i, :],
                 c = colorsComp[i],
                 xscale = :log10,
-                ylims = (0,5),
+                ylims = (0, 5),
                 yticks = 0:0.5:5,
                 label = labelString,
                 legend = :bottomright,
@@ -156,7 +167,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                     log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1),
                     c = colorsComp[i],
                     xscale = :log10,
-                    ylims = (0,5),
+                    ylims = (0, 5),
                     yticks = 0:0.5:5,
                     label = "",
                 )
@@ -274,8 +285,8 @@ function figureJ3()
         p45,
         p46,
         p47,
-        p48,        
-        layout = (12,4),
+        p48,
+        layout = (12, 4),
         size = (2000, 5000),
     )
     #ffig = plt.plot(p1, size = (1600s, 2400))

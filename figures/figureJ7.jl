@@ -48,14 +48,14 @@ function specPlot(ligandName, gp, biv = true)
             μs[i, :] = predict_f(gp, xMat')[1]
 
             #this may need some debugging
-            
+
             μs3d[i, :, ind] = 10.0 .^ μs[i, :]
 
         end
-   end
+    end
 
     μs = zeros(length(time), length(doseVec))
-    μs = μs3d[:,:,1] ./ ((μs3d[:,:,2] .+ μs3d[:,:,3] .+ μs3d[:,:,4])./3)
+    μs = μs3d[:, :, 1] ./ ((μs3d[:, :, 2] .+ μs3d[:, :, 3] .+ μs3d[:, :, 4]) ./ 3)
 
     for (i, ITtime) in enumerate(time)
         if biv == true
@@ -64,7 +64,7 @@ function specPlot(ligandName, gp, biv = true)
                 μs[i, :],
                 c = colors[i],
                 xscale = :log10,
-                ylims = (0,5),
+                ylims = (0, 5),
                 yticks = 0:0.5:5,
                 label = "",
                 title = string("Treg specificity for Bivalent ", ligandName),
@@ -72,19 +72,30 @@ function specPlot(ligandName, gp, biv = true)
             )
         else
             plt.plot!(
+                doseVec,
+                μs[i, :],
+                c = colors[i],
+                xscale = :log10,
+                ylims = (0, 5),
+                yticks = 0:0.5:5,
+                label = "",
+                title = string("Treg specificity for Monovalent ", ligandName),
+                titlefontsize = 9,
+            )
+        end
+        plt.plot!(
             doseVec,
             μs[i, :],
             c = colors[i],
             xscale = :log10,
-            ylims = (0,5),
-            yticks = 0:0.5:5,
-            label = "",
-            title = string("Treg specificity for Monovalent ", ligandName),
-            titlefontsize = 9,
+            ylims = (0, 30),
+            yticks = 0:1:30,
+            label = ITtime,
+            legend = :bottomright,
+            legendfontsize = 5,
+            markersize = 5,
         )
-        end
-        plt.plot!(doseVec, μs[i, :], c = colors[i], xscale = :log10, ylims = (0, 30), yticks = 0:1:30, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
-    
+
     end
 
     ylabel!("Treg pSTAT Specificity", yguidefontsize = 7)
@@ -107,8 +118,7 @@ function figureJ7()
     p6 = specPlot("R38Q/H16N", trainedGP, true)
     p7 = specPlot("F42Q N-Term", trainedGP, false)
     p8 = specPlot("H16N N-term", trainedGP, true)
-    
+
     ffig = plt.plot(p1, p2, p3, p4, p5, p6, p7, p8, layout = (2, 4), size = (1600, 600))
     plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ7.svg"))
 end
- 
