@@ -44,7 +44,7 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) wher
     paramvec[17] = kfbnd * 59.0 #k25
     paramvec[18] = unkVec[8]  #k27
     paramvec[19] = 5.0 #endoadjust #make sure this is right
-    ke = unkVec[9] 
+    ke = unkVec[9]
     aendo = unkVec[10]
     sortF = tanh(unkVec[11]) * 0.95 + 0.01
     krec = unkVec[12]
