@@ -101,14 +101,20 @@ function figureJ7()
     trainedGP = gcSolver.gaussianProcess(X', y)
     p1 = specPlot("IL2", trainedGP, false)
     p2 = specPlot("IL15", trainedGP, false)
-    p3 = specPlot("WT C-term", trainedGP, false)
-    p4 = specPlot("R38Q N-term", trainedGP, false)
-    p5 = specPlot("N88D C-term", trainedGP, false)
-    p6 = specPlot("R38Q/H16N", trainedGP, true)
+    p3 = specPlot("WT N-term", trainedGP, false)
+    p4 = specPlot("WT C-term", trainedGP, false)
+    p5 = specPlot("V91K C-term", trainedGP, false)
+    p6 = specPlot("R38Q N-term", trainedGP, false)
     p7 = specPlot("F42Q N-Term", trainedGP, false)
-    p8 = specPlot("H16N N-term", trainedGP, true)
+    p8 = specPlot("N88D C-term", trainedGP, false)
+
+    p9 = specPlot("WT N-term", trainedGP, true)
+    p10 = specPlot("R38Q N-term", trainedGP, true)
+    p11 = specPlot("H16N N-term", trainedGP, true)
+    p12 = specPlot("R38Q/H16N", trainedGP, true)
     
-    ffig = plt.plot(p1, p2, p3, p4, p5, p6, p7, p8, layout = (2, 4), size = (1600, 600))
+    
+    ffig = plt.plot(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, layout = (3, 4), size = (2400, 3200))
     plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ7.svg"))
 end
  
