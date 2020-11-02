@@ -12,7 +12,7 @@ function gpPlot(ligandName, cellType, gp, time)
 
     responseDF = gcSolver.importData()
 
-    valency = [1, 0]
+    valency = [true, false]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
 
@@ -38,23 +38,22 @@ function gpPlot(ligandName, cellType, gp, time)
         append!(intrinsLevels, gcSolver.cellHotEnc(cellType))
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
 
-        μs = zeros(length(valency), length(doseVec))
+        μs = zeros(length(doseVec))
         #println("valLength = ", length(valency))
         σ²s = similar(μs)
 
-        pl1 = plt.plot()
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
         xMat[:, 1] .= log10.(doseVec)
         xMat[:, 2] .= time
         xMat[:, 3:size(xMat, 2)] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
-        μs[ind, :], σ²s[ind, :] = predict_f(gp, xMat')
+        μs[:], σ²s[:] = predict_f(gp, xMat')
 
         plt.plot!(
         doseVec,
-        [μs[ind, :] μs[ind, :]],
-        fillrange = [μs[ind, :] .- σ²s[ind, :] μs[ind, :] .+ σ²s[ind, :]],
+        [μs μs],
+        fillrange = [μs .- σ²s μs .+ σ²s],
         fillalpha = 0.3,
         c = colors[ind],
         xscale = :log10,
@@ -64,7 +63,7 @@ function gpPlot(ligandName, cellType, gp, time)
         title = string(cellType, " Response to ", ligandName, " at t = ", time),
         titlefontsize = 9)
 
-        plt.plot!(doseVec, μs[ind, :], c = colors[ind], xscale = :log10, ylims = (0,5), yticks = 0:0.5:5, label = val, legend = :bottomright, legendfontsize = 5, markersize = 5)
+        plt.plot!(doseVec, μs, c = colors[ind], xscale = :log10, ylims = (0,5), yticks = 0:0.5:5, label = val, legend = :bottomright, legendfontsize = 5, markersize = 5)
 
         if length(log10.(valDataDF[valDataDF.Bivalent .== val, :].Mean_mean .+ 1)) > 0
             plt.scatter!(doseVec, log10.(valDataDF[valDataDF.Bivalent .== val, :].Mean_mean .+ 1), c = colors[ind], xscale = :log10, label = "")
