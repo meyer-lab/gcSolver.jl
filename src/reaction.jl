@@ -106,7 +106,7 @@ function fullDeriv(du, u, p, t)
     du[recIDX] .+= view(trafP, 6:10)
 
     # Degradation does lead to some clearance of ligand in the endosome
-    du[ligIDX] .-= view(u, ligIDX) .* trafP[5]
+    du[ligIDX] .-= view(u, ligIDX) * trafP[5]
 
     return nothing
 end
