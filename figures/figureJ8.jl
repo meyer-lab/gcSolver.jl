@@ -22,6 +22,7 @@ function gpPlot(ligandName, cellType, gp, time)
     #filter!(row -> string(row["Date"]) .== date, filtFrame)
 
     colors = ["aqua", "goldenrod"]
+    leg = ["Bivalent", "Monovalent"]
 
     pl1 = plt.plot()
 
@@ -63,7 +64,7 @@ function gpPlot(ligandName, cellType, gp, time)
         title = string(cellType, " Response to ", ligandName, " at t = ", time),
         titlefontsize = 9)
 
-        plt.plot!(doseVec, μs, c = colors[ind], xscale = :log10, ylims = (0,5), yticks = 0:0.5:5, label = val, legend = :bottomright, legendfontsize = 5, markersize = 5)
+        plt.plot!(doseVec, μs, c = colors[ind], xscale = :log10, ylims = (0,5), yticks = 0:0.5:5, label = leg[ind], legend = :bottomright, legendfontsize = 5, markersize = 5)
 
         if length(log10.(valDataDF[valDataDF.Bivalent .== val, :].Mean_mean .+ 1)) > 0
             plt.scatter!(doseVec, log10.(valDataDF[valDataDF.Bivalent .== val, :].Mean_mean .+ 1), c = colors[ind], xscale = :log10, label = "")
@@ -83,7 +84,72 @@ function figureJ8()
     trainedGP = gcSolver.gaussianProcess(X', y)
     p1 = gpPlot("R38Q N-term", "Treg", trainedGP, 2)
     p2 = gpPlot("WT N-term", "Treg", trainedGP, 2)
+    p3 = gpPlot("R38Q N-term", "CD8", trainedGP, 2)
+    #p4 = gpPlot("WT N-term", "CD8", trainedGP, 2)
+    p5 = gpPlot("R38Q N-term", "NK", trainedGP, 2)
+    #p6 = gpPlot("WT N-term", "NK", trainedGP, 2)
+    p7 = gpPlot("R38Q N-term", "Thelper", trainedGP, 2)
+    p8 = gpPlot("WT N-term", "Thelper", trainedGP, 2)
+
+    p9 = gpPlot("R38Q N-term", "Treg", trainedGP, 4)
+    p10 = gpPlot("WT N-term", "Treg", trainedGP, 4)
+    p11 = gpPlot("R38Q N-term", "CD8", trainedGP, 4)
+    p12 = gpPlot("WT N-term", "CD8", trainedGP, 4)
+    p13 = gpPlot("R38Q N-term", "NK", trainedGP, 4)
+    p14 = gpPlot("WT N-term", "NK", trainedGP, 4)
+    p15 = gpPlot("R38Q N-term", "Thelper", trainedGP, 4)
+    p16 = gpPlot("WT N-term", "Thelper", trainedGP, 4)
+
+    #p17 = gpPlot("R38Q N-term", "Treg", trainedGP, 0.5)
+    p18 = gpPlot("WT N-term", "Treg", trainedGP, 0.5)
+    #p19 = gpPlot("R38Q N-term", "CD8", trainedGP, 0.5)
+    p20 = gpPlot("WT N-term", "CD8", trainedGP, 0.5)
+    #p21 = gpPlot("R38Q N-term", "NK", trainedGP, 0.5)
+    p22 = gpPlot("WT N-term", "NK", trainedGP, 0.5)
+    #p23 = gpPlot("R38Q N-term", "Thelper", trainedGP, 0.5)
+    p24 = gpPlot("WT N-term", "Thelper", trainedGP, 0.5)
+
+    p25 = gpPlot("R38Q N-term", "Treg", trainedGP, 1)
+    p26 = gpPlot("WT N-term", "Treg", trainedGP, 1)
+    p27 = gpPlot("R38Q N-term", "CD8", trainedGP, 1)
+    p28 = gpPlot("WT N-term", "CD8", trainedGP, 1)
+    p29 = gpPlot("R38Q N-term", "NK", trainedGP, 1)
+    p30 = gpPlot("WT N-term", "NK", trainedGP, 1)
+    p31 = gpPlot("R38Q N-term", "Thelper", trainedGP, 1)
+    p32 = gpPlot("WT N-term", "Thelper", trainedGP, 1)
     
-    ffig = plt.plot(p1, p2, layout = (2,1), size = (1600, 2400))
+    ffig = plt.plot(p1,
+    p2,
+    p3,
+    #p4,
+    p5,
+    #p6,
+    p7,
+    p8,
+    p9,
+    p10,
+    p11,
+    p12,
+    p13,
+    p14,
+    p15,
+    p16,
+    #p17,
+    p18,
+    #p19,
+    p20,
+    #p21,
+    p22,
+    #p23,
+    p24,
+    p25,
+    p26,
+    p27,
+    p28,
+    p29,
+    p30,
+    p31,
+    p32,
+    layout = (13,2), size = (1200, 6400))
     plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ8.svg"))
 end
