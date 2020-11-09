@@ -289,6 +289,6 @@ function figureJ3()
         layout = (12, 4),
         size = (2000, 5000),
     )
-    #ffig = plt.plot(p1, size = (1600s, 2400))
+    #ffig = plt.plot(p1, size = (1600, 2400))
     plt.savefig(ffig, joinpath(dirname(pathof(gcSolver)), "..", "figureJ3.svg"))
 end

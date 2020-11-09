@@ -27,6 +27,33 @@ function getGPdata()
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
 end
 
+function getGPdataNL()
+    fullData = importData()
+
+    hotEnc = indicatormat(fullData.Cell)
+    hotEncName = sort(unique(fullData.Cell))
+
+    fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc, :Bivalent]]
+    fullDataY = fullData.Mean
+
+    fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]] = fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]]
+
+    for (ii, iiName) in enumerate(hotEncName)
+        fullDataX[!, iiName] = vec(hotEnc[ii, :])
+    end
+
+    combCD4 = fullDataX[:, size(fullDataX, 2)]
+    for iii = 1:length(combCD4)
+        if combCD4[iii] == 1
+            fullDataX[iii, 13] = 1
+        end
+    end
+
+    fullDataX = fullDataX[:, 1:13]
+
+    return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
+end
+
 
 " Assemble Gaussian process model. "
 function gaussianProcess(X, y::Vector)
