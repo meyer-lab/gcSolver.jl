@@ -66,7 +66,7 @@ function gpPlot(ligandName, cellType, gp, time)
         plt.plot!(doseVec, μs, c = colors[ind], 
         #ylims = (0,5), 
         #yticks = 0:0.5:5, 
-        label = leg[ind], title = string(cellType, " Response to ", ligandName, " at t = ", time), legend = :bottomright, legendfontsize = 5, markersize = 5)
+        label = leg[ind], title = string(cellType, " Response to ", ligandName, " at t = ", time), xscale = :log10, legend = :bottomright, legendfontsize = 5, markersize = 5)
 
         if length(valDataDF[valDataDF.Bivalent .== val, :].Mean_mean .+ 1) > 0
             plt.scatter!(doseVec, valDataDF[valDataDF.Bivalent .== val, :].Mean_mean .+ 1, c = colors[ind], label = "")
