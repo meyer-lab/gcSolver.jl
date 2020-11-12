@@ -15,8 +15,7 @@ function gpPlot(ligandName, cellType, gp, time)
     valency = [true, false]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
-    minDose = minimum(doseVec)
-    maxDose = maximum(doseVec)
+    newDoses = 10 .^ (range(log10(minimum(doseVec)), stop=log10(maximum(doseVec)), length=100))
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
@@ -46,7 +45,7 @@ function gpPlot(ligandName, cellType, gp, time)
         σ²s = similar(μs)
 
         xMat = zeros(100, length(intrinsLevels) + 2)
-        xMat[:, 1] .=  10 .^(range(minDose, stop=maxDose, length=100))
+        xMat[:, 1] .=  newDoses
         xMat[:, 2] .= time
         xMat[:, 3:size(xMat, 2)] .= repeat(intrinsLevels, outer = [1, 100])'
         xMat[:, 3] .= xMat[:, 3]
@@ -65,7 +64,7 @@ function gpPlot(ligandName, cellType, gp, time)
         title = string(cellType, " Response to ", ligandName, " at t = ", time),
         titlefontsize = 9)"""
 
-        plt.plot!(doseVec, μs, c = colors[ind], 
+        plt.plot!(newDoses, μs, c = colors[ind], 
         #ylims = (0,5), 
         #yticks = 0:0.5:5, 
         label = leg[ind], title = string(cellType, " Response to ", ligandName, " at t = ", time), xscale = :log10, legend = :bottomright, legendfontsize = 5, markersize = 5)
