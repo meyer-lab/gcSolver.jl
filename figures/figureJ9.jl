@@ -15,6 +15,8 @@ function gpPlot(ligandName, cellType, gp, time)
     valency = [true, false]
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
+    minDose = minimum(doseVec)
+    maxDose = maximum(doseVec)
 
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
@@ -39,14 +41,14 @@ function gpPlot(ligandName, cellType, gp, time)
         append!(intrinsLevels, gcSolver.cellHotEnc(cellType))
         xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
 
-        μs = zeros(length(doseVec))
+        μs = zeros(100)
         #println("valLength = ", length(valency))
         σ²s = similar(μs)
 
-        xMat = zeros(length(doseVec), length(intrinsLevels) + 2)
-        xMat[:, 1] .= doseVec
+        xMat = zeros(100, length(intrinsLevels) + 2)
+        xMat[:, 1] .=  10 .^(range(minDose, stop=maxDose, length=100))
         xMat[:, 2] .= time
-        xMat[:, 3:size(xMat, 2)] .= repeat(intrinsLevels, outer = [1, length(doseVec)])'
+        xMat[:, 3:size(xMat, 2)] .= repeat(intrinsLevels, outer = [1, 100])'
         xMat[:, 3] .= xMat[:, 3]
         xMat[:, 4] .= xMat[:, 4]
         μs[:], σ²s[:] = predict_f(gp, xMat')
