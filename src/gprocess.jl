@@ -36,7 +36,7 @@ function getGPdataNL()
     fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc, :Bivalent]]
     fullDataY = fullData.Mean
 
-    fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]] = fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]]
+    fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]] = log10.(fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]])
 
     for (ii, iiName) in enumerate(hotEncName)
         fullDataX[!, iiName] = vec(hotEnc[ii, :])
@@ -79,7 +79,7 @@ end
 
 
 function LOOCV()
-    X, y, df = getGPdata()
+    X, y, df = getGPdataNL()
 
     muteins = unique(df.Ligand)
     y_pred = zeros(length(y))

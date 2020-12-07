@@ -45,24 +45,23 @@ function gpPlot(ligandName, cellType, gp, time)
         σ²s = similar(μs)
 
         xMat = zeros(100, length(intrinsLevels) + 2)
-        xMat[:, 1] .=  newDoses
+        xMat[:, 1] .=  log10.(newDoses)
         xMat[:, 2] .= time
         xMat[:, 3:size(xMat, 2)] .= repeat(intrinsLevels, outer = [1, 100])'
-        xMat[:, 3] .= xMat[:, 3]
-        xMat[:, 4] .= xMat[:, 4]
+        xMat[:, 3] .= log10.(xMat[:, 3])
+        xMat[:, 4] .= log10.(xMat[:, 4])
         μs[:], σ²s[:] = predict_f(gp, xMat')
+        print(σ²s)
 
-        """plt.plot!(
-        doseVec,
+        plt.plot!(
+        newDoses,
         [μs μs],
         fillrange = [μs .- σ²s μs .+ σ²s],
         fillalpha = 0.3,
         c = colors[ind],
-        #ylims = (0,5),
-        #yticks = 0:0.5:5,
         label = "",
         title = string(cellType, " Response to ", ligandName, " at t = ", time),
-        titlefontsize = 9)"""
+        titlefontsize = 9)
 
         plt.plot!(newDoses, μs, c = colors[ind], 
         #ylims = (0,5), 
