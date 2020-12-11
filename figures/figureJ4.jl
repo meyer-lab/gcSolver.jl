@@ -6,7 +6,7 @@ using DataFrames;
 using GaussianProcesses;
 gdf = Gadfly;
 
-function cellTypeContr(gp, srealType, compType, recExp = false, biv = true)
+function cellTypeContr(gp, realType, compType, recExp = false, biv = true)
 
     x, y, df = gcSolver.getGPdata()
 
