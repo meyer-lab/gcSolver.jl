@@ -1,4 +1,4 @@
-""" This file builds the depletion manuscript, Figure 9. """
+""" Dose response curve with valency comparison and unlogged pSTAT (GP model), Figure 9. """
 
 using Plots;
 using gcSolver;
@@ -65,7 +65,7 @@ function gpPlot(ligandName, cellType, gp, time)
         titlefontsize = 9)"""
 
         plt.plot!(newDoses, μs, c = colors[ind], 
-        #ylims = (0,5), 
+        ylims = (0,40000), 
         #yticks = 0:0.5:5, 
         label = leg[ind], title = string(cellType, " Response to ", ligandName, " at t = ", time), xscale = :log10, legend = :bottomright, legendfontsize = 5, markersize = 5)
 

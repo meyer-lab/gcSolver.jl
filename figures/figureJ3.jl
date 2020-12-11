@@ -1,4 +1,4 @@
-""" This file builds the depletion manuscript, Figure 3. """
+""" Dose response curve (GP model), Figure 3. """
 
 using Plots;
 using gcSolver;
