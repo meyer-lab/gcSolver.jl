@@ -1,13 +1,17 @@
 using GaussianProcesses
 
-function getGPdata()
+function getGPdata(log=true)
     fullData = importData()
 
     hotEnc = indicatormat(fullData.Cell)
     hotEncName = sort(unique(fullData.Cell))
 
     fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc, :Bivalent]]
-    fullDataY = log10.(fullData.Mean .+ 1.0)
+    if log
+        fullDataY = log10.(fullData.Mean .+ 1.0)
+    else
+        fullDataY = fullData.Mean
+    end
 
     fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]] = log10.(fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]])
 
@@ -22,6 +26,8 @@ function getGPdata()
         end
     end
 
+    Xdat = DataFrame(Matrix{Float64}(fullDataX))
+    Ydat = DataFrame(Y= fullDataY)
     fullDataX = fullDataX[:, 1:13]
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
@@ -58,11 +64,12 @@ end
 " Assemble Gaussian process model. "
 function gaussianProcess(X, y::Vector)
     mZero = MeanZero()
-    kern = RQIso(0.0, 0.0, 0.0)
+    lscales = zeros(Float64, size(X)[2])
+    kern = RQ(lscales, 0.0, 0.0)# + Noise(0.0)
 
-    gp = GP(X, y, mZero, kern)
+    gp = GPE(X, y, mZero, kern)#, 0.0)
 
-    optimize!(gp)
+    optimize!(gp)#, noisebounds=[-2.0, 2.0])
 
     return gp
 end

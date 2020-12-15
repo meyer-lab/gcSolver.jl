@@ -51,7 +51,6 @@ function gpPlot(ligandName, cellType, gp, time)
         xMat[:, 3] .= log10.(xMat[:, 3])
         xMat[:, 4] .= log10.(xMat[:, 4])
         μs[:], σ²s[:] = predict_f(gp, xMat')
-        print(σ²s)
 
         plt.plot!(
         newDoses,

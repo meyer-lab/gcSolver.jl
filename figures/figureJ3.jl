@@ -47,9 +47,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
         xMat[:, 4] .= log10.(xMat[:, 4])
         μs[i, :], σ²s[i, :] = predict_f(gp, xMat')
 
-        μs[i, :] .= 10 .^ μs[i, :]
-        σ²s[i, :] .= 10 .^  σ²s[i, :]
-        print(σ²s[i, :])
+        print(σ²s[1, 1])
 
         if biv == true
             plt.plot!(
@@ -59,8 +57,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                 fillalpha = 0.3,
                 c = colors[i],
                 xscale = :log10,
-                ylims = (0, 50000),
-                yticks = 0:5000:50000,
+                #ylims = (0, 5),
                 label = "",
                 title = string(cellType, " Response to Bivalent ", ligandName, " GP Model"),
                 titlefontsize = 9,
@@ -73,8 +70,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                 fillalpha = 0.3,
                 c = colors[i],
                 xscale = :log10,
-                ylims = (0, 50000),
-                yticks = 0:5000:50000,
+                #ylims = (0, 5),
                 label = "",
                 title = string(cellType, " Response to Monovalent ", ligandName, " GP Model"),
                 titlefontsize = 9,
@@ -85,8 +81,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
             μs[i, :],
             c = colors[i],
             xscale = :log10,
-            ylims = (0, 50000),
-            yticks = 0:5000:50000,
+            #ylims = (0, 5),
             label = ITtime,
             legend = :bottomright,
             legendfontsize = 5,
@@ -130,8 +125,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                     c = colorsComp[i],
                     #linestyle = :dot,
                     xscale = :log10,
-                    ylims = (0, 50000),
-                    yticks = 0:5000:50000,
+                    ylims = (0, 5),
                     label = "",
                     title = string(cellType, " Response to Bivalent ", ligandName, " GP Model"),
                     titlefontsize = 9,
@@ -145,8 +139,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                     c = colorsComp[i],
                     #linestyle = :dot,
                     xscale = :log10,
-                    ylims = (0, 50000),
-                    yticks = 0:5000:50000,
+                    ylims = (0, 5),
                     label = "",
                     title = string(cellType, " Response to Monovalent ", ligandName, " GP Model"),
                     titlefontsize = 9,
@@ -158,8 +151,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                 μsComp[i, :],
                 c = colorsComp[i],
                 xscale = :log10,
-                ylims = (0, 50000),
-                yticks = 0:5000:50000,
+                ylims = (0, 5),
                 label = labelString,
                 legend = :bottomright,
                 legendfontsize = 5,
@@ -173,8 +165,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                     log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1),
                     c = colorsComp[i],
                     xscale = :log10,
-                    ylims = (0, 50000),
-                    yticks = 0:5000:50000,
+                    ylims = (0, 5),
                     label = "",
                 )
             end
@@ -190,7 +181,7 @@ end
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ3()
     l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x; z aa bb cc]
-    X, y, df = gcSolver.getGPdata()
+    X, y, df = gcSolver.getGPdata(false)
     trainedGP = gcSolver.gaussianProcess(X', y)
     #p1 = gpPlot("IL2", "Treg", trainedGP)
     p1 = gpPlot("IL2", "Treg", trainedGP, false)
