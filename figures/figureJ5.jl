@@ -1,4 +1,4 @@
-""" This file builds the depletion manuscript, Figure 5. """
+""" log(pSTAT)/IL2Ra covariance versus dose curve (GP model), Figure 5. """
 
 using Plots;
 using gcSolver;

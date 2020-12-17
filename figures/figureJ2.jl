@@ -1,4 +1,4 @@
-""" This file builds the depletion manuscript, Figure 2. """
+""" Cell type specificity plots (ODE model), Figure 2. """
 
 using Gadfly;
 using Statistics;

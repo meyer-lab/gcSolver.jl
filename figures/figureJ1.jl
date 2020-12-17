@@ -1,4 +1,4 @@
-""" This file builds the depletion manuscript, Figure 1. """
+""" Dose response curve (ODE model), Figure 1. """
 
 using DataFrames;
 using gcSolver;

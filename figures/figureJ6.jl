@@ -1,4 +1,4 @@
-""" This file builds the depletion manuscript, Figure 4. """
+""" Incorrect model training comparison using incorrect valency (GP model), Figure 6. """
 
 using Gadfly;
 using gcSolver;
