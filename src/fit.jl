@@ -7,19 +7,15 @@ dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 """ Creates full vector of unknown values to be fit """
 function getUnkVec()
     #kfwd, k4, k5, k16, k17, k22, k23, k27, endo, aendo, sort, krec, kdeg, k34, k35, k36, k37, k38, k39
-    p = 0.1ones(23)
+    p = 0.1ones(18)
 
     p[1] = 0.001 # means of prior distributions from gc-cytokines paper
     p[8] = 1.0 #27
-    p[10] = 0.678
-    p[11] = 0.2
-    p[12] = 0.01
-    p[13] = 0.13
-    p[14] = 1.0 # initial Treg stat
-    p[15] = 0.5 # initial Thelp stat
-    p[16] = 0.3 # initial NK stat
-    p[17] = 0.3 # initial CD8 stat
-    p[18:23] .= 0.001
+    p[9] = 1.0 # initial Treg stat
+    p[10] = 0.5 # initial Thelp stat
+    p[11] = 0.3 # initial NK stat
+    p[12] = 0.3 # initial CD8 stat
+    p[13:18] .= 0.001
 
     return p
 end
@@ -43,12 +39,12 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) wher
     paramvec[13:16] = unkVec[4:7] #k16, k17, k22, k23
     paramvec[17] = kfbnd * 59.0 #k25
     paramvec[18] = unkVec[8]  #k27
-    paramvec[19] = 5.0 #endoadjust #make sure this is right
-    ke = unkVec[9]
-    aendo = unkVec[10]
-    sortF = tanh(unkVec[11]) * 0.95 + 0.01
-    krec = unkVec[12]
-    kdeg = unkVec[13]
+    paramvec[19] = 5.0 #endo
+    ke = 0.09
+    aendo = 2.5
+    sortF = 0.125
+    krec = 0.009
+    kdeg = 0.0068
     paramvec[20] = ke
     paramvec[21] = aendo
     paramvec[22] = sortF
@@ -56,17 +52,17 @@ function fitParams(ILs, unkVec::Vector{T}, recAbundances, CellType::String) wher
     paramvec[24] = kdeg
     paramvec[25:29] = recAbundances * ke / (1.0 + (krec * (1.0 - sortF) / kdeg / sortF))
     if CellType == "Treg"
-        paramvec[30] = unkVec[14] #initial stat
+        paramvec[30] = unkVec[9] #initial stat
     elseif CellType == "Thelper"
-        paramvec[30] = unkVec[15] #initial stat
+        paramvec[30] = unkVec[10] #initial stat
     elseif CellType == "NK"
-        paramvec[30] = unkVec[16] #initial stat
+        paramvec[30] = unkVec[11] #initial stat
     elseif CellType == "CD8"
-        paramvec[30] = unkVec[17] #initial stat
+        paramvec[30] = unkVec[12] #initial stat
     else
         @assert false
     end
-    paramvec[31:36] = unkVec[18:23]
+    paramvec[31:36] = unkVec[13:18]
 
     return paramvec
 end
@@ -85,7 +81,7 @@ end
 function resids(x::Vector{T})::T where {T}
     @assert all(x .>= 0.0)
     df = importData(true)
-    df = df[df.Ligand .!= "IL15", :]
+    #df = df[df.Ligand .!= "IL15", :]
 
     sort!(df, :Time)
     df.Time *= 60.0
@@ -118,6 +114,7 @@ function resids(x::Vector{T})::T where {T}
 
                 # Regularize for exploding values
                 cost += sum(softplus.(vector .- 1.0e6))
+                cost += sum(softplus.(x .^ -1 .- 1.0e5))
 
                 FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
             end
@@ -239,16 +236,23 @@ function getFarhatVec()
     p[6] = 4.57
     p[7] = 25.12
     p[8] = 1.0
+    """
     p[9] = 0.09
     p[10] = 2.5
     p[11] = 0.125
     p[12] = 0.009
     p[13] = 0.0068
-
-    p[14] = 2.0 # initial Treg stat
-    p[15] = 0.5 # initial Thelp stat
-    p[16] = 0.2 # initial NK stat
-    p[17] = 0.2 # initial CD8 stat
-    p[18:23] .= 0.001 # pSTAT Rates
+    """
+    p[9] = 2.0 # initial Treg stat
+    p[10] = 0.5 # initial Thelp stat
+    p[11] = 0.2 # initial NK stat
+    p[12] = 0.2 # initial CD8 stat
+    p[13:18] .= 0.001 # pSTAT Rates
     return p
+end
+
+
+"""Use this to get string of parameter names"""
+function getParamNames()
+    return ["kfwd"; "k4"; "k5"; "k16"; "k17"; "k22"; "k23"; "k27"; "pSTAT Treg"; "pSTAT Thelp"; "pSTAT NK"; "pSTAT CD8"; "k34"; "k35"; "k36"; "k37"; "k38"; "k39"]
 end

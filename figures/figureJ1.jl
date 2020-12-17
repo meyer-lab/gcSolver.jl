@@ -67,12 +67,26 @@ function doseResPlot(ligandName, cellType, date, unkVec, biv = false)
     return pl1
 end
 
+
+"""This function compares the fit of Farhat and our Jak/STAT pathway model"""
+function fitCompare(fitVec)
+    numParams = 18
+    farhatParams = gcSolver.getFarhatVec()[1:numParams]
+    fitVecComp = fitVec[1:numParams]
+    paramNames = gcSolver.getParamNames()[1:numParams]
+    compDF = DataFrame(Parameter = repeat(paramNames, 2), Value = append!(farhatParams, fitVecComp), Source=append!(fill("Farhat", numParams), fill("Jak/STAT", numParams)))
+    pl1 = gdf.plot(compDF, y=:Value, x=:Parameter, color=:Source, Scale.y_log10)
+    return pl1
+end
+
+
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ1()
     fitVec = gcSolver.importFit()
     fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
     fitVec = softplus.(fitVec)
 
+    pParam = fitCompare(fitVec)
     p1 = doseResPlot("IL2", "Treg", "3/19/2019", fitVec, 0)
     p2 = doseResPlot("IL2", "Thelper", "3/19/2019", fitVec, 0)
     p3 = doseResPlot("IL2", "NK", "3/15/2019", fitVec, 0)
@@ -101,10 +115,14 @@ function figureJ1()
     p26 = doseResPlot("F42Q N-Term", "Thelper", "3/1/19", fitVec, 0)
     p27 = doseResPlot("F42Q N-Term", "NK", "3/1/19", fitVec, 0)
     p28 = doseResPlot("F42Q N-Term", "CD8", "3/1/19", fitVec, 0)
+    p29 = doseResPlot("IL15", "Treg", "4/18/2019", fitVec, 0)
+    p30 = doseResPlot("IL15", "Thelper", "4/18/2019", fitVec, 0)
+    p31 = doseResPlot("IL15", "NK", "3/15/2019", fitVec, 0)
+    p32 = doseResPlot("IL15", "CD8", "3/15/2019", fitVec, 0)
 
     #draw(SVG("figureJ2.svg", 1000px, 800px), p1)
     draw(
         SVG("figureJ1.svg", 4000px, 2400px),
-        gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24; p25 p26 p27 p28]),
+        gridstack([pParam pParam pParam pParam; p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24; p25 p26 p27 p28; p29 p30 p31 p32]),
     )
 end
