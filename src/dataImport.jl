@@ -26,7 +26,7 @@ end
 """ Import the saved fit. """
 function importFit()
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "MonomericFit.csv")))
+    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "MonomericReducedLim.csv")))
     return fitVec
 end
 
