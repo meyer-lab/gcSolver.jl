@@ -42,7 +42,7 @@ function gaussianProcess(X, y::Vector)
     lscales = zeros(Float64, size(X)[1])
     kern = RQ(lscales, 0.0, 0.0)
     indices = collect(1:size(X)[2])
-    idxs = sample(indices, convert(Int64, round(size(X)[2]/10, digits=0)), replace=false)
+    idxs = sample(indices, convert(Int64, round(size(X)[2]/5, digits=0)), replace=false)
     Xtrain = X[:, idxs]
     Ytrain = y[idxs]
     gp = GPE(Xtrain, Ytrain, mZero, kern)
