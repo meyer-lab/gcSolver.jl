@@ -1,6 +1,6 @@
-using GaussianProcesses
+using GaussianProcesses, StatsBase
 
-function getGPdata()
+function getGPdata(log=true)
     fullData = importData()
 
     hotEnc = indicatormat(fullData.Cell)
@@ -8,6 +8,11 @@ function getGPdata()
 
     fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc, :Bivalent]]
     fullDataY = log10.(fullData.Mean .+ 1.0)
+    if log
+        fullDataY = log10.(fullData.Mean .+ 1.0)
+    else
+        fullDataY = fullData.Mean
+    end
 
     fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]] = log10.(fullDataX[!, [:Dose, :IL2RaKD, :IL2RBGKD]])
 
@@ -22,6 +27,8 @@ function getGPdata()
         end
     end
 
+    Xdat = DataFrame(Matrix{Float64}(fullDataX))
+    Ydat = DataFrame(Y= fullDataY)
     fullDataX = fullDataX[:, 1:13]
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
@@ -31,9 +38,14 @@ end
 " Assemble Gaussian process model. "
 function gaussianProcess(X, y::Vector)
     mZero = MeanZero()
-    kern = RQIso(0.0, 0.0, 0.0)
 
-    gp = GP(X, y, mZero, kern)
+    lscales = zeros(Float64, size(X)[1])
+    kern = RQ(lscales, 0.0, 0.0)
+    indices = collect(1:size(X)[2])
+    idxs = sample(indices, convert(Int64, round(size(X)[2]/5, digits=0)), replace=false)
+    Xtrain = X[:, idxs]
+    Ytrain = y[idxs]
+    gp = GPE(Xtrain, Ytrain, mZero, kern)
 
     optimize!(gp)
 
