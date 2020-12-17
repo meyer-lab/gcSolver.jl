@@ -1,4 +1,4 @@
-""" This file builds the depletion manuscript, Figure 7. """
+""" Treg specificity vs. dose curve (GP model), Figure 7. """
 
 using Plots;
 using gcSolver;

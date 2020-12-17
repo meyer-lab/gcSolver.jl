@@ -1,4 +1,4 @@
-""" This file builds the depletion manuscript, Figure 4. """
+""" Incorrect model training comparison using incorrect cellType or receptor expression (GP model), Figure 4. """
 
 using Gadfly;
 using gcSolver;
