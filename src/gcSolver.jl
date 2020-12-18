@@ -89,12 +89,12 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
 
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
-        pp = vcat(params[1:24], x, params[30:end])
+        pp = vcat(params[1:24], x, params[28:end])
         return runCkine(tps, pp, pSTAT5 = true)
     end
 
-    jac = zeros(5, length(tps))
-    jacobian!(jac, jacF, params[25:29])
+    jac = zeros(3, length(tps))
+    jacobian!(jac, jacF, params[25:27])
 
     # Just return the diagonal for the marginal variance
     return diag(transpose(jac) * sigma * jac)
