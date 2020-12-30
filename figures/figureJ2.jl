@@ -57,7 +57,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, sense = true, biv = fa
                 push!(predictDF, (dose, tps[indx] / 60, JacResults[1, indx]))
             end
         else
-            VarResults = runCkineVarProp(tps, iterParams, sigma, date)
+            VarResults = runCkineVarProp(tps, iterParams, sigma)
             for indx = 1:length(tps)
                 #use dataframe and push row into it - enter data into data frame
                 push!(predictDF, (dose, tps[indx] / 60, VarResults[indx]))
