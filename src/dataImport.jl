@@ -3,12 +3,12 @@
 function importData(monomeric = false)
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
-    yData = DataFrame!(CSV.File(joinpath(dataDir, "WTMuteinsMomentsBiv.csv")))
-    if monomeric
-        yData = filter(row -> row.Ligand ∈ ["IL2", "IL15"], yData)
-    end
-    monDF = DataFrame!(CSV.File(joinpath(dataDir, "MonomericMutpSTATbiv.csv")))
+    yData = DataFrame!(CSV.File(joinpath(dataDir, "WTDimericMutSingleCellData.csv")))
+    monDF = DataFrame!(CSV.File(joinpath(dataDir, "MonomericMutSingleCellData.csv")))
     append!(yData, monDF)
+    if monomeric
+        yData = filter(row -> row.Bivalent ∈ [0], yData)
+    end
 
     affDF = DataFrame!(CSV.File(joinpath(dataDir, "WTmutAffData.csv")))
     exprDF = DataFrame!(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
@@ -26,7 +26,7 @@ end
 """ Import the saved fit. """
 function importFit()
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "MonomericReducedLim.csv")))
+    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "actualFit.csv")))
     return fitVec
 end
 

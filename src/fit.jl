@@ -115,6 +115,7 @@ function resids(x::Vector{T})::T where {T}
                 # Regularize for exploding values
                 cost += sum(softplus.(vector .- 1.0e6))
                 cost += sum(softplus.(x .^ -1 .- 1.0e5))
+                cost += sum(softplus.(x[2] .^ -1))
 
                 FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
             end
