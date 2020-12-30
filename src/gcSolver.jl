@@ -84,7 +84,7 @@ end
 
 
 " Calculate the Jacobian of the model and perform variance propagation. "
-function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
+function runCkineVarProp(tps::Vector, params::Vector, sigma, date)::Vector
     checkInputs(tps, params)
 
     # Sigma is the covariance matrix of the input parameters
@@ -93,8 +93,10 @@ function runCkineVarProp(tps::Vector, params::Vector, sigma)::Vector
         return runCkine(tps, pp, pSTAT5 = true)
     end
 
+
     jac = zeros(3, length(tps))
     jacobian!(jac, jacF, params[25:27])
+
 
     # Just return the diagonal for the marginal variance
     return diag(transpose(jac) * sigma * jac)
