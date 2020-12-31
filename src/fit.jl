@@ -114,8 +114,8 @@ function resids(x::Vector{T})::T where {T}
 
                 # Regularize for exploding values
                 cost += sum(softplus.(vector .- 1.0e6))
-                cost += sum(softplus.(x .^ -1 .- 1.0e5))
-                cost += sum(softplus.(x[2] .^ -1))
+                cost += sum(softplus.(x .^ -1 .- 1.0e4))
+                #cost += sum(softplus.(x[2] .^ -1))
 
                 FutureDict[(dose, ligand, cell)] = @spawnat :any runCkine(tpss, vector; pSTAT5 = true)
             end
@@ -134,7 +134,9 @@ function resids(x::Vector{T})::T where {T}
     delete!(predictsFrame, 1:size(predictsFrame, 1))
     for date in unique(df.Date)
         dateFilt = filter(row -> string(row["Date"]) .== date, df)
-        dateFilt.MeanPredict .*= dateFilt.MeanPredict \ dateFilt.Mean
+        correction = dateFilt.MeanPredict \ dateFilt.Mean
+        #cost += softplus.(correction .- 1.0e3)
+        dateFilt.MeanPredict .*= correction
         append!(predictsFrame, dateFilt)
     end
     cost += norm(predictsFrame.MeanPredict - predictsFrame.Mean)
