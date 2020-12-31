@@ -6,18 +6,21 @@ using gcSolver;
 using DataFrames;
 using ForwardDiff;
 using StatsFuns;
+import LinearAlgebra: diag;
+
 gdf = Gadfly;
 
 # Plot of dose response curves
-function doseResPlot2(ligandName, cellType, date, unkVec, sense = true, biv = false)
+function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true, biv = false)
     responseDF = gcSolver.importData(false)
+    DateFrame = gcSolver.importConvFrame()
     tps = [0.5, 1, 2, 4] .* 60
     doseVec = unique(responseDF, "Dose")
     doseVec = doseVec[!, :Dose]
-    if sense
+    sigma = gcSolver.getSigma(cellType)
+    if alphaCov
         predictDF = DataFrame(Dose = Float64[], tps = Float64[], sensitivity = Float64[])
     else
-        sigma = gcSolver.getSigma(cellType)
         predictDF = DataFrame(Dose = Float64[], tps = Float64[], Variance = Float64[])
     end
 
@@ -26,9 +29,15 @@ function doseResPlot2(ligandName, cellType, date, unkVec, sense = true, biv = fa
     filter!(row -> string(row["Date"]) .== date, filtFrame)
     filter!(row -> row["Bivalent"] .== biv, filtFrame)
 
-    realDataDF = filtFrame[!, [:Dose, :Time, :Mean, :Variance]]
-    realDataDF = groupby(realDataDF, [:Time, :Dose])
-    realDataDF = combine(realDataDF, :Mean => mean, :Variance => mean)
+    if alphaCov
+        realDataDF = filtFrame[!, [:Dose, :Time, :Mean, :alphStatCov]]
+        realDataDF = groupby(realDataDF, [:Time, :Dose])
+        realDataDF = combine(realDataDF, :Mean => mean, :alphStatCov => mean)
+    else
+        realDataDF = filtFrame[!, [:Dose, :Time, :Mean, :Variance]]
+        realDataDF = groupby(realDataDF, [:Time, :Dose])
+        realDataDF = combine(realDataDF, :Mean => mean, :Variance => mean)
+    end
 
 
     for (i, dose) in enumerate(doseVec)
@@ -42,7 +51,6 @@ function doseResPlot2(ligandName, cellType, date, unkVec, sense = true, biv = fa
             doseLevel = [dose, 0, 0]
         end
 
-        #Gives back 36 parameter long
         idxx = findfirst(responseDF.Cell .== cellType)
         iterParams =
             gcSolver.fitParams(doseLevel, unkVec, 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL2Ra, :IL2Rb, :gc, :IL15Ra, :IL7Ra]]), cellType)
@@ -50,14 +58,14 @@ function doseResPlot2(ligandName, cellType, date, unkVec, sense = true, biv = fa
             iterParams = gcSolver.mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
         end
 
-        if sense
-            JacResults = runRecJac(tps, iterParams)
+        if alphaCov
+            JacResults = runAlphJac(tps, iterParams, sigma)
             for indx = 1:length(tps)
                 #use dataframe and push row into it - enter data into data frame
-                push!(predictDF, (dose, tps[indx] / 60, JacResults[1, indx]))
+                push!(predictDF, (dose, tps[indx] / 60, JacResults[indx]))
             end
         else
-            VarResults = runCkineVarProp(tps, iterParams, sigma, date)
+            VarResults = runCkineVarProp(tps, iterParams, sigma)
             for indx = 1:length(tps)
                 #use dataframe and push row into it - enter data into data frame
                 push!(predictDF, (dose, tps[indx] / 60, VarResults[indx]))
@@ -67,18 +75,20 @@ function doseResPlot2(ligandName, cellType, date, unkVec, sense = true, biv = fa
         
     end
 
-    if sense
+    if alphaCov 
+        predictDF.sensitivity .*= filter(row -> row.Date ∈ [date], DateFrame).Conv
         pl1 = gdf.plot(
             layer(predictDF, x = :Dose, y = :sensitivity, color = :tps, Geom.line),
+            layer(realDataDF, x = :Dose, y = :alphStatCov_mean, color = :Time, Geom.point),
             Scale.x_log10,
             Guide.title(string(cellType, " Response to ", ligandName)),
             Guide.xlabel("Dose"),
             Guide.ylabel("Sensitivity"),
             Scale.color_discrete(),
             Guide.colorkey(title = "Time (hr)", labels = ["4", "2", "1", "0.5"]),
-            Coord.cartesian(ymin=-2, ymax=2.0)
         )
     else
+        predictDF.Variance .*= filter(row -> row.Date ∈ [date], DateFrame).Conv
         pl1 = gdf.plot(
             layer(predictDF, x = :Dose, y = :Variance, color = :tps, Geom.line),
             layer(realDataDF, x = :Dose, y = :Variance_mean, color = :Time, Geom.point),
@@ -95,18 +105,18 @@ function doseResPlot2(ligandName, cellType, date, unkVec, sense = true, biv = fa
     return pl1
 end
 
-function runRecJac(tps::Vector, params::Vector)
+function runAlphJac(tps::Vector, params::Vector, sigma)
     gcSolver.checkInputs(tps, params)
 
     # Sigma is the covariance matrix of the input parameters
     function jacF(x)
-        pp = vcat(params[1:24], x, params[30:end])
+        pp = vcat(params[1:24], x[1], params[26:end])
         return runCkine(tps, pp, pSTAT5 = true)
     end
 
-    jac = zeros(5, length(tps))
-    ForwardDiff.jacobian!(jac, jacF, params[25:29])
-    return jac
+    jac = zeros(1, length(tps))
+    ForwardDiff.jacobian!(jac, jacF, [params[25]])
+    return diag(transpose(jac) * sigma[1, 1] * jac)
 end
 
 
