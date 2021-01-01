@@ -1,6 +1,6 @@
 using GaussianProcesses, StatsBase
 
-function getGPdata(log=true)
+function getGPdata(log = true)
     fullData = importData()
 
     hotEnc = indicatormat(fullData.Cell)
@@ -28,7 +28,7 @@ function getGPdata(log=true)
     end
 
     Xdat = DataFrame(Matrix{Float64}(fullDataX))
-    Ydat = DataFrame(Y= fullDataY)
+    Ydat = DataFrame(Y = fullDataY)
     fullDataX = fullDataX[:, 1:13]
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
@@ -42,7 +42,7 @@ function gaussianProcess(X, y::Vector)
     lscales = zeros(Float64, size(X)[1])
     kern = RQ(lscales, 0.0, 0.0)
     indices = collect(1:size(X)[2])
-    idxs = sample(indices, convert(Int64, round(size(X)[2]/5, digits=0)), replace=false)
+    idxs = sample(indices, convert(Int64, round(size(X)[2] / 5, digits = 0)), replace = false)
     Xtrain = X[:, idxs]
     Ytrain = y[idxs]
     gp = GPE(Xtrain, Ytrain, mZero, kern)
