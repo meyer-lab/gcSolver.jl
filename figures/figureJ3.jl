@@ -19,7 +19,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
     filtFrame = filter(row -> row["Ligand"] .== ligandName, responseDF)
     filter!(row -> row["Cell"] .== cellType, filtFrame)
     filter!(row -> row["Bivalent"] .== biv, filtFrame)
-    newDoses = 10 .^ (range(log10(minimum(doseVec)), stop=log10(maximum(doseVec)), length=100))
+    newDoses = 10 .^ (range(log10(minimum(doseVec)), stop = log10(maximum(doseVec)), length = 100))
 
     realDataDF = filtFrame[!, [:Dose, :Time, :Mean]]
     realDataDF = groupby(realDataDF, [:Time, :Dose])
@@ -70,16 +70,7 @@ function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
                 titlefontsize = 9,
             )
         end
-        plt.plot!(
-            newDoses,
-            μs[i, :],
-            c = colors[i],
-            xscale = :log10,
-            label = ITtime,
-            legend = :bottomright,
-            legendfontsize = 5,
-            markersize = 5,
-        )
+        plt.plot!(newDoses, μs[i, :], c = colors[i], xscale = :log10, label = ITtime, legend = :bottomright, legendfontsize = 5, markersize = 5)
 
         if length(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean) > 0
             plt.scatter!(doseVec, log10.(realDataDF[realDataDF.Time .== ITtime, :].Mean_mean .+ 1), c = colors[i], xscale = :log10, label = "")

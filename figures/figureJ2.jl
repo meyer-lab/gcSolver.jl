@@ -72,10 +72,10 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true, biv =
             end
         end
 
-        
+
     end
 
-    if alphaCov 
+    if alphaCov
         predictDF.sensitivity .*= filter(row -> row.Date ∈ [date], DateFrame).Conv
         pl1 = gdf.plot(
             layer(predictDF, x = :Dose, y = :sensitivity, color = :tps, Geom.line),
@@ -99,7 +99,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true, biv =
             Scale.color_discrete(),
             Guide.colorkey(title = "Time (hr)", labels = ["4", "2", "1", "0.5"]),
             Scale.y_log10,
-            Coord.cartesian(ymin=1, ymax=10)
+            Coord.cartesian(ymin = 1, ymax = 10),
         )
     end
     return pl1
@@ -152,8 +152,5 @@ function figureJ2()
     p23 = doseResPlot2("F42Q N-Term", "NK", "12/5/2019", fitVec, false, false)
     p24 = doseResPlot2("F42Q N-Term", "CD8", "12/5/2019", fitVec, false, false)
     #draw(SVG("figureJ2.svg", 1000px, 800px), p1)
-    draw(
-        SVG("figureJ2.svg", 4000px, 2400px),
-        gridstack([p1 p2 p3 p4; p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]),
-    )
+    draw(SVG("figureJ2.svg", 4000px, 2400px), gridstack([p1 p2 p3 p4; p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
 end
