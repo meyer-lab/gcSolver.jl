@@ -257,5 +257,24 @@ end
 
 """Use this to get string of parameter names"""
 function getParamNames()
-    return ["kfwd"; "k4"; "k5"; "k16"; "k17"; "k22"; "k23"; "k27"; "pSTAT Treg"; "pSTAT Thelp"; "pSTAT NK"; "pSTAT CD8"; "k34"; "k35"; "k36"; "k37"; "k38"; "k39"]
+    return [
+        "kfwd"
+        "k4"
+        "k5"
+        "k16"
+        "k17"
+        "k22"
+        "k23"
+        "k27"
+        "pSTAT Treg"
+        "pSTAT Thelp"
+        "pSTAT NK"
+        "pSTAT CD8"
+        "k34"
+        "k35"
+        "k36"
+        "k37"
+        "k38"
+        "k39"
+    ]
 end
