@@ -76,7 +76,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true, biv =
     end
 
     if alphaCov
-        predictDF.sensitivity .*= filter(row -> row.Date ∈ [date], DateFrame).Conv
+        predictDF.sensitivity .*= filter(row -> row.Date ∈ [date], DateFrame).Conv.^2
         pl1 = gdf.plot(
             layer(predictDF, x = :Dose, y = :sensitivity, color = :tps, Geom.line),
             layer(realDataDF, x = :Dose, y = :alphStatCov_mean, color = :Time, Geom.point),
@@ -88,7 +88,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true, biv =
             Guide.colorkey(title = "Time (hr)", labels = ["4", "2", "1", "0.5"]),
         )
     else
-        predictDF.Variance .*= filter(row -> row.Date ∈ [date], DateFrame).Conv
+        predictDF.Variance .*= filter(row -> row.Date ∈ [date], DateFrame).Conv.^2
         pl1 = gdf.plot(
             layer(predictDF, x = :Dose, y = :Variance, color = :tps, Geom.line),
             layer(realDataDF, x = :Dose, y = :Variance_mean, color = :Time, Geom.point),
