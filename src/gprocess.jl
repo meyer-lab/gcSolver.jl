@@ -28,10 +28,6 @@ function getGPdata(log = true)
     end
 
     fullDataX = fullDataX[:, 1:13]
-    Xdat = DataFrame(Matrix{Float64}(fullDataX))
-    Ydat = DataFrame(Y = fullDataY)
-    CSV.write("Ydata.csv", Ydat)
-    CSV.write("Xdata.csv", Xdat)
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
 end
@@ -39,7 +35,7 @@ end
 
 " Assemble Gaussian process model. "
 function gaussianProcess(X, y::Vector)
-    mZero = MeanConst(mean(y))
+    mZero = MeanZero()
 
     lscales = zeros(Float64, size(X)[1])
     kern = RQ(lscales, 0.0, 0.0)
