@@ -10,7 +10,7 @@ plt = Plots;
 # Plot of dose response curves
 function gpPlot(ligandName, cellType, gp, biv = true, compType = "none")
 
-    responseDF = gcSolver.importData()
+    responseDF = gcSolver.importData(false)
 
     time = [0.5, 1, 2, 4]
     doseVec = unique(responseDF, "Dose")

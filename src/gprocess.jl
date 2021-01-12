@@ -1,4 +1,4 @@
-using GaussianProcesses, StatsBase
+using GaussianProcesses, StatsBase, CSV
 
 function getGPdata(log = true)
     fullData = importData()
@@ -27,8 +27,6 @@ function getGPdata(log = true)
         end
     end
 
-    Xdat = DataFrame(Matrix{Float64}(fullDataX))
-    Ydat = DataFrame(Y = fullDataY)
     fullDataX = fullDataX[:, 1:13]
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
