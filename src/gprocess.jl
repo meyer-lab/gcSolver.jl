@@ -1,4 +1,4 @@
-using GaussianProcesses, StatsBase
+using GaussianProcesses, StatsBase, CSV
 
 function getGPdata(log = true)
     fullData = importData()
@@ -27,9 +27,11 @@ function getGPdata(log = true)
         end
     end
 
+    fullDataX = fullDataX[:, 1:13]
     Xdat = DataFrame(Matrix{Float64}(fullDataX))
     Ydat = DataFrame(Y = fullDataY)
-    fullDataX = fullDataX[:, 1:13]
+    CSV.write("Ydata.csv", Ydat)
+    CSV.write("Xdata.csv", Xdat)
 
     return Matrix{Float64}(fullDataX), vec(fullDataY), fullData
 end
@@ -37,7 +39,7 @@ end
 
 " Assemble Gaussian process model. "
 function gaussianProcess(X, y::Vector)
-    mZero = MeanZero()
+    mZero = MeanConst(mean(y))
 
     lscales = zeros(Float64, size(X)[1])
     kern = RQ(lscales, 0.0, 0.0)
