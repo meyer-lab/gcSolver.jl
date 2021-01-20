@@ -2,9 +2,16 @@ using GaussianProcesses
 
 function getGPdata()
     fullData = importData()
+    println("Cell = ", fullData.Cell[1:5])
+    println("fullData size = ", size(fullData))
 
     hotEnc = indicatormat(fullData.Cell)
+    println("hotEnc size = ", size(hotEnc))
+    #println("hotEnc = ", hotEnc)
+    show(stdout, "text/plain", hotEnc[:,1:5])
     hotEncName = sort(unique(fullData.Cell))
+    println("hotEncName size = ", size(hotEncName))
+    show(stdout, "text/plain", (hotEncName))
 
     fullDataX = fullData[!, [:Dose, :Time, :IL2RaKD, :IL2RBGKD, :IL15Ra, :IL2Ra, :IL2Rb, :IL7Ra, :gc, :Bivalent]]
     fullDataY = log10.(fullData.Mean .+ 1.0)
