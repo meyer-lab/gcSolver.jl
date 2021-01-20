@@ -1,8 +1,9 @@
 
 @testset "Reasonable return from varprop function." begin
     sigma = Matrix{Int}(I, 3, 3)
+    recAbund = ones(5)
 
-    retval = runCkineVarProp(tps, rxntfR, sigma)
+    retval = runCkineVarProp(tps, rxntfR, sigma, recAbund)
 
     @test length(retval) == length(tps)
     @test all(retval .>= 0.0)
