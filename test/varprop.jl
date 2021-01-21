@@ -1,8 +1,10 @@
+using StatsFuns
 
 @testset "Reasonable return from varprop function." begin
     sigma = Matrix{Int}(I, 3, 3)
+    recAbund = ones(5)
 
-    retval = runCkineVarProp(tps, rxntfR, sigma)
+    retval = runCkineVarProp(tps, rxntfR, sigma, recAbund)
 
     @test length(retval) == length(tps)
     @test all(retval .>= 0.0)
@@ -23,8 +25,10 @@ end
 end
 
 
-@testset "Test that residuals can be calculated using Farhat Fit." begin
-    farhatVec = gcSolver.getFarhatVec()
-    resids = gcSolver.resids(farhatVec)
+@testset "Test that residuals can be calculated using Fit." begin
+    fitVec = gcSolver.importFit()
+    fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
+    fitVec = softplus.(fitVec)
+    resids = gcSolver.resids(fitVec)
     @test isfinite(resids)
 end
