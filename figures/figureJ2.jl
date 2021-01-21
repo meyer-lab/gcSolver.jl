@@ -72,8 +72,10 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true)
     end
 
     if alphaCov
+
         predictDF.sensitivity .*= filter(row -> row.Date ∈ [date], DateFrame).Conv.^2
         realDataDF.alphStatCov_mean = abs.(realDataDF.alphStatCov_mean)
+
         pl1 = gdf.plot(
             layer(predictDF, x = :Dose, y = :sensitivity, color = :tps, Geom.line),
             layer(realDataDF, x = :Dose, y = :alphStatCov_mean, color = :Time, Geom.point),
@@ -87,7 +89,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true)
             Coord.cartesian(ymin = 1, ymax = 10)
         )
     else
-        predictDF.Variance .*= filter(row -> row.Date ∈ [date], DateFrame).Conv.^2
+        predictDF.Variance .*= filter(row -> row.Date ∈ [date], DateFrame).Conv .^ 2
         pl1 = gdf.plot(
             layer(predictDF, x = :Dose, y = :Variance, color = :tps, Geom.line),
             layer(realDataDF, x = :Dose, y = :Variance_mean, color = :Time, Geom.point),
