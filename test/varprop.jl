@@ -24,8 +24,10 @@ end
 end
 
 
-@testset "Test that residuals can be calculated using Farhat Fit." begin
-    farhatVec = gcSolver.getFarhatVec()
-    resids = gcSolver.resids(farhatVec)
+@testset "Test that residuals can be calculated using Fit." begin
+    fitVec = gcSolver.importFit()
+    fitVec = convert(Vector{Float64}, fitVec[!, :Fit])
+    fitVec = softplus.(fitVec)
+    resids = gcSolver.resids(fitVec)
     @test isfinite(resids)
 end
