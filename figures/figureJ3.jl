@@ -162,7 +162,7 @@ end
 """Use this if you want to change the parameters here and not input any in the command line"""
 function figureJ3()
     l = @layout [a b c d; e f g h; i j k l; m n o p; q r s t; u v w x; z aa bb cc]
-    X, y, df = gcSolver.getGPdata(true)
+    X, y, df = gcSolver.getGPdata(false)
     trainedGP = gcSolver.gaussianProcess(X', y)
     #p1 = gpPlot("IL2", "Treg", trainedGP)
     p1 = gpPlot("IL2", "Treg", trainedGP, false)

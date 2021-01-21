@@ -56,6 +56,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true)
             gcSolver.fitParams(doseLevel, unkVec, recAbunds, cellType)
 
         iterParams = gcSolver.mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
+
         if alphaCov
             JacResults = runAlphJac(tps, iterParams, sigma, recAbunds)
             for indx = 1:length(tps)
