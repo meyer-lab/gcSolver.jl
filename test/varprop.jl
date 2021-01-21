@@ -1,3 +1,4 @@
+using StatsFuns
 
 @testset "Reasonable return from varprop function." begin
     sigma = Matrix{Int}(I, 3, 3)
