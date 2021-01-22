@@ -52,8 +52,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true)
 
         idxx = findfirst(responseDF.Cell .== cellType)
         recAbunds = 10.0 .^ Vector{Float64}(responseDF[idxx, [:IL2Ra, :IL2Rb, :gc, :IL15Ra, :IL7Ra]])
-        iterParams =
-            gcSolver.fitParams(doseLevel, unkVec, recAbunds, cellType)
+        iterParams = gcSolver.fitParams(doseLevel, unkVec, recAbunds, cellType)
 
         iterParams = gcSolver.mutAffAdjust(iterParams, responseDF[findfirst(responseDF.Ligand .== ligandName), [:IL2RaKD, :IL2RBGKD]])
 
@@ -74,7 +73,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true)
 
     if alphaCov
 
-        predictDF.sensitivity .*= filter(row -> row.Date ∈ [date], DateFrame).Conv.^2
+        predictDF.sensitivity .*= filter(row -> row.Date ∈ [date], DateFrame).Conv .^ 2
         realDataDF.alphStatCov_mean = abs.(realDataDF.alphStatCov_mean)
 
         pl1 = gdf.plot(
@@ -87,7 +86,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true)
             Guide.ylabel("Sensitivity"),
             Scale.color_discrete(),
             Guide.colorkey(title = "Time (hr)", labels = ["4", "2", "1", "0.5"]),
-            Coord.cartesian(ymin = 1, ymax = 10)
+            Coord.cartesian(ymin = 1, ymax = 10),
         )
     else
         predictDF.Variance .*= filter(row -> row.Date ∈ [date], DateFrame).Conv .^ 2
@@ -101,7 +100,7 @@ function doseResPlot2(ligandName, cellType, date, unkVec, alphaCov = true)
             Scale.color_discrete(),
             Guide.colorkey(title = "Time (hr)", labels = ["4", "2", "1", "0.5"]),
             Scale.y_log10,
-            Coord.cartesian(ymin = 1, ymax = 10)
+            Coord.cartesian(ymin = 1, ymax = 10),
         )
     end
     return pl1
@@ -155,5 +154,8 @@ function figureJ2()
     p23 = doseResPlot2("F42Q N-Term", "NK", "12/5/2019", fitVec, false)
     p24 = doseResPlot2("F42Q N-Term", "CD8", "12/5/2019", fitVec, false)
 
-    draw(SVG("figureJ2.svg", 4000px, 2400px), gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]))
+    draw(
+        SVG("figureJ2.svg", 4000px, 2400px),
+        gridstack([p1 p2 p3 p4; p5 p6 p7 p8; p9 p10 p11 p12; p13 p14 p15 p16; p17 p18 p19 p20; p21 p22 p23 p24]),
+    )
 end
