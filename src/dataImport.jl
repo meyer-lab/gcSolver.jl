@@ -9,6 +9,7 @@ end
 function importData(monomeric = false)
     yData = importFile("WTDimericMutSingleCellData.csv")
     monDF = importFile("MonomericMutSingleCellData.csv")
+
     append!(yData, monDF)
     if monomeric
         yData = filter(row -> row.Bivalent ∈ [0], yData)
