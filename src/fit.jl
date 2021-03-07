@@ -195,7 +195,7 @@ function getDateConvDict()
 
                 tpss = df[idxs, :Time]
                 # Make sure duplicate times are not considered duplicates
-                tpss += range(0.0, 0.01; length = length(tpss))
+                tpss += range(0.0, 0.001; length = length(tpss))
 
                 # Regularize for exploding values
 
