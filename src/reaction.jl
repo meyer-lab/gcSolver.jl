@@ -1,78 +1,48 @@
+using Catalyst
+
 const Nspecies = 47 # number of complexes in surface + endosome + free ligand
-const halfL = 19 # number of complexes on surface alone
+const halfL = 11 # number of complexes on surface alone
 const internalFrac = 0.5 # Same as that used in TAM model
-const recIDX = [1, 2, 3, 10, 17]
+const recIDX = [1, 2, 3]
 const recIDXint = [ii + halfL for ii in recIDX]
-const ligIDX = [39, 40, 41]
-const activeSpec = [8, 9, 15, 16, 19]
+const ligIDX = [39, 40]
+const activeSpec = [7, 8, 11]
 const pSTATidx = [43, 44, 45]
 
 const Nparams = 36 # number of unknowns for the full model
-const kfbnd = 0.60 # Assuming on rate of 10^7 M-1 sec-1
 const internalV = 623.0 # Same as that used in TAM model
 
-# p[1:4] is kfwd, k1rev, k2rev, k4rev
-# p[5:8] is k5rev, k10rev, k11rev, k13rev
-# p[9:12] is k14rev, k16rev, k17rev, k22rev
-# p[13:14] is k23rev, k24rev
 
-function dYdT(du, u, p, ILs)
-    # IL2Ra, IL2Rb, gc, IL2_IL2Ra, IL2_IL2Rb, IL2_IL2Ra_IL2Rb, IL2_IL2Ra_gc, IL2_IL2Rb_gc, IL2_IL2Ra_IL2Rb_gc
-    # IL15Ra, IL15_IL15Ra, IL15_IL2Rb, IL15_IL15Ra_IL2Rb, IL15_IL15Ra_gc, IL15_IL2Rb_gc, IL15_IL15Ra_IL2Rb_gc
+# 0.6 is kfbnd assuming on rate of 10^7 M-1 sec-1
+rxn = @reaction_network begin
+    (0.6 * IL2, k1ᵣ), Ra ↔ IL2_Ra
+    (0.6 * IL2, k2ᵣ), Rb ↔ IL2_Rb
+    (kf, k4ᵣ), IL2_Ra + gc ↔ IL2_Ra_gc
+    (kf, k5ᵣ), IL2_Rb + gc ↔ IL2_Rb_gc
+    (kf, k1ᵣ * k10ᵣ * k11ᵣ / k2ᵣ / k5ᵣ), IL2_Rb_gc + Ra ↔ IL2_Ra_Rb_gc # k8r, detailed balance
+    (kf, k10ᵣ * k11ᵣ / k4ᵣ), IL2_Ra_gc + Rb ↔ IL2_Ra_Rb_gc # k9r, detailed balance
+    (kf, k10ᵣ), IL2_Ra_Rb + gc ↔ IL2_Ra_Rb_gc
+    (kf, k11ᵣ), IL2_Ra + Rb ↔ IL2_Ra_Rb
+    (kf, k1ᵣ * k11ᵣ / k2ᵣ), IL2_Rb + Ra ↔ IL2_Ra_Rb # k12r, detailed balance
+    (0.6 * IL15, k14ᵣ), Rb ↔ IL15_Rb
+    (kf, k17ᵣ), IL15_Rb + gc ↔ IL15_Rb_gc
+end IL2 IL15 kf k1ᵣ k2ᵣ k4ᵣ k5ᵣ k10ᵣ k11ᵣ k14ᵣ k17ᵣ
 
-    # IL2/15
-    for i = 0:1
-        pp = view(p, (1 + i * 6):(8 + i * 6))
-        k12rev = pp[2] * pp[7] / pp[3] # Detailed balance
-        k8rev = pp[6] * k12rev / pp[5] # Detailed balance
-        k9rev = pp[6] * pp[7] / pp[4] # Detailed balance
+println(rxn)
 
-        du[2] +=
-            -kfbnd * u[2] * ILs[i + 1] + pp[3] * u[5 + 7 * i] - p[1] * u[2] * u[7 + 7 * i] + k9rev * u[9 + 7 * i] - p[1] * u[2] * u[4 + 7 * i] +
-            pp[7] * u[6 + 7 * i]
-        du[3] +=
-            -p[1] * u[5 + 7 * i] * u[3] + p[5 + 7 * i] * u[8 + 7 * i] - p[1] * u[4 + 7 * i] * u[3] + p[4 + 7 * i] * u[7 + 7 * i] -
-            p[1] * u[6 + 7 * i] * u[3] + p[6 + 7 * i] * u[9 + 7 * i]
-        du[1 + 9 * i] =
-            -kfbnd * u[1 + 9 * i] * ILs[i + 1] + pp[2] * u[4 + 7 * i] - p[1] * u[1 + 9 * i] * u[8 + 7 * i] + k8rev * u[9 + 7 * i] -
-            p[1] * u[1 + 9 * i] * u[5 + 7 * i] + k12rev * u[6 + 7 * i]
-        du[4 + 7 * i] =
-            -p[1] * u[4 + 7 * i] * u[2] + pp[7] * u[6 + 7 * i] - p[1] * u[4 + 7 * i] * u[3] +
-            pp[4] * u[7 + 7 * i] +
-            kfbnd * ILs[i + 1] * u[1 + 9 * i] - pp[2] * u[4 + 7 * i]
-        du[5 + 7 * i] =
-            -p[1] * u[5 + 7 * i] * u[1 + 9 * i] + k12rev * u[6 + 7 * i] - p[1] * u[5 + 7 * i] * u[3] +
-            p[5 + 7 * i] * u[8 + 7 * i] +
-            kfbnd * ILs[i + 1] * u[2] - pp[3] * u[5 + 7 * i]
-        du[6 + 7 * i] =
-            -p[1] * u[6 + 7 * i] * u[3] + pp[6] * u[9 + 7 * i] + p[1] * u[4 + 7 * i] * u[2] - pp[7] * u[6 + 7 * i] +
-            p[1] * u[5 + 7 * i] * u[1 + 9 * i] - k12rev * u[6 + 7 * i]
-        du[9 + 7 * i] =
-            p[1] * u[8 + 7 * i] * u[1 + 9 * i] - k8rev * u[9 + 7 * i] + p[1] * u[7 + 7 * i] * u[2] - k9rev * u[9 + 7 * i] +
-            p[1] * u[6 + 7 * i] * u[3] - pp[6] * u[9 + 7 * i]
-        du[7 + 7 * i] = -p[1] * u[7 + 7 * i] * u[2] + k9rev * u[9 + 7 * i] + p[1] * u[4 + 7 * i] * u[3] - pp[4] * u[7 + 7 * i]
-        du[8 + 7 * i] = -p[1] * u[8 + 7 * i] * u[1 + 9 * i] + k8rev * u[9 + 7 * i] + p[1] * u[3] * u[5 + 7 * i] - pp[5] * u[8 + 7 * i]
-    end
-
-    du[3] += -p[1] * u[3] * u[18] + p[15] * u[19]
-    du[17] = -kfbnd * u[17] * ILs[3] + p[14] * u[18]
-    du[18] = kfbnd * u[17] * ILs[3] - p[14] * u[18] - p[1] * u[3] * u[18] + p[15] * u[19]
-    du[19] = p[1] * u[3] * u[18] - p[15] * u[19]
-
-    return nothing
-end
+const rxnF = convert(ODESystem, rxn)
 
 
 function fullDeriv(du, u, p, t)
     fill!(du, 0.0)
 
-    ILs = view(p, 1:3)
-    pSurf = view(p, 4:18)
-    pEndo = p[19]
+    pEndo = p[12]
     trafP = view(p, 20:30)
 
     # Calculate cell surface and endosomal reactions
-    dYdT(du, u, pSurf, ILs)
+    rxnF.f(du, u, p[1:11])
+    endoIDX = (halfL + 1):(2 * halfL)
+    rxnF.f(du[endoIDX], u[endoIDX], hcat(u[ligIDX], p[3:11] * pEndo))
 
     # Add STAT5 reactions
     activR = sum(u[activeSpec]) + internalFrac * sum(u[activeSpec .+ halfL])
@@ -83,13 +53,10 @@ function fullDeriv(du, u, p, t)
     du[46] = p[34] * u[45] - 0.5 * p[35] * u[46] # STAT5nd
     du[47] = p[35] * u[46] - p[36] * u[47] # STAT5n
 
-    dYdT(view(du, (halfL + 1):(2 * halfL)), view(u, (halfL + 1):(2 * halfL)), pEndo * pSurf, view(u, ligIDX))
-
     # Handle endosomal ligand balance.
     # Must come before trafficking as we only calculate this based on reactions balance
     du[39] = -sum(view(du, (halfL + 4):(halfL + 9))) / internalV
-    du[40] = -sum(view(du, (halfL + 11):(halfL + 16))) / internalV
-    du[41] = -sum(view(du, (halfL + 18):(halfL + 19))) / internalV
+    du[40] = -sum(view(du, (halfL + 10):(halfL + 11))) / internalV
 
     # Actually calculate the trafficking
     for ii = 1:halfL
@@ -102,8 +69,8 @@ function fullDeriv(du, u, p, t)
         end
     end
 
-    # Expression: IL2Ra, IL2Rb, gc, IL15Ra, IL7Ra
-    du[recIDX] .+= view(trafP, 6:10)
+    # Expression: IL2Ra, IL2Rb, gc
+    du[recIDX] .+= view(trafP, 6:8)
 
     # Degradation does lead to some clearance of ligand in the endosome
     du[ligIDX] .-= view(u, ligIDX) * trafP[5]

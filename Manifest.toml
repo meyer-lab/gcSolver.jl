@@ -68,6 +68,12 @@ git-tree-sha1 = "e2f47f6d8337369411569fd45ae5753ca10394c6"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.0+6"
 
+[[Catalyst]]
+deps = ["DataStructures", "Latexify", "MacroTools", "ModelingToolkit", "Parameters", "Reexport"]
+git-tree-sha1 = "63d14d0b95679ddf8d8a8335eef0f7d6dfaa4388"
+uuid = "479239e8-5488-4da2-87a7-35f2df7eef83"
+version = "6.9.0"
+
 [[CategoricalArrays]]
 deps = ["DataAPI", "Future", "JSON", "Missings", "Printf", "Statistics", "StructTypes", "Unicode"]
 git-tree-sha1 = "2ac27f59196a68070e132b25713f9a5bbc5fa0d2"
