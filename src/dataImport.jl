@@ -3,15 +3,15 @@
 function importData(monomeric = false)
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
-    yData = DataFrame!(CSV.File(joinpath(dataDir, "WTDimericMutSingleCellData.csv")))
-    monDF = DataFrame!(CSV.File(joinpath(dataDir, "MonomericMutSingleCellData.csv")))
+    yData = DataFrame(CSV.File(joinpath(dataDir, "WTDimericMutSingleCellData.csv")))
+    monDF = DataFrame(CSV.File(joinpath(dataDir, "MonomericMutSingleCellData.csv")))
     append!(yData, monDF)
     if monomeric
         yData = filter(row -> row.Bivalent ∈ [0], yData)
     end
 
-    affDF = DataFrame!(CSV.File(joinpath(dataDir, "WTmutAffData.csv")))
-    exprDF = DataFrame!(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
+    affDF = DataFrame(CSV.File(joinpath(dataDir, "WTmutAffData.csv")))
+    exprDF = DataFrame(CSV.File(joinpath(dataDir, "RecQuantitation.csv")))
 
     exprDF = stack(exprDF, [:Treg, :Thelper, :NK, :CD8]; variable_name = "Cell")
     exprDF = unstack(exprDF, :Receptor, :value)
@@ -26,14 +26,14 @@ end
 """ Import the saved fit. """
 function importFit()
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-    fitVec = DataFrame!(CSV.File(joinpath(dataDir, "actualFit.csv")))
+    fitVec = DataFrame(CSV.File(joinpath(dataDir, "actualFit.csv")))
     return fitVec
 end
 
 """ Import Date pSTAT conversion factors. """
 function importConvFrame()
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
-    convFrame = DataFrame!(CSV.File(joinpath(dataDir, "DateConvFrame.csv")))
+    convFrame = DataFrame(CSV.File(joinpath(dataDir, "DateConvFrame.csv")))
     return convFrame
 end
 
@@ -42,8 +42,8 @@ function getSigma(cellType)
     dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
     sigma = zeros(3, 3)
 
-    momentDF = DataFrame!(CSV.File(joinpath(dataDir, "receptor_moments.csv")))
-    covDF = DataFrame!(CSV.File(joinpath(dataDir, "receptor_covariances.csv")))
+    momentDF = DataFrame(CSV.File(joinpath(dataDir, "receptor_moments.csv")))
+    covDF = DataFrame(CSV.File(joinpath(dataDir, "receptor_covariances.csv")))
 
     momentDF = momentDF[!, ["Cell Type", "Receptor", "Variance"]]
     momentDF = groupby(momentDF, ["Cell Type", "Receptor"])
