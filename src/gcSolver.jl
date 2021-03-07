@@ -9,7 +9,6 @@ using Statistics
 import ModelingToolkit: modelingtoolkitize
 import CSV
 using DataFrames
-import StatsBase: indicatormat
 using StatsFuns
 
 include("reaction.jl")
@@ -104,7 +103,6 @@ end
 
 
 include("fit.jl")
-include("gprocess.jl")
 
 export runCkine, runCkineVarProp, runCkineCost
 

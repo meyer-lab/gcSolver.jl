@@ -1,6 +1,5 @@
 using Distributed
 import LineSearches: InitialStatic
-using CSV
 
 dataDir = joinpath(dirname(pathof(gcSolver)), "..", "data")
 
